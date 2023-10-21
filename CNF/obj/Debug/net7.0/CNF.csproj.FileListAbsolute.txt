@@ -1,0 +1,15 @@
+/home/delphic/Development/CNF/CNF/bin/Debug/net7.0/CNF
+/home/delphic/Development/CNF/CNF/bin/Debug/net7.0/CNF.deps.json
+/home/delphic/Development/CNF/CNF/bin/Debug/net7.0/CNF.runtimeconfig.json
+/home/delphic/Development/CNF/CNF/bin/Debug/net7.0/CNF.dll
+/home/delphic/Development/CNF/CNF/bin/Debug/net7.0/CNF.pdb
+/home/delphic/Development/CNF/CNF/obj/Debug/net7.0/CNF.csproj.AssemblyReference.cache
+/home/delphic/Development/CNF/CNF/obj/Debug/net7.0/CNF.GeneratedMSBuildEditorConfig.editorconfig
+/home/delphic/Development/CNF/CNF/obj/Debug/net7.0/CNF.AssemblyInfoInputs.cache
+/home/delphic/Development/CNF/CNF/obj/Debug/net7.0/CNF.AssemblyInfo.cs
+/home/delphic/Development/CNF/CNF/obj/Debug/net7.0/CNF.csproj.CoreCompileInputs.cache
+/home/delphic/Development/CNF/CNF/obj/Debug/net7.0/CNF.dll
+/home/delphic/Development/CNF/CNF/obj/Debug/net7.0/refint/CNF.dll
+/home/delphic/Development/CNF/CNF/obj/Debug/net7.0/CNF.pdb
+/home/delphic/Development/CNF/CNF/obj/Debug/net7.0/CNF.genruntimeconfig.cache
+/home/delphic/Development/CNF/CNF/obj/Debug/net7.0/ref/CNF.dll
