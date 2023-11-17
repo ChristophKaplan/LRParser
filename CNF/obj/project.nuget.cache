@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "f9KFcFxIq63wd1uPyj1p8PloWiUQ7cLbuKzreTYW+zrHmdJB8tqWZEt4Hr89FWjAiUHY33oUmXVLHSWHkGigKg==",
+  "dgSpecHash": "zzcbkdUvtYdxW8WY/dnG4qe2rTh1llTzLdMxhl7/x39P3JhmbidWojIj07SdRLp8T0UhfS//QIUYPkdA2inxPw==",
   "success": true,
-  "projectFilePath": "/home/delphic/Development/CNF/CNF/CNF.csproj",
+  "projectFilePath": "/Volumes/Data/Development/CNF/CNF/CNF.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }
