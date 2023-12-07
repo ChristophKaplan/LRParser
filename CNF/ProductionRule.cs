@@ -1,5 +1,32 @@
 namespace CNF; 
 
+
 public class ProductionRule {
-    
+    internal NonTerminal from;
+    internal Symbol[] to;
+
+    public ProductionRule(NonTerminal from, params Symbol[] to) {
+        this.from = from;
+        this.to = to;
+    }
+
+    public bool CheckLeftRecursion() {
+        return from.Equals(to[0]);
+    }
+
+    public override string ToString() {
+        return $"{from} -> {to.Aggregate("(", (c, n) => $"{c} {n},")})";
+    }
+
+    public override int GetHashCode() {
+        return ToString().GetHashCode();
+    }
+
+    public override bool Equals(object? obj) {
+        if (obj is ProductionRule other) {
+            return this.ToString().Equals(other.ToString());
+        }
+
+        return false;
+    }
 }
