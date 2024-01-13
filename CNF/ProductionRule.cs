@@ -29,4 +29,20 @@ public class ProductionRule {
 
         return false;
     }
+
+    public int GetMostRightPosOf(NonTerminal S) {
+        for (var i = to.Length-1; i >= 0; i--) {
+            if (to[i].Equals(S)) {
+                return  i;
+            }
+        }
+
+        return -1;
+    }
+
+    public bool ContainsNonTerminalConclusion() {
+        return to.OfType<NonTerminal>().Any();
+    }
+    
+    
 }

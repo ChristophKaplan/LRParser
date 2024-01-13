@@ -45,6 +45,10 @@ public class ContextFreeGrammar {
             ProductionRules.Remove(removeMe);
         }
 
+        foreach (var r in ProductionRules) {
+            if(!NonTerminals.Contains(r.from)) NonTerminals.Add(r.from);
+        }
+        
         Console.WriteLine(toAdd.Aggregate("\tchanged rules:", (c, n) => $"{c} {n},"));
     }
 

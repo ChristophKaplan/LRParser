@@ -1,13 +1,14 @@
 using System.Diagnostics;
 using System.Diagnostics.SymbolStore;
 using System.Dynamic;
+using System.Runtime.CompilerServices;
 using Microsoft.VisualBasic;
 
 namespace CNF;
 
 public abstract class Symbol {
     protected internal readonly string _value;
-
+    public bool IsEpsilon => _value.Equals("epsilon");
     public Symbol(string value) {
         _value = value;
     }
@@ -32,6 +33,7 @@ public class Terminal : Symbol {
 
     public Terminal() : base("epsilon") {
     }
+    
 }
 
 public class NonTerminal : Symbol {

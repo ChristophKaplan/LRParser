@@ -1,27 +1,29 @@
+using System.Diagnostics;
+
 namespace CNF; 
 
 public static class ContextFreeGrammarExtensions {
     public static bool GetGraphTopDownV1(this ContextFreeGrammar cnf, List<Terminal> tokens) {
-        var root = new Node<Symbol>(cnf.StartSymbol, null);
+        var root = new TreeNode<Symbol>(cnf.StartSymbol, null);
         return GetGraphTopDownV1(cnf, root, 0, tokens, 0);
     }
 
-    private static bool GetGraphTopDownV1(this ContextFreeGrammar cnf, Node<Symbol> currentNode, int childIndex, List<Terminal> tokens, int tokenIndex) {
+    private static bool GetGraphTopDownV1(this ContextFreeGrammar cnf, TreeNode<Symbol> currentTreeNode, int childIndex, List<Terminal> tokens, int tokenIndex) {
         //Page 45 TopDownAnalyse nachempfunden
         
-        Console.WriteLine($"check for: ({currentNode.data} != {tokens[tokenIndex]})");
+        Console.WriteLine($"check for: ({currentTreeNode.data} != {tokens[tokenIndex]})");
 
-        if (currentNode.data is Terminal && !currentNode.data.Equals(tokens[tokenIndex])) {
-            Console.WriteLine($"\tterminals not matching ({currentNode.data} != {tokens[tokenIndex]}), go back");
+        if (currentTreeNode.data is Terminal && !currentTreeNode.data.Equals(tokens[tokenIndex])) {
+            Console.WriteLine($"\tterminals not matching ({currentTreeNode.data} != {tokens[tokenIndex]}), go back");
             return false;
         }
 
-        if (currentNode.data is Terminal && currentNode.data.Equals(tokens[tokenIndex])) {
-            Console.WriteLine($"\tfound:{currentNode.data} = {tokens[tokenIndex]}, go next...");
+        if (currentTreeNode.data is Terminal && currentTreeNode.data.Equals(tokens[tokenIndex])) {
+            Console.WriteLine($"\tfound:{currentTreeNode.data} = {tokens[tokenIndex]}, go next...");
             childIndex++;
             tokenIndex++;
 
-            if (childIndex >= currentNode.Parent.Children.Count) {
+            if (childIndex >= currentTreeNode.Parent.Children.Count) {
                 Console.WriteLine($"\tIDK");
                 return true;
             }
@@ -31,33 +33,33 @@ public static class ContextFreeGrammarExtensions {
                 return true;
             }
 
-            return GetGraphTopDownV1(cnf, currentNode.Parent.Children[childIndex], childIndex, tokens, tokenIndex);
+            return GetGraphTopDownV1(cnf, currentTreeNode.Parent.Children[childIndex], childIndex, tokens, tokenIndex);
         }
 
-        if (currentNode.data is NonTerminal nonTerminal && !currentNode.data.Equals(tokens[tokenIndex])) {
+        if (currentTreeNode.data is NonTerminal nonTerminal && !currentTreeNode.data.Equals(tokens[tokenIndex])) {
             var possibleProd = cnf.GetAllProdForNonTerminal(nonTerminal);
-            Console.WriteLine($"\tFound {possibleProd.Count} prod's for {currentNode.data}");
+            Console.WriteLine($"\tFound {possibleProd.Count} prod's for {currentTreeNode.data}");
 
             for (var i = 0; i < possibleProd.Count; i++) {
                 foreach (var sym in possibleProd[i].to) {
-                    var child = new Node<Symbol>(sym, currentNode);
-                    currentNode.AddChild(child);
+                    var child = new TreeNode<Symbol>(sym, currentTreeNode);
+                    currentTreeNode.AddChild(child);
                 }
 
-                Console.WriteLine($"\tExpand from {currentNode.data} -> {currentNode.Children.First()}");
-                if (GetGraphTopDownV1(cnf, currentNode.Children.First(), childIndex, tokens, tokenIndex)) {
+                Console.WriteLine($"\tExpand from {currentTreeNode.data} -> {currentTreeNode.Children.First()}");
+                if (GetGraphTopDownV1(cnf, currentTreeNode.Children.First(), childIndex, tokens, tokenIndex)) {
                     return true;
                 }
 
-                Console.WriteLine($"\t\twe are back at {currentNode.data}, rule:({i + 1}/{possibleProd.Count})");
-                currentNode.Children.Clear();
+                Console.WriteLine($"\t\twe are back at {currentTreeNode.data}, rule:({i + 1}/{possibleProd.Count})");
+                currentTreeNode.Children.Clear();
             }
 
-            Console.WriteLine($"\t\t\ttested all prod's for {currentNode.data}, no success here");
+            Console.WriteLine($"\t\t\ttested all prod's for {currentTreeNode.data}, no success here");
             return false;
         }
 
-        Console.WriteLine($"END: what is here? {currentNode.data}");
+        Console.WriteLine($"END: what is here? {currentTreeNode.data}");
         return false;
     }
 
@@ -108,28 +110,69 @@ public static class ContextFreeGrammarExtensions {
         return result;
     }
 
-    public static List<Symbol> FOLLOW(this ContextFreeGrammar cnf, NonTerminal S) {
-        List<Node<NonTerminal>> nodes = new ();
-        foreach (var nonTerminal in cnf.NonTerminals) {
-            nodes.Add(new Node<NonTerminal>(nonTerminal,null));
-        }
-
-        foreach (var rule in cnf.ProductionRules) {
-            for (var i = 0; i < rule.to.Length; i++) {
-                var outcome = rule.to[i];
-                if (outcome is NonTerminal ntOut) {
-                    if (i == rule.to.Length - 1) {
-                        connect(new Node<NonTerminal>(rule.from), new Node<NonTerminal>(ntOut));
-                    }
-                    else {
-                        //nicht letzte
-                        var first = FIRST(cnf, ntOut);
-                        
-                    }
-                }
+    private static void AddRangeLikeSet(List<Symbol> from, List<Symbol> to, ref bool changed) {
+        foreach (var s in from) {
+            if (!to.Contains(s)) {
+                to.Add(s);
+                changed = true;
             }
         }
-        
     }
     
+    public static List<Symbol> FOLLOW(this ContextFreeGrammar cnf, NonTerminal S) {
+        
+        Dictionary<NonTerminal,List<Symbol>> followSets = new ();
+        foreach (var nonTerminal in cnf.NonTerminals) {
+            followSets.Add(nonTerminal,new List<Symbol>(){new Terminal("$")});
+        }
+
+        while (true) {
+            bool changed = false;
+            
+            foreach (var prod in cnf.ProductionRules) {
+                if(!prod.to.Contains(S)) continue;
+                if(!prod.ContainsNonTerminalConclusion() ) continue;
+                    
+                var posOfLastNonTerminal = prod.GetMostRightPosOf(S);
+                
+                
+                var lastNonTerminal = (NonTerminal)prod.to[posOfLastNonTerminal];
+                if (!followSets.TryGetValue(lastNonTerminal, out var curFollowSet)) {
+                    throw new Exception($"cant find value: {lastNonTerminal} in followSets");
+                }
+                
+                if (posOfLastNonTerminal == prod.to.Length - 1 || prod.to[posOfLastNonTerminal+1].IsEpsilon) {
+                    //end or epsilon
+                    //A-> aB
+                    var f = FOLLOW(cnf, prod.from);
+                    AddRangeLikeSet(f,curFollowSet,ref changed);
+                    
+                    if (!changed) {
+                        break;
+                    }
+                    continue;
+                }
+                
+                //we have beta
+                var first_beta = FIRST(cnf, prod.to[posOfLastNonTerminal + 1]);
+                
+                if (first_beta.Contains(new Terminal())) {
+                    var f = FOLLOW(cnf, prod.from);
+                    AddRangeLikeSet(f,curFollowSet,ref changed);
+                }
+
+                var first_beta_withoutEps = new List<Symbol>(first_beta);
+                foreach (var s in first_beta_withoutEps.Where(s => s.IsEpsilon)) {
+                    first_beta_withoutEps.Remove(s);
+                }
+                AddRangeLikeSet(first_beta_withoutEps,curFollowSet,ref changed);
+            }
+
+            if (!changed) {
+                break;
+            }
+        }
+
+        return followSets[S];
+    }
 }
