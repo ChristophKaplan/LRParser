@@ -1,0 +1,15 @@
+/Volumes/Data/Development/CNF/CFG/bin/Debug/net7.0/CFG
+/Volumes/Data/Development/CNF/CFG/bin/Debug/net7.0/CFG.deps.json
+/Volumes/Data/Development/CNF/CFG/bin/Debug/net7.0/CFG.runtimeconfig.json
+/Volumes/Data/Development/CNF/CFG/bin/Debug/net7.0/CFG.dll
+/Volumes/Data/Development/CNF/CFG/bin/Debug/net7.0/CFG.pdb
+/Volumes/Data/Development/CNF/CFG/obj/Debug/net7.0/CFG.csproj.AssemblyReference.cache
+/Volumes/Data/Development/CNF/CFG/obj/Debug/net7.0/CFG.GeneratedMSBuildEditorConfig.editorconfig
+/Volumes/Data/Development/CNF/CFG/obj/Debug/net7.0/CFG.AssemblyInfoInputs.cache
+/Volumes/Data/Development/CNF/CFG/obj/Debug/net7.0/CFG.AssemblyInfo.cs
+/Volumes/Data/Development/CNF/CFG/obj/Debug/net7.0/CFG.csproj.CoreCompileInputs.cache
+/Volumes/Data/Development/CNF/CFG/obj/Debug/net7.0/CFG.dll
+/Volumes/Data/Development/CNF/CFG/obj/Debug/net7.0/refint/CFG.dll
+/Volumes/Data/Development/CNF/CFG/obj/Debug/net7.0/CFG.pdb
+/Volumes/Data/Development/CNF/CFG/obj/Debug/net7.0/CFG.genruntimeconfig.cache
+/Volumes/Data/Development/CNF/CFG/obj/Debug/net7.0/ref/CFG.dll
