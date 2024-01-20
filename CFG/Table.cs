@@ -4,7 +4,6 @@ public enum Action {
     Shift,
     Reduce,
     Accept,
-    Error,
 }
 
 public class Table {

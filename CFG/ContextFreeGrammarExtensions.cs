@@ -245,13 +245,8 @@ public static class ContextFreeGrammarExtensions {
             var next = new State(nextClosure, count);
             
             if(states.TryGetSameState(next, out var sameState)) {
-                if (!sameState.IsReflexive()) {
-                    current.transitions.Add(group.Key, sameState);
-                    Console.WriteLine(current.Id+ "add " +group.Key+ " transition to" + sameState );
-                }
-                else {
-                    Console.WriteLine(current.Id+ "found reflexive " +group.Key+ " transition to" + sameState );
-                }
+                current.transitions.Add(group.Key, sameState);
+                //Console.WriteLine(current.Id+ " add " +group.Key+ " transition to" + sameState );
             }
             else {
                 current.transitions.Add(group.Key, next);

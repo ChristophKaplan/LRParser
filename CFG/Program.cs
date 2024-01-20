@@ -1,6 +1,6 @@
 ﻿using CNF;
 
-
+/*
 List<NonTerminal> N = new() {
     new NonTerminal("S'"),
     new NonTerminal("S"),
@@ -31,6 +31,43 @@ var tokens = new List<Terminal>() {
     new Terminal("id"),
     new Terminal("="),
     new Terminal("id"),
+};
+
+var parser = new Parser(cnf);
+parser.Parse(tokens);
+
+*/
+
+
+
+
+List<NonTerminal> N = new() {
+    new NonTerminal("A"),
+    new NonTerminal("B")
+};
+
+List<Terminal> Sigma = new() {
+    new Terminal("x"),
+    new Terminal("y"),
+    new Terminal("z"),
+};
+
+List<ProductionRule> P = new() {
+    new ProductionRule(new NonTerminal("A"), new NonTerminal("B"),new Terminal("x")),
+    new ProductionRule(new NonTerminal("B"),new Terminal("y"), new NonTerminal("B")),
+    new ProductionRule(new NonTerminal("B"), new Terminal("z"))
+};
+
+NonTerminal S = new NonTerminal("A");
+
+ContextFreeGrammar cnf = new ContextFreeGrammar(N, Sigma, P, S);
+Console.WriteLine(cnf);
+
+var tokens = new List<Terminal>() {
+    new Terminal("y"),
+    new Terminal("y"),
+    new Terminal("z"),
+    new Terminal("x"),
 };
 
 var parser = new Parser(cnf);

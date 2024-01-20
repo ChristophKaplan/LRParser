@@ -1,7 +1,7 @@
 namespace CNF;
 
 public class State {
-    public List<LRItem> items;
+    private List<LRItem> items;
     public Dictionary<Symbol,State> transitions;
     private int id;
 
@@ -32,13 +32,5 @@ public class State {
         }
 
         return true;
-    }
-
-    public bool IsReflexive() {
-        foreach (var state in transitions.Values) {
-            if (this.id == state.id) return true;
-        }
-
-        return false;
     }
 }
