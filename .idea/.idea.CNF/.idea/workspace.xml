@@ -7,80 +7,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3c66b1b5-3c51-4f2b-b1a1-5fe3ae959fed" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.CFG/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.CFG/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.CFG/.idea/indexLayout.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.CFG/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.CNF/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/LRItem.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/Program.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/States.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/bin/Debug/net7.0/CFG" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/bin/Debug/net7.0/CFG.deps.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/bin/Debug/net7.0/CFG.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/bin/Debug/net7.0/CNF.runtimeconfig.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/CFG.csproj.nuget.dgspec.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/CFG.csproj.nuget.g.props" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/CNF.csproj.nuget.g.targets" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CFG.AssemblyInfo.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CFG.AssemblyInfoInputs.cache" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CFG.GeneratedMSBuildEditorConfig.editorconfig" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CFG.assets.cache" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CFG.csproj.AssemblyReference.cache" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CFG.csproj.CoreCompileInputs.cache" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CFG.csproj.FileListAbsolute.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CFG.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CFG.genruntimeconfig.cache" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CFG.pdb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CNF.GlobalUsings.g.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CNF.csproj.CoreCompileInputs.cache" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CNF.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/ref/CFG.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/ref/CNF.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/refint/CFG.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/refint/CNF.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CNF/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CNF/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CNF/.idea/indexLayout.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CNF/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF.sln" beforeDir="false" afterPath="$PROJECT_DIR$/CFG.sln" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/CNF.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/CFG.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/ContextFreeGrammar.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/ContextFreeGrammar.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/ContextFreeGrammarExtensions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/ContextFreeGrammarExtensions.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/ProductionRule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/ProductionRule.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/Program.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/Symbol.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/Symbol.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/TreeNode.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/TreeNode.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/bin/Debug/net7.0/CNF" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/bin/Debug/net7.0/CNF" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/bin/Debug/net7.0/CNF.deps.json" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/bin/Debug/net7.0/CNF.deps.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/bin/Debug/net7.0/CNF.dll" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/bin/Debug/net7.0/CNF.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/bin/Debug/net7.0/CFG.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/bin/Debug/net7.0/CNF.runtimeconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/bin/Debug/net7.0/CFG.runtimeconfig.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/CNF.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/CNF.csproj.nuget.dgspec.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/CNF.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/CNF.csproj.nuget.g.props" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/CNF.csproj.nuget.g.targets" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/CFG.csproj.nuget.g.targets" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/Debug/net7.0/.NETCoreApp,Version=v7.0.AssemblyAttributes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/.NETCoreApp,Version=v7.0.AssemblyAttributes.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/Debug/net7.0/CNF.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CNF.AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/Debug/net7.0/CNF.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CNF.AssemblyInfoInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/Debug/net7.0/CNF.GeneratedMSBuildEditorConfig.editorconfig" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CNF.GeneratedMSBuildEditorConfig.editorconfig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/Debug/net7.0/CNF.GlobalUsings.g.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CFG.GlobalUsings.g.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/Debug/net7.0/CNF.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CNF.assets.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/Debug/net7.0/CNF.csproj.AssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CNF.csproj.AssemblyReference.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/Debug/net7.0/CNF.csproj.CoreCompileInputs.cache" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/Debug/net7.0/CNF.csproj.FileListAbsolute.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CNF.csproj.FileListAbsolute.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/Debug/net7.0/CNF.dll" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/Debug/net7.0/CNF.genruntimeconfig.cache" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CNF.genruntimeconfig.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/Debug/net7.0/CNF.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/CNF.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/Debug/net7.0/apphost" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/Debug/net7.0/apphost" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/Debug/net7.0/ref/CNF.dll" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/Debug/net7.0/refint/CNF.dll" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/project.assets.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/project.nuget.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/project.packagespec.json" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/project.packagespec.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/rider.project.model.nuget.info" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/rider.project.model.nuget.info" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNF/obj/rider.project.restore.info" beforeDir="false" afterPath="$PROJECT_DIR$/CFG/obj/rider.project.restore.info" afterDir="false" />
-    </list>
+    <list default="true" id="3c66b1b5-3c51-4f2b-b1a1-5fe3ae959fed" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -166,7 +93,7 @@
       <workItem from="1702107590631" duration="5913000" />
       <workItem from="1702196318622" duration="517000" />
       <workItem from="1705587206675" duration="81000" />
-      <workItem from="1705587368019" duration="12067000" />
+      <workItem from="1705587368019" duration="13558000" />
     </task>
     <servers />
   </component>

@@ -69,6 +69,8 @@ public static class ContextFreeGrammarExtensions {
     }
 
     public static List<Symbol> FIRST(this ContextFreeGrammar cnf, Symbol S) {
+        //Console.WriteLine( $"FIRST({S})");
+        
         var result = new List<Symbol>();
 
         if (S is not NonTerminal A) {
@@ -79,8 +81,7 @@ public static class ContextFreeGrammarExtensions {
         var p = cnf.GetAllProdForNonTerminal(A);
         int n = p.Count;
         var D = new List<Symbol>[n];
-
-
+        
         for (int i = 0; i < n; i++) {
             D[i] = new List<Symbol>();
 
@@ -178,6 +179,7 @@ public static class ContextFreeGrammarExtensions {
     }
 
     public static List<LRItem> Closure(this ContextFreeGrammar cfg, List<LRItem> lrItems, int k = 1) {
+
         var result = new List<LRItem>();
         var stack = new Stack<LRItem>(lrItems);
         
@@ -192,24 +194,24 @@ public static class ContextFreeGrammarExtensions {
             var rest = cur.GetSymbolsAfterDot();
             var oldLookahead = cur.Lookahead;
             rest.AddRange(oldLookahead);
+            
             var curLookahead = cfg.FIRST(rest[0]); //k = 1
             
             if (cur.GetSymbol() is NonTerminal nonTerminal) {
                 var prods = cfg.GetAllProdForNonTerminal(nonTerminal);
             
                 foreach (var prod in prods) {
-                    var closed = result.Where(r => r.Rule.Equals(prod)).ToList();
-                
-                    if (closed.Count == 0) {
-                        var item = new LRItem(prod, 0, curLookahead);
-                        stack.Push(item);
-                        
-                        //Console.WriteLine("item: "+ item +" cur:" + cur +" "+ result.Aggregate("result:", (c, n) => $"{c} {n}, ") );
+                    
+                    var deeperItem = new LRItem(prod, 0, curLookahead);
+                    var containedAlready = result.Where(r => r.Rule.Equals(deeperItem.rule) && r.dotPosition.Equals(deeperItem.dotPosition)).ToList();
+                    if(containedAlready.Count > 1) throw new Exception("this should not happen? " + containedAlready.Aggregate("", (c, n) => $"{c} {n}, "));
+                    
+                    if (containedAlready.Count == 0) {
+                        stack.Push(deeperItem);
                     }
                     else {
-                        if(closed.Count > 1) throw new Exception("this should not happen: " + closed.Aggregate("", (c, n) => $"{c} {n}, "));
                         bool dontNeed = false;
-                        AddRangeLikeSet(curLookahead,closed[0].Lookahead,ref dontNeed);
+                        AddRangeLikeSet(curLookahead,containedAlready[0].Lookahead,ref dontNeed);
                     }
                 }
             }
@@ -217,9 +219,57 @@ public static class ContextFreeGrammarExtensions {
         return result;
     }
 
-    public static void GenerateStates(this ContextFreeGrammar cfg, LRItem startItem) {
-        var state = new State(cfg.Closure(new List<LRItem>(){startItem}), 0);
-        Console.WriteLine(state);
-        state.PossibleTransitions(cfg);
+    public static List<State> GenerateStates(this ContextFreeGrammar cfg, LRItem startItem) {
+        var firstState = new State(cfg.Closure(new List<LRItem>(){startItem}), 0);
+        var states = new List<State>(){firstState};
+        int count = 0;
+        EnfoldTransitions(cfg, firstState,states,ref count);
+        return states;
+    }
+    
+    private static void EnfoldTransitions(this ContextFreeGrammar cfg, State current, List<State> states, ref int count) {
+        
+        var groups = current.GetIncompleteItems().GroupBy(i => i.GetSymbol());
+
+        foreach (var group in groups) {
+            
+            if (group.Key.Equals(new Terminal())) continue;
+            
+            var nextItems = new List<LRItem>();
+            foreach (var item in group) {
+                if(!item.IsComplete()) nextItems.Add(item.NextItem());
+            }
+            
+            var nextClosure = cfg.Closure(nextItems);
+            count++;
+            var next = new State(nextClosure, count);
+            
+            if(states.TryGetSameState(next, out var sameState)) {
+                if (!sameState.IsReflexive()) {
+                    current.transitions.Add(group.Key, sameState);
+                    Console.WriteLine(current.Id+ "add " +group.Key+ " transition to" + sameState );
+                }
+                else {
+                    Console.WriteLine(current.Id+ "found reflexive " +group.Key+ " transition to" + sameState );
+                }
+            }
+            else {
+                current.transitions.Add(group.Key, next);
+                states.Add(next);
+                EnfoldTransitions(cfg, next,states,ref count);
+            }
+        }
+    }
+
+    private static bool TryGetSameState(this List<State> states, State state, out State sameState) {
+        foreach (var s in states) {
+            if (s.EqualItems(state)) {
+                sameState = s;
+                return true;
+            }
+        }
+
+        sameState = null;
+        return false;
     }
 }

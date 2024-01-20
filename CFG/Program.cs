@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.SymbolStore;
-using CNF;
+﻿using CNF;
 
 
 List<NonTerminal> N = new() {
@@ -27,5 +26,12 @@ NonTerminal S = new NonTerminal("S'");
 ContextFreeGrammar cnf = new ContextFreeGrammar(N, Sigma, P, S);
 Console.WriteLine(cnf);
 
-cnf.GenerateStates(new LRItem(P[0], 0, new List<Symbol>() { new Terminal("$") })); 
+var tokens = new List<Terminal>() {
 
+    new Terminal("id"),
+    new Terminal("="),
+    new Terminal("id"),
+};
+
+var parser = new Parser(cnf);
+parser.Parse(tokens);

@@ -1,18 +1,22 @@
 namespace CNF;
 
 public class LRItem {
-    private ProductionRule rule;
-    private int dotPosition;
+    public ProductionRule rule;
+    public int dotPosition;
     private List<Symbol> lookahead;
     
     public LRItem(ProductionRule rule, int dotPosition, List<Symbol> lookahead) {
         this.rule = rule;
         this.dotPosition = dotPosition;
         this.lookahead = lookahead;
+
+        if (GetSymbol() != null && GetSymbol().IsEpsilon) {
+            this.dotPosition++;
+            //this.rule = new ProductionRule(rule.from, new Symbol[] { });
+        }
     }
 
     public ProductionRule Rule => rule;
-    public int DotPosition => dotPosition;
     public List<Symbol> Lookahead => lookahead;
 
     public bool IsComplete() {
@@ -32,28 +36,6 @@ public class LRItem {
 
         return symbols;
     }
-
-    public bool IsNextSymbolTerminal() {
-        if (IsComplete()) return false;
-        return rule.to[dotPosition] is Terminal;
-    }
-
-    public bool IsNextSymbolNonTerminal() {
-        if (IsComplete()) return false;
-        return rule.to[dotPosition] is NonTerminal;
-    }
-
-    public bool HasLookahead(List<Symbol> lookahead) {
-        foreach (var symbol in lookahead) {
-            if (!this.lookahead.Contains(symbol)) return false;
-        }
-
-        return true;
-    }
-
-    public bool HasLookahead(Symbol lookahead) {
-        return this.lookahead.Contains(lookahead);
-    }
     
     public LRItem NextItem() {
         if (IsComplete()) return null;
@@ -69,5 +51,27 @@ public class LRItem {
         if (dotPosition == rule.to.Length) s += " .";
         s += $", {string.Join(" ", lookahead)}";
         return $"[{s}]";
+    }
+
+    public override bool Equals(object? obj) {
+        if (obj == null) return false;
+        if (obj.GetType() != GetType()) return false;
+        var other = (LRItem) obj;
+        return rule.Equals(other.rule) && dotPosition == other.dotPosition && LookAheadEquals(other.lookahead);
+    }
+
+    public override int GetHashCode() {
+        return HashCode.Combine(rule, dotPosition, lookahead);
+    }
+    
+    private bool LookAheadEquals(List<Symbol> other) {
+        if (lookahead.Count != other.Count) return false;
+        foreach (var symbol in lookahead) {
+            if (!other.Contains(symbol)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

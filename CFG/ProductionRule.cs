@@ -43,6 +43,4 @@ public class ProductionRule {
     public bool ContainsNonTerminalConclusion() {
         return to.OfType<NonTerminal>().Any();
     }
-    
-    
 }
