@@ -1,0 +1,15 @@
+/Volumes/Data/Development/LRParser/LRParser/bin/Debug/net7.0/LRParser
+/Volumes/Data/Development/LRParser/LRParser/bin/Debug/net7.0/LRParser.deps.json
+/Volumes/Data/Development/LRParser/LRParser/bin/Debug/net7.0/LRParser.runtimeconfig.json
+/Volumes/Data/Development/LRParser/LRParser/bin/Debug/net7.0/LRParser.dll
+/Volumes/Data/Development/LRParser/LRParser/bin/Debug/net7.0/LRParser.pdb
+/Volumes/Data/Development/LRParser/LRParser/obj/Debug/net7.0/LRParser.csproj.AssemblyReference.cache
+/Volumes/Data/Development/LRParser/LRParser/obj/Debug/net7.0/LRParser.GeneratedMSBuildEditorConfig.editorconfig
+/Volumes/Data/Development/LRParser/LRParser/obj/Debug/net7.0/LRParser.AssemblyInfoInputs.cache
+/Volumes/Data/Development/LRParser/LRParser/obj/Debug/net7.0/LRParser.AssemblyInfo.cs
+/Volumes/Data/Development/LRParser/LRParser/obj/Debug/net7.0/LRParser.csproj.CoreCompileInputs.cache
+/Volumes/Data/Development/LRParser/LRParser/obj/Debug/net7.0/LRParser.dll
+/Volumes/Data/Development/LRParser/LRParser/obj/Debug/net7.0/refint/LRParser.dll
+/Volumes/Data/Development/LRParser/LRParser/obj/Debug/net7.0/LRParser.pdb
+/Volumes/Data/Development/LRParser/LRParser/obj/Debug/net7.0/LRParser.genruntimeconfig.cache
+/Volumes/Data/Development/LRParser/LRParser/obj/Debug/net7.0/ref/LRParser.dll
