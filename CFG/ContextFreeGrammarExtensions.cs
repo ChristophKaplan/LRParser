@@ -1,10 +1,11 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace CNF; 
+namespace CFG; 
 
 public static class ContextFreeGrammarExtensions {
-    public static bool GetGraphTopDownV1(this ContextFreeGrammar cnf, List<Terminal> tokens) {
+    
+    /*public static bool GetGraphTopDownV1(this ContextFreeGrammar cnf, List<Terminal> tokens) {
         var root = new TreeNode<Symbol>(cnf.StartSymbol, null);
         return GetGraphTopDownV1(cnf, root, 0, tokens, 0);
     }
@@ -62,7 +63,7 @@ public static class ContextFreeGrammarExtensions {
 
         Console.WriteLine($"END: what is here? {currentTreeNode.data}");
         return false;
-    }
+    }*/
 
     public static Word START(this ContextFreeGrammar cnf, Word v, int k) {
         return v.Length < k ? v : v.Slice(k);
@@ -176,95 +177,5 @@ public static class ContextFreeGrammarExtensions {
         }
 
         return followSets[S];
-    }
-
-    public static List<LRItem> Closure(this ContextFreeGrammar cfg, List<LRItem> lrItems, int k = 1) {
-
-        var result = new List<LRItem>();
-        var stack = new Stack<LRItem>(lrItems);
-        
-        while (stack.Count > 0) {
-            var cur = stack.Pop();
-            result.Add(cur);
-
-            if (cur.IsComplete()) {
-                continue;
-            }
-                
-            var rest = cur.GetSymbolsAfterDot();
-            var oldLookahead = cur.Lookahead;
-            rest.AddRange(oldLookahead);
-            
-            var curLookahead = cfg.FIRST(rest[0]); //k = 1
-            
-            if (cur.GetSymbol() is NonTerminal nonTerminal) {
-                var prods = cfg.GetAllProdForNonTerminal(nonTerminal);
-            
-                foreach (var prod in prods) {
-                    
-                    var deeperItem = new LRItem(prod, 0, curLookahead);
-                    var containedAlready = result.Where(r => r.Rule.Equals(deeperItem.rule) && r.dotPosition.Equals(deeperItem.dotPosition)).ToList();
-                    if(containedAlready.Count > 1) throw new Exception("this should not happen? " + containedAlready.Aggregate("", (c, n) => $"{c} {n}, "));
-                    
-                    if (containedAlready.Count == 0) {
-                        stack.Push(deeperItem);
-                    }
-                    else {
-                        bool dontNeed = false;
-                        AddRangeLikeSet(curLookahead,containedAlready[0].Lookahead,ref dontNeed);
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    public static List<State> GenerateStates(this ContextFreeGrammar cfg, LRItem startItem) {
-        var firstState = new State(cfg.Closure(new List<LRItem>(){startItem}), 0);
-        var states = new List<State>(){firstState};
-        int count = 0;
-        EnfoldTransitions(cfg, firstState,states,ref count);
-        return states;
-    }
-    
-    private static void EnfoldTransitions(this ContextFreeGrammar cfg, State current, List<State> states, ref int count) {
-        
-        var groups = current.GetIncompleteItems().GroupBy(i => i.GetSymbol());
-
-        foreach (var group in groups) {
-            
-            if (group.Key.Equals(new Terminal())) continue;
-            
-            var nextItems = new List<LRItem>();
-            foreach (var item in group) {
-                if(!item.IsComplete()) nextItems.Add(item.NextItem());
-            }
-            
-            var nextClosure = cfg.Closure(nextItems);
-            count++;
-            var next = new State(nextClosure, count);
-            
-            if(states.TryGetSameState(next, out var sameState)) {
-                current.transitions.Add(group.Key, sameState);
-                //Console.WriteLine(current.Id+ " add " +group.Key+ " transition to" + sameState );
-            }
-            else {
-                current.transitions.Add(group.Key, next);
-                states.Add(next);
-                EnfoldTransitions(cfg, next,states,ref count);
-            }
-        }
-    }
-
-    private static bool TryGetSameState(this List<State> states, State state, out State sameState) {
-        foreach (var s in states) {
-            if (s.EqualItems(state)) {
-                sameState = s;
-                return true;
-            }
-        }
-
-        sameState = null;
-        return false;
     }
 }

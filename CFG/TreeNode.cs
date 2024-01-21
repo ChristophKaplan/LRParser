@@ -1,4 +1,4 @@
-namespace CNF; 
+namespace CFG; 
 
 public class TreeNode<T> {
     public readonly T data;

@@ -1,4 +1,4 @@
-namespace CNF;
+namespace CFG;
 
 public class State {
     private List<LRItem> items;
@@ -15,7 +15,6 @@ public class State {
     public int Id => id;
 
     public override string ToString() {
-        
         return items.Aggregate($"State({Id}):\n", (c, n) => $"{c} {n},\n") + transitions.Aggregate("\ttransitions:\n", (c, n) => $"{c} {n.Key} -> {n.Value.Id},\n");
     }
     

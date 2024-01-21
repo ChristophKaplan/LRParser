@@ -4,7 +4,7 @@ using System.Dynamic;
 using System.Runtime.CompilerServices;
 using Microsoft.VisualBasic;
 
-namespace CNF;
+namespace CFG;
 
 public abstract class Symbol {
     protected internal readonly string _value;

@@ -1,4 +1,4 @@
-namespace CNF; 
+namespace CFG; 
 
 
 public class ProductionRule {

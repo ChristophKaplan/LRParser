@@ -1,4 +1,4 @@
-﻿using CNF;
+﻿using CFG;
 
 /*
 List<NonTerminal> N = new() {
@@ -70,5 +70,5 @@ var tokens = new List<Terminal>() {
     new Terminal("x"),
 };
 
-var parser = new Parser(cnf);
+var parser = new LRParser(cnf);
 parser.Parse(tokens);
