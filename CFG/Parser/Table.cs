@@ -1,4 +1,6 @@
-namespace CFG;
+using LRParser.CFG;
+
+namespace LRParser.Parser;
 
 public class Table {
     private ContextFreeGrammar cfg;
@@ -7,8 +9,8 @@ public class Table {
 
     public Table(ContextFreeGrammar cfg, List<State> states) {
         this.cfg = cfg;
-        this.actionTable = new Dictionary<(int, Symbol), (Action, int)>();
-        this.gotoTable = new Dictionary<(int, Symbol), int>();
+        actionTable = new Dictionary<(int, Symbol), (Action, int)>();
+        gotoTable = new Dictionary<(int, Symbol), int>();
     }
 
     public Dictionary<(int, Symbol), (Action, int)> GetActionTable() {
@@ -20,14 +22,16 @@ public class Table {
     }
 
     public override string ToString() {
-        string s = "ACTION\n";
+        var s = "ACTION\n";
         foreach (var entry in actionTable) {
             s += $"({entry.Key.Item1}, {entry.Key.Item2}) -> {entry.Value}\n";
         }
+
         s += "\nGOTO\n";
         foreach (var entry in gotoTable) {
             s += $"({entry.Key}) -> {entry.Value}\n";
         }
+
         return s;
     }
 }

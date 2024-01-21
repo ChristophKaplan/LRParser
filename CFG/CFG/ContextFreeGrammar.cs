@@ -1,5 +1,4 @@
-namespace CFG;
-
+namespace LRParser.CFG;
 
 public class ContextFreeGrammar {
     public readonly List<NonTerminal> NonTerminals;
@@ -13,7 +12,10 @@ public class ContextFreeGrammar {
         ProductionRules = p;
         StartSymbol = s;
 
-        if (HasLeftRecursion()) ResolveLeftRecursion();
+        if (HasLeftRecursion()) {
+            ResolveLeftRecursion();
+        }
+
         Console.WriteLine($"HasLeftRecursion() = {HasLeftRecursion()}");
     }
 
@@ -46,9 +48,11 @@ public class ContextFreeGrammar {
         }
 
         foreach (var r in ProductionRules) {
-            if(!NonTerminals.Contains(r.from)) NonTerminals.Add(r.from);
+            if (!NonTerminals.Contains(r.from)) {
+                NonTerminals.Add(r.from);
+            }
         }
-        
+
         Console.WriteLine(toAdd.Aggregate("\tchanged rules:", (c, n) => $"{c} {n},"));
     }
 
@@ -58,7 +62,7 @@ public class ContextFreeGrammar {
         var newNonTerminal = new NonTerminal($"{leftRecursiveRule.from._value}'");
 
         foreach (var alt in alternatives) {
-            if (alt == leftRecursiveRule) {
+            if (alt.Equals(leftRecursiveRule)) {
                 continue;
             }
 

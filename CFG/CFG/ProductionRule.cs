@@ -1,5 +1,4 @@
-namespace CFG; 
-
+namespace LRParser.CFG;
 
 public class ProductionRule {
     internal NonTerminal from;
@@ -24,16 +23,16 @@ public class ProductionRule {
 
     public override bool Equals(object? obj) {
         if (obj is ProductionRule other) {
-            return this.ToString().Equals(other.ToString());
+            return ToString().Equals(other.ToString());
         }
 
         return false;
     }
 
     public int GetMostRightPosOf(NonTerminal S) {
-        for (var i = to.Length-1; i >= 0; i--) {
+        for (var i = to.Length - 1; i >= 0; i--) {
             if (to[i].Equals(S)) {
-                return  i;
+                return i;
             }
         }
 

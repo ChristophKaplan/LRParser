@@ -1,4 +1,4 @@
-namespace CFG; 
+namespace LRParser.Parser;
 
 public class TreeNode<T> {
     public readonly T data;
@@ -8,7 +8,7 @@ public class TreeNode<T> {
     public TreeNode(T data, TreeNode<T> parent) {
         data = data;
         Parent = parent;
-        Children = new();
+        Children = new List<TreeNode<T>>();
     }
 
     public void AddChild(TreeNode<T> child) {
@@ -30,7 +30,7 @@ public class Node<T> {
 
     public Node(T data) {
         data = data;
-        Edge = new();
+        Edge = new List<Node<T>>();
     }
 
     public void AddEdge(Node<T> edge) {
@@ -40,5 +40,4 @@ public class Node<T> {
     public override string ToString() {
         return $"{data} - {Edge.Aggregate("(", (current, next) => $"{current} {next},")})";
     }
-
 }
