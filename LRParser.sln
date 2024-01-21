@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CFG", "CFG\CFG.csproj", "{600259D6-1091-4258-A9FB-D24A3549DB7E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LRParser", "LRParser\LRParser.csproj", "{600259D6-1091-4258-A9FB-D24A3549DB7E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

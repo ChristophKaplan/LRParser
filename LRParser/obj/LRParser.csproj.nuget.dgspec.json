@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Volumes/Data/Development/CNF/CFG/CFG.csproj": {}
+    "/Volumes/Data/Development/LRParser/LRParser/LRParser.csproj": {}
   },
   "projects": {
-    "/Volumes/Data/Development/CNF/CFG/CFG.csproj": {
+    "/Volumes/Data/Development/LRParser/LRParser/LRParser.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Volumes/Data/Development/CNF/CFG/CFG.csproj",
-        "projectName": "CFG",
-        "projectPath": "/Volumes/Data/Development/CNF/CFG/CFG.csproj",
+        "projectUniqueName": "/Volumes/Data/Development/LRParser/LRParser/LRParser.csproj",
+        "projectName": "LRParser",
+        "projectPath": "/Volumes/Data/Development/LRParser/LRParser/LRParser.csproj",
         "packagesPath": "/Users/delphicmind/.nuget/packages/",
-        "outputPath": "/Volumes/Data/Development/CNF/CFG/obj/",
+        "outputPath": "/Volumes/Data/Development/LRParser/LRParser/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/delphicmind/.nuget/NuGet/NuGet.Config"
