@@ -13,7 +13,7 @@ public class ContextFreeGrammar {
         StartSymbol = s;
 
         if (HasLeftRecursion()) {
-            ResolveLeftRecursion();
+            //ResolveLeftRecursion();
         }
 
         Console.WriteLine($"HasLeftRecursion() = {HasLeftRecursion()}");

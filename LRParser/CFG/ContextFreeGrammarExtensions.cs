@@ -3,7 +3,7 @@ namespace LRParser.CFG;
 public static class ContextFreeGrammarExtensions {
     public static List<Symbol> FIRST(this ContextFreeGrammar cnf, Symbol S) {
         var result = new List<Symbol>();
-
+        
         if (S is not NonTerminal A) {
             result.Add(S);
             return result;
@@ -17,32 +17,41 @@ public static class ContextFreeGrammarExtensions {
             D[i] = new List<Symbol>();
 
             var alpha_i = p[i].to[0];
+
+            if (S.Equals(alpha_i)) {
+                Console.WriteLine("recursive ?!?" + p[i]);
+                continue;
+            }
+            
             if (alpha_i.Equals(new Terminal())) {
                 D[i].Add(new Terminal());
             }
             else {
-                var m = p[i].to.Length;
-
-                D[i].AddRange(FIRST(cnf, p[i].to[0]));
+                var length = p[i].to.Length;
+                var changed1 = false;
+                var f = FIRST(cnf, p[i].to[0]);
+                AddRangeLikeSet(f,D[i], ref changed1);
                 D[i].Remove(new Terminal());
-                var j = 0;
-                while (FIRST(cnf, p[i].to[j]).Contains(new Terminal()) && j < m) {
-                    j++;
-                    D[i].AddRange(FIRST(cnf, p[i].to[j]));
+
+                int j = 0;
+                for (j = 0; FIRST(cnf, p[i].to[j]).Contains(new Terminal()) && (j < length); j++) {
+                    var changed2 = false;
+                    AddRangeLikeSet(FIRST(cnf, p[i].to[j]), D[i], ref changed2);
                     D[i].Remove(new Terminal());
                 }
 
-                if (j == m && FIRST(cnf, p[i].to[m]).Contains(new Terminal())) {
+                if (j == length && FIRST(cnf, p[i].to[length]).Contains(new Terminal())) {
                     D[i].Add(new Terminal());
                 }
             }
-
-            result.AddRange(D[i]);
+            
+            var changed3 = false;
+            AddRangeLikeSet(D[i],result, ref changed3);
         }
 
         return result;
     }
-
+    
     public static List<Symbol> FOLLOW(this ContextFreeGrammar cnf, NonTerminal S) {
         Dictionary<NonTerminal, List<Symbol>> followSets = new();
         foreach (var nonTerminal in cnf.NonTerminals) {

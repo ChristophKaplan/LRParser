@@ -18,7 +18,6 @@ List<ProductionRule> P = new()
     new ProductionRule(new NonTerminal("AtomicSentence"), new Terminal("Q")),
     
     new ProductionRule(new NonTerminal("ComplexSentence"),new NonTerminal("AtomicSentence"), new Terminal("&&"),new NonTerminal("AtomicSentence")),
-  
     new ProductionRule(new NonTerminal("ComplexSentence"),new NonTerminal("ComplexSentence"), new Terminal("&&"),new NonTerminal("ComplexSentence")),
 };
 
