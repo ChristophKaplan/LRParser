@@ -1,22 +1,33 @@
 ﻿using LRParser.CFG;
 using LRParser.Parser;
 
-List<NonTerminal> N = new() { new NonTerminal("A"), new NonTerminal("B") };
-
-List<Terminal> Sigma = new() { new Terminal("x"), new Terminal("y"), new Terminal("z") };
-
-List<ProductionRule> P = new() {
-    new ProductionRule(new NonTerminal("A"), new NonTerminal("B"), new Terminal("x")),
-    new ProductionRule(new NonTerminal("B"), new Terminal("y"), new NonTerminal("B")),
-    new ProductionRule(new NonTerminal("B"), new Terminal("z"))
+List<NonTerminal> N = new()
+{
+    new NonTerminal("S"), new NonTerminal("Sentence"), new NonTerminal("AtomicSentence"),
+    new NonTerminal("ComplexSentence")
 };
 
-var S = new NonTerminal("A");
+List<Terminal> Sigma = new() { new Terminal("P"), new Terminal("Q"), new Terminal("&&"),new Terminal() };
+
+List<ProductionRule> P = new()
+{
+    new ProductionRule(new NonTerminal("S"), new NonTerminal("Sentence")),
+    new ProductionRule(new NonTerminal("Sentence"), new NonTerminal("AtomicSentence")),
+    new ProductionRule(new NonTerminal("Sentence"), new NonTerminal("ComplexSentence")),
+    new ProductionRule(new NonTerminal("AtomicSentence"), new Terminal("P")),
+    new ProductionRule(new NonTerminal("AtomicSentence"), new Terminal("Q")),
+    
+    new ProductionRule(new NonTerminal("ComplexSentence"),new NonTerminal("AtomicSentence"), new Terminal("&&"),new NonTerminal("AtomicSentence")),
+  
+    new ProductionRule(new NonTerminal("ComplexSentence"),new NonTerminal("ComplexSentence"), new Terminal("&&"),new NonTerminal("ComplexSentence")),
+};
+
+var S = new NonTerminal("Sentence");
 
 var cnf = new ContextFreeGrammar(N, Sigma, P, S);
 Console.WriteLine(cnf);
 
-var tokens = new List<Terminal>() { new("y"), new("y"), new("z"), new("x") };
+var tokens = new List<Terminal>() { new("P"), new("&&"), new("Q") };
 
 var parser = new Parser(cnf);
 parser.Parse(tokens);

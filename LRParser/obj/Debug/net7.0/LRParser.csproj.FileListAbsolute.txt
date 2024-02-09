@@ -13,3 +13,17 @@
 /Volumes/Data/Development/LRParser/LRParser/obj/Debug/net7.0/LRParser.pdb
 /Volumes/Data/Development/LRParser/LRParser/obj/Debug/net7.0/LRParser.genruntimeconfig.cache
 /Volumes/Data/Development/LRParser/LRParser/obj/Debug/net7.0/ref/LRParser.dll
+E:\Development\CNF\LRParser\bin\Debug\net7.0\LRParser.exe
+E:\Development\CNF\LRParser\bin\Debug\net7.0\LRParser.deps.json
+E:\Development\CNF\LRParser\bin\Debug\net7.0\LRParser.runtimeconfig.json
+E:\Development\CNF\LRParser\bin\Debug\net7.0\LRParser.dll
+E:\Development\CNF\LRParser\bin\Debug\net7.0\LRParser.pdb
+E:\Development\CNF\LRParser\obj\Debug\net7.0\LRParser.GeneratedMSBuildEditorConfig.editorconfig
+E:\Development\CNF\LRParser\obj\Debug\net7.0\LRParser.AssemblyInfoInputs.cache
+E:\Development\CNF\LRParser\obj\Debug\net7.0\LRParser.AssemblyInfo.cs
+E:\Development\CNF\LRParser\obj\Debug\net7.0\LRParser.csproj.CoreCompileInputs.cache
+E:\Development\CNF\LRParser\obj\Debug\net7.0\LRParser.dll
+E:\Development\CNF\LRParser\obj\Debug\net7.0\refint\LRParser.dll
+E:\Development\CNF\LRParser\obj\Debug\net7.0\LRParser.pdb
+E:\Development\CNF\LRParser\obj\Debug\net7.0\LRParser.genruntimeconfig.cache
+E:\Development\CNF\LRParser\obj\Debug\net7.0\ref\LRParser.dll

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "JESR/P3rsiqHlngRRwfTiUchrfqVTzS8NILOcQKjhm/OJvfYhUuGe2Vi4EHuXa4sOldDyyYLgpJ3z92fbHFuig==",
+  "dgSpecHash": "YRwd/N0L0xyznHINcm1DIW+1klBHdlnKRV/Ebl/3yNftdY17VOBd41gvFXUhMn/ZyUPRcprXkt9F9hLuATHzAQ==",
   "success": true,
-  "projectFilePath": "/Volumes/Data/Development/LRParser/LRParser/LRParser.csproj",
+  "projectFilePath": "E:\\Development\\CNF\\LRParser\\LRParser.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }
