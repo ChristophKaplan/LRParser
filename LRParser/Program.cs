@@ -16,17 +16,17 @@ List<ProductionRule> P = new()
     new ProductionRule(new NonTerminal("Sentence"), new NonTerminal("ComplexSentence")),
     new ProductionRule(new NonTerminal("AtomicSentence"), new Terminal("P")),
     new ProductionRule(new NonTerminal("AtomicSentence"), new Terminal("Q")),
-    
-    new ProductionRule(new NonTerminal("ComplexSentence"),new NonTerminal("AtomicSentence"), new Terminal("&&"),new NonTerminal("AtomicSentence")),
-    new ProductionRule(new NonTerminal("ComplexSentence"),new NonTerminal("ComplexSentence"), new Terminal("&&"),new NonTerminal("ComplexSentence")),
+    new ProductionRule(new NonTerminal("ComplexSentence"),new NonTerminal("AtomicSentence"),new Terminal("&&"), new NonTerminal("Sentence")),
 };
 
-var S = new NonTerminal("Sentence");
+var S = new NonTerminal("S");
 
 var cnf = new ContextFreeGrammar(N, Sigma, P, S);
 Console.WriteLine(cnf);
 
-var tokens = new List<Terminal>() { new("P"), new("&&"), new("Q") };
+var tokens = new List<Terminal>() { new("P"), new("&&"), new("Q")};
 
 var parser = new Parser(cnf);
-parser.Parse(tokens);
+var tree = parser.Parse(tokens);
+
+Console.WriteLine("tree: "+tree);

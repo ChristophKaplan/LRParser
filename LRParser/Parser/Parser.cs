@@ -162,12 +162,14 @@ public class Parser {
         return table;
     }
 
-    public void Parse(List<Terminal> input) {
+    public TreeNode<Symbol> Parse(List<Terminal> input) {
         input.Add(new Terminal("$"));
 
         var stackState = new Stack<int>();
         stackState.Push(0);
-
+        
+        var tree = new Stack<TreeNode<Symbol>>();
+        
         while (true) {
             if (table.GetActionTable().TryGetValue((stackState.Peek(), input[0]), out var action)) {
                 if (action.Item1 == Action.Accept) {
@@ -177,15 +179,20 @@ public class Parser {
                 else if (action.Item1 == Action.Shift) {
                     Console.WriteLine("SHIFT:" + input[0]);
                     stackState.Push(action.Item2);
+                    tree.Push(new TreeNode<Symbol>(input[0],null));
                     input.RemoveAt(0);
                 }
                 else if (action.Item1 == Action.Reduce) {
                     var rule = cfg.ProductionRules[action.Item2];
                     Console.WriteLine("REDUCE nr:" + action.Item2 + " = " + rule);
 
+                    var reduced = new TreeNode<Symbol>(rule.from, null);
                     for (var i = 0; i < rule.to.Count(s => !s.IsEpsilon); i++) {
-                        stackState.Pop();
+                        stackState.Pop(); 
+                        reduced.AddChild(tree.Pop());
                     }
+                    
+                    tree.Push(reduced);
 
                     if (table.GetGotoTable().TryGetValue((stackState.Peek(), rule.from), out var gotoId)) {
                         stackState.Push(gotoId);
@@ -201,5 +208,7 @@ public class Parser {
                 break;
             }
         }
+        
+        return tree.Pop();
     }
 }

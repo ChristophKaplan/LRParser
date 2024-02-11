@@ -6,7 +6,7 @@ public class TreeNode<T> {
     public readonly List<TreeNode<T>> Children;
 
     public TreeNode(T data, TreeNode<T> parent) {
-        data = data;
+        this.data = data;
         Parent = parent;
         Children = new List<TreeNode<T>>();
     }
@@ -14,7 +14,7 @@ public class TreeNode<T> {
     public void AddChild(TreeNode<T> child) {
         Children.Add(child);
     }
-
+    
     public override string ToString() {
         return $"{data} - {Children.Aggregate("(", (current, next) => $"{current} {next},")})";
     }

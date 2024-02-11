@@ -1,7 +1,7 @@
 namespace LRParser.CFG;
 
 public static class ContextFreeGrammarExtensions {
-    public static List<Symbol> FIRST(this ContextFreeGrammar cnf, Symbol S) {
+    public static List<Symbol> FIRST(this ContextFreeGrammar cnf, Symbol S, List<NonTerminal> alreadyChecked = null) {
         var result = new List<Symbol>();
         
         if (S is not NonTerminal A) {
@@ -9,6 +9,14 @@ public static class ContextFreeGrammarExtensions {
             return result;
         }
 
+        alreadyChecked ??= new List<NonTerminal>();
+        if (alreadyChecked.Contains(S))
+        {
+            Console.WriteLine("recursive rule?!?" + A);
+            //return result;
+        }
+        alreadyChecked.Add(A);
+        
         var p = cnf.GetAllProdForNonTerminal(A);
         var n = p.Count;
         var D = new List<Symbol>[n];
@@ -17,36 +25,34 @@ public static class ContextFreeGrammarExtensions {
             D[i] = new List<Symbol>();
 
             var alpha_i = p[i].to[0];
-
-            if (S.Equals(alpha_i)) {
-                Console.WriteLine("recursive ?!?" + p[i]);
-                continue;
-            }
+            var changed = false;
             
             if (alpha_i.Equals(new Terminal())) {
                 D[i].Add(new Terminal());
             }
             else {
                 var length = p[i].to.Length;
-                var changed1 = false;
-                var f = FIRST(cnf, p[i].to[0]);
-                AddRangeLikeSet(f,D[i], ref changed1);
+                
+                //first symbol no eps
+                AddRangeLikeSet(FIRST(cnf, p[i].to[0],alreadyChecked),D[i], ref changed);
                 D[i].Remove(new Terminal());
 
-                int j = 0;
-                for (j = 0; FIRST(cnf, p[i].to[j]).Contains(new Terminal()) && (j < length); j++) {
-                    var changed2 = false;
-                    AddRangeLikeSet(FIRST(cnf, p[i].to[j]), D[i], ref changed2);
+                if(length == 1) continue; //first entry already checked
+                
+                //mid symbols,if has eps check next
+                int j;
+                for (j = 1; FIRST(cnf, p[i].to[j],alreadyChecked).Contains(new Terminal()) && (j < length); j++) {
+                    AddRangeLikeSet(FIRST(cnf, p[i].to[j],alreadyChecked), D[i], ref changed);
                     D[i].Remove(new Terminal());
                 }
 
-                if (j == length && FIRST(cnf, p[i].to[length]).Contains(new Terminal())) {
+                //last symbol if mid had no epsilon
+                if (j == length && FIRST(cnf, p[i].to[length],alreadyChecked).Contains(new Terminal())) {
                     D[i].Add(new Terminal());
                 }
             }
             
-            var changed3 = false;
-            AddRangeLikeSet(D[i],result, ref changed3);
+            AddRangeLikeSet(D[i],result, ref changed);
         }
 
         return result;
