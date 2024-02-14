@@ -3,39 +3,26 @@ using LRParser.CFG;
 namespace LRParser.Parser;
 
 public class State {
-    private List<LRItem> items;
-    public Dictionary<Symbol, State> transitions;
-    private int id;
-
+    public int Id { get; }
+    public List<LRItem> Items { get; }
+    public Dictionary<Symbol, State> Transitions { get; }
+    
     public State(List<LRItem> items, int id) {
-        this.items = items;
-        transitions = new Dictionary<Symbol, State>();
-        this.id = id;
+        Id = id;
+        Items = items;
+        Transitions = new Dictionary<Symbol, State>();
     }
-
-    public List<LRItem> Items => items;
-    public int Id => id;
-
-    public override string ToString() {
-        return items.Aggregate($"State({Id}):\n", (c, n) => $"{c} {n},\n") +
-               transitions.Aggregate("\ttransitions:\n", (c, n) => $"{c} {n.Key} -> {n.Value.Id},\n");
-    }
-
+    
     public List<LRItem> GetIncompleteItems() {
-        return items.Where(i => !i.IsComplete()).ToList();
+        return Items.Where(i => !i.IsComplete).ToList();
     }
 
-    public bool EqualItems(State other) {
-        if (items.Count != other.items.Count) {
-            return false;
-        }
-
-        foreach (var item in items) {
-            if (!other.items.Contains(item)) {
-                return false;
-            }
-        }
-
-        return true;
+    public bool HasEqualItems(State other) {
+        return Items.Count == other.Items.Count && Items.All(item => other.Items.Contains(item));
+    }
+    
+    public override string ToString() {
+        return Items.Aggregate($"State({Id}):\n", (c, n) => $"{c} {n},\n") +
+               Transitions.Aggregate("\ttransitions:\n", (c, n) => $"{c} {n.Key} -> {n.Value.Id},\n");
     }
 }

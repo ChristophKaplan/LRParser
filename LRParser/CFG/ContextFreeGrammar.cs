@@ -19,23 +19,16 @@ public class ContextFreeGrammar {
         Console.WriteLine($"HasLeftRecursion() = {HasLeftRecursion()}");
     }
 
-    private bool HasLeftRecursion() {
-        foreach (var rule in ProductionRules) {
-            if (rule.CheckLeftRecursion()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
+    internal List<ProductionRule> GetAllProdForNonTerminal(NonTerminal nonTerminal) => ProductionRules.Where(rule => rule.Premise.Equals(nonTerminal)).ToList();
+    private bool HasLeftRecursion() => ProductionRules.Any(rule => rule.CheckLeftRecursion());
+    
     private void ResolveLeftRecursion() {
         List<ProductionRule> toRemove = new();
         List<ProductionRule> toAdd = new();
 
         foreach (var rule in ProductionRules) {
             if (rule.CheckLeftRecursion()) {
-                List<ProductionRule> alternatives = GetAllProdForNonTerminal(rule.from);
+                var alternatives = GetAllProdForNonTerminal(rule.Premise);
                 var changed = ChangeLeftRecursionRule(rule, alternatives);
                 toAdd.AddRange(changed);
                 toRemove.AddRange(alternatives);
@@ -48,8 +41,8 @@ public class ContextFreeGrammar {
         }
 
         foreach (var r in ProductionRules) {
-            if (!NonTerminals.Contains(r.from)) {
-                NonTerminals.Add(r.from);
+            if (!NonTerminals.Contains(r.Premise)) {
+                NonTerminals.Add(r.Premise);
             }
         }
 
@@ -59,19 +52,19 @@ public class ContextFreeGrammar {
     private List<ProductionRule> ChangeLeftRecursionRule(ProductionRule leftRecursiveRule, List<ProductionRule> alternatives) {
         Console.WriteLine($"Try Resolve left recursion at: {leftRecursiveRule}");
         List<ProductionRule> changed = new();
-        var newNonTerminal = new NonTerminal($"{leftRecursiveRule.from._value}'");
+        var newNonTerminal = new NonTerminal($"{leftRecursiveRule.Premise.Value}'");
 
         foreach (var alt in alternatives) {
             if (alt.Equals(leftRecursiveRule)) {
                 continue;
             }
 
-            var temp = alt.to.ToList();
+            var temp = alt.Conclusion.ToList();
             temp.Add(newNonTerminal);
-            changed.Add(new ProductionRule(alt.from, temp.ToArray()));
+            changed.Add(new ProductionRule(alt.Premise, temp.ToArray()));
         }
 
-        var newTo = leftRecursiveRule.to.ToList();
+        var newTo = leftRecursiveRule.Conclusion.ToList();
         newTo.RemoveAt(0);
         newTo.Add(newNonTerminal);
 
@@ -88,9 +81,5 @@ public class ContextFreeGrammar {
         var s = StartSymbol;
 
         return $"N:{n}\nSigma:{sigma}\nP:{p}\nS:{s}\n";
-    }
-
-    internal List<ProductionRule> GetAllProdForNonTerminal(NonTerminal nonTerminal) {
-        return ProductionRules.Where(rule => rule.from.Equals(nonTerminal)).ToList();
     }
 }

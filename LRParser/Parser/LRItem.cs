@@ -3,99 +3,65 @@ using LRParser.CFG;
 namespace LRParser.Parser;
 
 public class LRItem {
-    public ProductionRule rule;
-    public int dotPosition;
-    private List<Symbol> lookahead;
+    public ProductionRule Production { get; }
+    public readonly int DotPosition;
+    public List<Symbol> LookAheadSymbols { get; }
+    
+    public LRItem(ProductionRule production, int dotPosition, List<Symbol> lookAheadSymbols) {
+        Production = production;
+        DotPosition = dotPosition;
+        LookAheadSymbols = lookAheadSymbols;
 
-    public LRItem(ProductionRule rule, int dotPosition, List<Symbol> lookahead) {
-        this.rule = rule;
-        this.dotPosition = dotPosition;
-        this.lookahead = lookahead;
-
-        if (GetSymbol() != null && GetSymbol().IsEpsilon) {
-            this.dotPosition++;
-            //this.rule = new ProductionRule(rule.from, new Symbol[] { });
+        if (CurrentSymbol.IsEpsilon) {
+            DotPosition++;
         }
     }
 
-    public ProductionRule Rule => rule;
-    public List<Symbol> Lookahead => lookahead;
-
-    public bool IsComplete() {
-        return dotPosition == rule.to.Length;
-    }
-
-    public Symbol GetSymbol() {
-        if (IsComplete()) {
-            return null;
-        }
-
-        return rule.to[dotPosition];
-    }
+    public bool IsComplete => DotPosition == Production.Conclusion.Length;
+    public Symbol CurrentSymbol => IsComplete ? null : Production.Conclusion[DotPosition];
+    public LRItem NextItem => IsComplete ? null : new LRItem(Production, DotPosition + 1, LookAheadSymbols);
 
     public List<Symbol> GetSymbolsAfterDot() {
         List<Symbol> symbols = new();
-        for (var i = dotPosition + 1; i < rule.to.Length; i++) {
-            symbols.Add(rule.to[i]);
+        for (var i = DotPosition + 1; i < Production.Conclusion.Length; i++) {
+            symbols.Add(Production.Conclusion[i]);
         }
 
         return symbols;
     }
 
-    public LRItem NextItem() {
-        if (IsComplete()) {
-            return null;
-        }
-
-        return new LRItem(rule, dotPosition + 1, lookahead);
-    }
-
-    public override string ToString() {
-        var s = $"{rule.from} ->";
-        for (var i = 0; i < rule.to.Length; i++) {
-            if (i == dotPosition) {
-                s += " .";
-            }
-
-            s += $" {rule.to[i]}";
-        }
-
-        if (dotPosition == rule.to.Length) {
-            s += " .";
-        }
-
-        s += $", {string.Join(" ", lookahead)}";
-        return $"[{s}]";
+    private bool LookAheadEquals(List<Symbol> other) {
+        return LookAheadSymbols.Count == other.Count && LookAheadSymbols.All(symbol => other.Contains(symbol));
     }
 
     public override bool Equals(object? obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.GetType() != GetType()) {
+        if (obj == null || obj.GetType() != GetType()) {
             return false;
         }
 
         var other = (LRItem)obj;
-        return rule.Equals(other.rule) && dotPosition == other.dotPosition && LookAheadEquals(other.lookahead);
+        return Production.Equals(other.Production) && DotPosition == other.DotPosition && LookAheadEquals(other.LookAheadSymbols);
     }
 
     public override int GetHashCode() {
-        return HashCode.Combine(rule, dotPosition, lookahead);
+        return HashCode.Combine(Production, DotPosition, LookAheadSymbols);
     }
-
-    private bool LookAheadEquals(List<Symbol> other) {
-        if (lookahead.Count != other.Count) {
-            return false;
-        }
-
-        foreach (var symbol in lookahead) {
-            if (!other.Contains(symbol)) {
-                return false;
+    
+    public override string ToString() {
+        var s = $"{Production.Premise} ->";
+        for (var i = 0; i < Production.Conclusion.Length; i++) {
+            if (i == DotPosition) {
+                s += " .";
             }
+
+            s += $" {Production.Conclusion[i]}";
         }
 
-        return true;
+        if (DotPosition == Production.Conclusion.Length) {
+            s += " .";
+        }
+
+        s += $", {string.Join(" ", LookAheadSymbols)}";
+        return $"[{s}]";
     }
 }

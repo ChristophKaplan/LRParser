@@ -1,74 +1,68 @@
 namespace LRParser.CFG;
 
 public static class ContextFreeGrammarExtensions {
-    public static List<Symbol> FIRST(this ContextFreeGrammar cnf, Symbol S, List<NonTerminal> alreadyChecked = null) {
+    public static List<Symbol> First(this ContextFreeGrammar cnf, Symbol Symbol, List<NonTerminal> alreadyChecked = null) {
         var result = new List<Symbol>();
         
-        if (S is not NonTerminal A) {
-            result.Add(S);
+        if (Symbol is not NonTerminal nonTerminal) {
+            result.Add(Symbol);
             return result;
         }
 
         alreadyChecked ??= new List<NonTerminal>();
-        if (alreadyChecked.Contains(S))
+        if (alreadyChecked.Contains(Symbol))
         {
-            Console.WriteLine("recursive rule?!?" + A);
+            Console.WriteLine("recursive rule?!?" + nonTerminal);
             //return result;
         }
-        alreadyChecked.Add(A);
+        alreadyChecked.Add(nonTerminal);
         
-        var p = cnf.GetAllProdForNonTerminal(A);
+        var p = cnf.GetAllProdForNonTerminal(nonTerminal);
         var n = p.Count;
-        var D = new List<Symbol>[n];
+        var directorSet = new List<Symbol>[n];
 
         for (var i = 0; i < n; i++) {
-            D[i] = new List<Symbol>();
+            directorSet[i] = new List<Symbol>();
 
-            var alpha_i = p[i].to[0];
-            var changed = false;
-            
-            if (alpha_i.Equals(new Terminal())) {
-                D[i].Add(new Terminal());
+            if ( p[i].Conclusion[0].Equals(new Terminal())) {
+                directorSet[i].Add(new Terminal());
             }
             else {
-                var length = p[i].to.Length;
+                var length = p[i].Conclusion.Length;
                 
                 //first symbol no eps
-                AddRangeLikeSet(FIRST(cnf, p[i].to[0],alreadyChecked),D[i], ref changed);
-                D[i].Remove(new Terminal());
+                AddRangeLikeSet(First(cnf, p[i].Conclusion[0],alreadyChecked),directorSet[i]);
+                directorSet[i].Remove(new Terminal());
 
                 if(length == 1) continue; //first entry already checked
                 
                 //mid symbols,if has eps check next
                 int j;
-                for (j = 1; FIRST(cnf, p[i].to[j],alreadyChecked).Contains(new Terminal()) && (j < length); j++) {
-                    AddRangeLikeSet(FIRST(cnf, p[i].to[j],alreadyChecked), D[i], ref changed);
-                    D[i].Remove(new Terminal());
+                for (j = 1; First(cnf, p[i].Conclusion[j],alreadyChecked).Contains(new Terminal()) && (j < length); j++) {
+                    AddRangeLikeSet(First(cnf, p[i].Conclusion[j],alreadyChecked), directorSet[i]);
+                    directorSet[i].Remove(new Terminal());
                 }
 
                 //last symbol if mid had no epsilon
-                if (j == length && FIRST(cnf, p[i].to[length],alreadyChecked).Contains(new Terminal())) {
-                    D[i].Add(new Terminal());
+                if (j == length && First(cnf, p[i].Conclusion[length],alreadyChecked).Contains(new Terminal())) {
+                    directorSet[i].Add(new Terminal());
                 }
             }
             
-            AddRangeLikeSet(D[i],result, ref changed);
+            AddRangeLikeSet(directorSet[i],result);
         }
 
         return result;
     }
     
-    public static List<Symbol> FOLLOW(this ContextFreeGrammar cnf, NonTerminal S) {
-        Dictionary<NonTerminal, List<Symbol>> followSets = new();
-        foreach (var nonTerminal in cnf.NonTerminals) {
-            followSets.Add(nonTerminal, new List<Symbol>() { new Terminal("$") });
-        }
+    public static List<Symbol> Follow(this ContextFreeGrammar cnf, NonTerminal S) {
+        var followSets = cnf.NonTerminals.ToDictionary(nonTerminal => nonTerminal, nonTerminal => new List<Symbol>() { new Terminal("$") });
 
         while (true) {
             var changed = false;
 
             foreach (var prod in cnf.ProductionRules) {
-                if (!prod.to.Contains(S)) {
+                if (!prod.Conclusion.Contains(S)) {
                     continue;
                 }
 
@@ -79,16 +73,14 @@ public static class ContextFreeGrammarExtensions {
                 var posOfLastNonTerminal = prod.GetMostRightPosOf(S);
 
 
-                var lastNonTerminal = (NonTerminal)prod.to[posOfLastNonTerminal];
+                var lastNonTerminal = (NonTerminal)prod.Conclusion[posOfLastNonTerminal];
                 if (!followSets.TryGetValue(lastNonTerminal, out var curFollowSet)) {
                     throw new Exception($"cant find value: {lastNonTerminal} in followSets");
                 }
 
-                if (posOfLastNonTerminal == prod.to.Length - 1 || prod.to[posOfLastNonTerminal + 1].IsEpsilon) {
-                    //end or epsilon
-                    //A-> aB
-                    var f = FOLLOW(cnf, prod.from);
-                    AddRangeLikeSet(f, curFollowSet, ref changed);
+                if (posOfLastNonTerminal == prod.Conclusion.Length - 1 || prod.Conclusion[posOfLastNonTerminal + 1].IsEpsilon) {
+                    var f = Follow(cnf, prod.Premise);
+                    changed = AddRangeLikeSet(f, curFollowSet);
 
                     if (!changed) {
                         break;
@@ -98,11 +90,11 @@ public static class ContextFreeGrammarExtensions {
                 }
 
                 //we have beta
-                var first_beta = FIRST(cnf, prod.to[posOfLastNonTerminal + 1]);
+                var first_beta = First(cnf, prod.Conclusion[posOfLastNonTerminal + 1]);
 
                 if (first_beta.Contains(new Terminal())) {
-                    var f = FOLLOW(cnf, prod.from);
-                    AddRangeLikeSet(f, curFollowSet, ref changed);
+                    var f = Follow(cnf, prod.Premise);
+                    changed = AddRangeLikeSet(f, curFollowSet);
                 }
 
                 var first_beta_withoutEps = new List<Symbol>(first_beta);
@@ -110,7 +102,7 @@ public static class ContextFreeGrammarExtensions {
                     first_beta_withoutEps.Remove(s);
                 }
 
-                AddRangeLikeSet(first_beta_withoutEps, curFollowSet, ref changed);
+                changed = AddRangeLikeSet(first_beta_withoutEps, curFollowSet);
             }
 
             if (!changed) {
@@ -121,12 +113,17 @@ public static class ContextFreeGrammarExtensions {
         return followSets[S];
     }
 
-    private static void AddRangeLikeSet(List<Symbol> from, List<Symbol> to, ref bool changed) {
+    private static bool AddRangeLikeSet(List<Symbol> from, List<Symbol> to) {
+        var changed = false;
         foreach (var s in from) {
-            if (!to.Contains(s)) {
-                to.Add(s);
-                changed = true;
+            if (to.Contains(s)) {
+                continue;
             }
+
+            to.Add(s);
+            changed = true;
         }
+
+        return changed;
     }
 }

@@ -1,22 +1,38 @@
 namespace LRParser.CFG;
 
 public class ProductionRule {
-    internal NonTerminal from;
-    internal Symbol[] to;
+    internal readonly NonTerminal Premise;
+    internal readonly Symbol[] Conclusion;
 
-    public ProductionRule(NonTerminal from, params Symbol[] to) {
-        this.from = from;
-        this.to = to;
+    public ProductionRule(NonTerminal premise, params Symbol[] conclusion) {
+        Premise = premise;
+        Conclusion = conclusion;
     }
 
     public bool CheckLeftRecursion() {
-        return from.Equals(to[0]);
+        for (var i = 0; i < Conclusion.Length; i++) {
+            if(Conclusion[i] is NonTerminal nonTerminal) {
+                return Premise.Equals(nonTerminal);
+            }
+        }
+        
+        return false;
     }
 
-    public override string ToString() {
-        return $"{from} -> {to.Aggregate("(", (c, n) => $"{c} {n},")})";
+    public int GetMostRightPosOf(NonTerminal nonTerminal) {
+        for (var i = Conclusion.Length - 1; i >= 0; i--) {
+            if (Conclusion[i].Equals(nonTerminal)) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
+    public bool ContainsNonTerminalConclusion() {
+        return Conclusion.OfType<NonTerminal>().Any();
+    }
+    
     public override int GetHashCode() {
         return ToString().GetHashCode();
     }
@@ -28,18 +44,8 @@ public class ProductionRule {
 
         return false;
     }
-
-    public int GetMostRightPosOf(NonTerminal S) {
-        for (var i = to.Length - 1; i >= 0; i--) {
-            if (to[i].Equals(S)) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    public bool ContainsNonTerminalConclusion() {
-        return to.OfType<NonTerminal>().Any();
+    
+    public override string ToString() {
+        return $"{Premise} -> {Conclusion.Aggregate("(", (c, n) => $"{c} {n},")})";
     }
 }

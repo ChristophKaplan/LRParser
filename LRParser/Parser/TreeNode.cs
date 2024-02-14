@@ -1,43 +1,26 @@
 namespace LRParser.Parser;
 
 public class TreeNode<T> {
-    public readonly T data;
-    public readonly TreeNode<T> Parent;
-    public readonly List<TreeNode<T>> Children;
+    private T Data { get; }
+    private TreeNode<T> Parent { get; }
+
+    private readonly List<TreeNode<T>> _children;
 
     public TreeNode(T data, TreeNode<T> parent) {
-        this.data = data;
+        Data = data;
         Parent = parent;
-        Children = new List<TreeNode<T>>();
+        _children = new List<TreeNode<T>>();
     }
 
     public void AddChild(TreeNode<T> child) {
-        Children.Add(child);
+        _children.Add(child);
     }
     
     public override string ToString() {
-        return $"{data} - {Children.Aggregate("(", (current, next) => $"{current} {next},")})";
+        return $"{Data} - {_children.Aggregate("(", (current, next) => $"{current} {next},")})";
     }
 
     public TreeNode<T> GetRoot() {
         return Parent == null ? this : Parent.GetRoot();
-    }
-}
-
-public class Node<T> {
-    public readonly T data;
-    public readonly List<Node<T>> Edge;
-
-    public Node(T data) {
-        data = data;
-        Edge = new List<Node<T>>();
-    }
-
-    public void AddEdge(Node<T> edge) {
-        Edge.Add(edge);
-    }
-
-    public override string ToString() {
-        return $"{data} - {Edge.Aggregate("(", (current, next) => $"{current} {next},")})";
     }
 }

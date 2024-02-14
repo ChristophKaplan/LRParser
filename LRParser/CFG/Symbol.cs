@@ -1,28 +1,24 @@
 namespace LRParser.CFG;
 
 public abstract class Symbol {
-    protected internal readonly string _value;
-    public bool IsEpsilon => _value.Equals("epsilon");
+    protected internal readonly string Value;
+    public bool IsEpsilon => Value.Equals("epsilon");
 
-    public Symbol(string value) {
-        _value = value;
+    protected Symbol(string value) {
+        Value = value;
     }
 
-    public override string ToString() {
-        return _value;
-    }
-
-    public override int GetHashCode() {
-        return _value.GetHashCode();
-    }
-
+    public override int GetHashCode() => Value.GetHashCode();
+    
     public override bool Equals(object? obj) {
         if (obj is Symbol other) {
-            return _value.Equals(other._value);
+            return Value.Equals(other.Value);
         }
 
         return false;
     }
+    
+    public override string ToString() => Value;
 }
 
 public class Terminal : Symbol {
@@ -35,24 +31,5 @@ public class Terminal : Symbol {
 
 public class NonTerminal : Symbol {
     public NonTerminal(string value) : base(value) {
-    }
-}
-
-public class Word {
-    private Terminal[] tokens;
-
-    public Word(params Terminal[] terminals) {
-        tokens = terminals;
-    }
-
-    public int Length => tokens.Length;
-
-    public Word Slice(int n) {
-        var t = new Terminal[n];
-        for (var i = 0; i < n; i++) {
-            t[i] = tokens[i];
-        }
-
-        return new Word(t);
     }
 }

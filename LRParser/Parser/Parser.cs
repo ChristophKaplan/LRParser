@@ -34,22 +34,22 @@ public class Parser {
             var cur = stack.Pop();
             result.Add(cur);
 
-            if (cur.IsComplete()) {
+            if (cur.IsComplete) {
                 continue;
             }
 
             var rest = cur.GetSymbolsAfterDot();
-            var oldLookahead = cur.Lookahead;
+            var oldLookahead = cur.LookAheadSymbols;
             rest.AddRange(oldLookahead);
 
-            var curLookahead = cfg.FIRST(rest[0]); //k = 1
+            var curLookahead = cfg.First(rest[0]); //k = 1
 
-            if (cur.GetSymbol() is NonTerminal nonTerminal) {
+            if (cur.CurrentSymbol is NonTerminal nonTerminal) {
                 var prods = cfg.GetAllProdForNonTerminal(nonTerminal);
 
                 foreach (var prod in prods) {
                     var deeperItem = new LRItem(prod, 0, curLookahead);
-                    var containedAlready = result.Where(r => r.Rule.Equals(deeperItem.rule) && r.dotPosition.Equals(deeperItem.dotPosition)).ToList();
+                    var containedAlready = result.Where(r => r.Production.Equals(deeperItem.Production) && r.DotPosition.Equals(deeperItem.DotPosition)).ToList();
 
                     if (containedAlready.Count == 0) {
                         stack.Push(deeperItem);
@@ -60,8 +60,8 @@ public class Parser {
                         }
 
                         foreach (var s in curLookahead) {
-                            if (!containedAlready[0].Lookahead.Contains(s)) {
-                                containedAlready[0].Lookahead.Add(s);
+                            if (!containedAlready[0].LookAheadSymbols.Contains(s)) {
+                                containedAlready[0].LookAheadSymbols.Add(s);
                             }
                         }
                     }
@@ -81,7 +81,7 @@ public class Parser {
     }
 
     private void GenerateStates(State current, List<State> states, ref int count) {
-        var possibleTransitionGroups = current.GetIncompleteItems().GroupBy(i => i.GetSymbol());
+        var possibleTransitionGroups = current.GetIncompleteItems().GroupBy(i => i.CurrentSymbol);
 
         foreach (var possibleTransitions in possibleTransitionGroups) {
             if (possibleTransitions.Key.Equals(new Terminal())) {
@@ -90,8 +90,8 @@ public class Parser {
 
             var nextItems = new List<LRItem>();
             foreach (var item in possibleTransitions) {
-                if (!item.IsComplete()) {
-                    nextItems.Add(item.NextItem());
+                if (!item.IsComplete) {
+                    nextItems.Add(item.NextItem);
                 }
             }
 
@@ -100,11 +100,11 @@ public class Parser {
             var next = new State(nextClosure, count);
 
             if (TryGetSameState(states, next, out var sameState)) {
-                current.transitions.Add(possibleTransitions.Key, sameState);
+                current.Transitions.Add(possibleTransitions.Key, sameState);
                 //Console.WriteLine(current.Id+ " add " +group.Key+ " transition to" + sameState );
             }
             else {
-                current.transitions.Add(possibleTransitions.Key, next);
+                current.Transitions.Add(possibleTransitions.Key, next);
                 states.Add(next);
                 GenerateStates(next, states, ref count);
             }
@@ -113,7 +113,7 @@ public class Parser {
 
     private static bool TryGetSameState(List<State> states, State state, out State sameState) {
         foreach (var s in states) {
-            if (s.EqualItems(state)) {
+            if (s.HasEqualItems(state)) {
                 sameState = s;
                 return true;
             }
@@ -124,34 +124,34 @@ public class Parser {
     }
 
     private Table GenerateTable(List<State> states) {
-        var table = new Table(cfg, states);
+        var table = new Table();
 
         foreach (var state in states) {
             foreach (var item in state.Items) {
-                if (item.IsComplete()) {
-                    if (item.rule.from.Equals(cfg.StartSymbol)) {
-                        table.GetActionTable()[(state.Id, new Terminal("$"))] = (Action.Accept, -1);
+                if (item.IsComplete) {
+                    if (item.Production.Premise.Equals(cfg.StartSymbol)) {
+                        table.ActionTable[(state.Id, new Terminal("$"))] = (Action.Accept, -1);
                     }
                     else {
-                        foreach (var la in item.Lookahead) {
-                            table.GetActionTable()[(state.Id, la)] = (Action.Reduce, cfg.ProductionRules.IndexOf(item.rule));
+                        foreach (var la in item.LookAheadSymbols) {
+                            table.ActionTable[(state.Id, la)] = (Action.Reduce, cfg.ProductionRules.IndexOf(item.Production));
                         }
                     }
                 }
                 else {
-                    var symbol = item.GetSymbol();
+                    var symbol = item.CurrentSymbol;
                     switch (symbol) {
                         case Terminal: {
-                            if (!state.transitions.TryGetValue(symbol, out var nextState)) {
+                            if (!state.Transitions.TryGetValue(symbol, out var nextState)) {
                                 Console.WriteLine($"Conflict at state {state} with symbol {symbol}.");
                             }
 
-                            table.GetActionTable()[(state.Id, symbol)] = (Action.Shift, nextState.Id);
+                            table.ActionTable[(state.Id, symbol)] = (Action.Shift, nextState.Id);
                             break;
                         }
                         case NonTerminal: {
-                            var nextState = state.transitions[symbol];
-                            table.GetGotoTable()[(state.Id, symbol)] = nextState.Id;
+                            var nextState = state.Transitions[symbol];
+                            table.GotoTable[(state.Id, symbol)] = nextState.Id;
                             break;
                         }
                     }
@@ -171,7 +171,7 @@ public class Parser {
         var tree = new Stack<TreeNode<Symbol>>();
         
         while (true) {
-            if (table.GetActionTable().TryGetValue((stackState.Peek(), input[0]), out var action)) {
+            if (table.ActionTable.TryGetValue((stackState.Peek(), input[0]), out var action)) {
                 if (action.Item1 == Action.Accept) {
                     Console.WriteLine("ACCEPT");
                     break;
@@ -186,19 +186,19 @@ public class Parser {
                     var rule = cfg.ProductionRules[action.Item2];
                     Console.WriteLine("REDUCE nr:" + action.Item2 + " = " + rule);
 
-                    var reduced = new TreeNode<Symbol>(rule.from, null);
-                    for (var i = 0; i < rule.to.Count(s => !s.IsEpsilon); i++) {
+                    var reduced = new TreeNode<Symbol>(rule.Premise, null);
+                    for (var i = 0; i < rule.Conclusion.Count(s => !s.IsEpsilon); i++) {
                         stackState.Pop(); 
                         reduced.AddChild(tree.Pop());
                     }
                     
                     tree.Push(reduced);
 
-                    if (table.GetGotoTable().TryGetValue((stackState.Peek(), rule.from), out var gotoId)) {
+                    if (table.GotoTable.TryGetValue((stackState.Peek(), rule.Premise), out var gotoId)) {
                         stackState.Push(gotoId);
                     }
                     else {
-                        Console.WriteLine("Goto not found:" + (stackState.Peek(), rule.from));
+                        Console.WriteLine("Goto not found:" + (stackState.Peek(), rule.Premise));
                         break;
                     }
                 }
