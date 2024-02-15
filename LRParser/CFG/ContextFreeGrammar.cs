@@ -57,7 +57,7 @@ public class ContextFreeGrammar {
     private List<ProductionRule> ChangeLeftRecursionRule(ProductionRule leftRecursiveRule, List<ProductionRule> alternatives) {
         Console.WriteLine($"Try Resolve left recursion at: {leftRecursiveRule}");
         List<ProductionRule> changed = new();
-        var newNonTerminal = new NonTerminal($"{leftRecursiveRule.Premise.Value}'");
+        var newNonTerminal = new NonTerminal($"{leftRecursiveRule.Premise.Description}'");
 
         foreach (var alt in alternatives) {
             if (alt.Equals(leftRecursiveRule)) {

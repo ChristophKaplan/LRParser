@@ -3,12 +3,18 @@ namespace LRParser.CFG;
 public class ProductionRule {
     internal readonly Symbol[] Conclusion;
     internal readonly NonTerminal Premise;
-
+    
+    public Func<object[], object> SemanticAction;
+    
     public ProductionRule(NonTerminal premise, params Symbol[] conclusion) {
         Premise = premise;
         Conclusion = conclusion;
     }
 
+    public void SetSemanticAction(Func<object[], object> semanticAction){ 
+        SemanticAction = semanticAction;
+    }
+    
     public bool CheckLeftRecursion() {
         for (var i = 0; i < Conclusion.Length; i++) {
             if (Conclusion[i] is NonTerminal nonTerminal) {

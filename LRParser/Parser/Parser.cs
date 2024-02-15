@@ -182,14 +182,15 @@ public class Parser {
                 if (action.Item1 == Action.Shift) {
                     Console.WriteLine("SHIFT:" + input[0]);
                     stackState.Push(action.Item2);
-                    tree.Push(new TreeNode<Symbol>(input[0], null));
+                    tree.Push(new TreeNode<Symbol>(input[0]));
                     input.RemoveAt(0);
                 }
                 else if (action.Item1 == Action.Reduce) {
                     var rule = cfg.ProductionRules[action.Item2];
                     Console.WriteLine("REDUCE nr:" + action.Item2 + " = " + rule);
 
-                    var reduced = new TreeNode<Symbol>(rule.Premise, null);
+                    var reduced = new TreeNode<Symbol>(rule.Premise, rule);
+                    
                     for (var i = 0; i < rule.Conclusion.Count(s => !s.IsEpsilon); i++) {
                         stackState.Pop();
                         reduced.AddChild(tree.Pop());

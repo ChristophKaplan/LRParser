@@ -11,8 +11,8 @@ public static class ContextFreeGrammarExtensions {
 
         alreadyChecked ??= new List<NonTerminal>();
         if (alreadyChecked.Contains(Symbol)) {
-            Console.WriteLine("recursive rule?!?" + nonTerminal);
-            //return result;
+            Console.WriteLine("recursion: " + nonTerminal);
+            return result;
         }
 
         alreadyChecked.Add(nonTerminal);

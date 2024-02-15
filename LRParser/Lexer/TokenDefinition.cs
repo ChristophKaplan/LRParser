@@ -13,6 +13,6 @@ public class TokenDefinition {
     public Regex Regex { get; }
 
     public Terminal CreateTerminal(string value) {
-        return new Terminal(Symbol);
+        return new Terminal(Symbol, value);
     }
 }
