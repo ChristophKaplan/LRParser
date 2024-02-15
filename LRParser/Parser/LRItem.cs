@@ -12,7 +12,7 @@ public class LRItem {
         DotPosition = dotPosition;
         LookAheadSymbols = lookAheadSymbols;
 
-        if (CurrentSymbol.IsEpsilon) {
+        if (CurrentSymbol != null && CurrentSymbol.IsEpsilon) {
             DotPosition++;
         }
     }

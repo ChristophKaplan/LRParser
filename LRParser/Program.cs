@@ -1,4 +1,5 @@
-﻿using LRParser.CFG;
+﻿using LRParser;
+using LRParser.CFG;
 using LRParser.Parser;
 
 List<NonTerminal> N = new()
@@ -29,4 +30,9 @@ var tokens = new List<Terminal>() { new("P"), new("&&"), new("Q")};
 var parser = new Parser(cnf);
 var tree = parser.Parse(tokens);
 
-Console.WriteLine("tree: "+tree);
+tree.PreOrder( node =>
+{
+    if(node.Data is Terminal) Console.WriteLine(node);
+});
+
+var lexer = new Lexer();
