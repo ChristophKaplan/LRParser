@@ -1,9 +1,6 @@
 namespace LRParser.Parser;
 
 public class TreeNode<T> {
-    public T Data { get; }
-    private TreeNode<T> Parent { get; }
-
     private readonly List<TreeNode<T>> _children;
 
     public TreeNode(T data, TreeNode<T> parent) {
@@ -12,10 +9,18 @@ public class TreeNode<T> {
         _children = new List<TreeNode<T>>();
     }
 
+    public T Data {
+        get;
+    }
+
+    private TreeNode<T> Parent {
+        get;
+    }
+
     public void AddChild(TreeNode<T> child) {
         _children.Add(child);
     }
-    
+
     public override string ToString() {
         return $"{Data} - {_children.Aggregate("(", (current, next) => $"{current} {next},")})";
     }
@@ -23,7 +28,7 @@ public class TreeNode<T> {
     public TreeNode<T> GetRoot() {
         return Parent == null ? this : Parent.GetRoot();
     }
-    
+
     public void PreOrder(Action<TreeNode<T>> action) {
         action(this);
         foreach (var child in _children) {

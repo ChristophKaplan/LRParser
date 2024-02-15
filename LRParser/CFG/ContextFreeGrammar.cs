@@ -2,9 +2,9 @@ namespace LRParser.CFG;
 
 public class ContextFreeGrammar {
     public readonly List<NonTerminal> NonTerminals;
-    public readonly List<Terminal> Terminals;
     public readonly List<ProductionRule> ProductionRules;
     public readonly NonTerminal StartSymbol;
+    public readonly List<Terminal> Terminals;
 
     public ContextFreeGrammar(List<NonTerminal> n, List<Terminal> sigma, List<ProductionRule> p, NonTerminal s) {
         NonTerminals = n;
@@ -19,9 +19,14 @@ public class ContextFreeGrammar {
         Console.WriteLine($"HasLeftRecursion() = {HasLeftRecursion()}");
     }
 
-    internal List<ProductionRule> GetAllProdForNonTerminal(NonTerminal nonTerminal) => ProductionRules.Where(rule => rule.Premise.Equals(nonTerminal)).ToList();
-    private bool HasLeftRecursion() => ProductionRules.Any(rule => rule.CheckLeftRecursion());
-    
+    internal List<ProductionRule> GetAllProdForNonTerminal(NonTerminal nonTerminal) {
+        return ProductionRules.Where(rule => rule.Premise.Equals(nonTerminal)).ToList();
+    }
+
+    private bool HasLeftRecursion() {
+        return ProductionRules.Any(rule => rule.CheckLeftRecursion());
+    }
+
     private void ResolveLeftRecursion() {
         List<ProductionRule> toRemove = new();
         List<ProductionRule> toAdd = new();

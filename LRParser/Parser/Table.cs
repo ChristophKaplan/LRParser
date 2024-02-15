@@ -1,9 +1,15 @@
 using LRParser.CFG;
+
 namespace LRParser.Parser;
 
 public class Table {
-    public Dictionary<(int, Symbol), (Action, int)> ActionTable { get; } = new();
-    public Dictionary<(int, Symbol), int> GotoTable{ get; } = new();
+    public Dictionary<(int, Symbol), (Action, int)> ActionTable {
+        get;
+    } = new();
+
+    public Dictionary<(int, Symbol), int> GotoTable {
+        get;
+    } = new();
 
     public override string ToString() {
         var s = "ACTION\n";

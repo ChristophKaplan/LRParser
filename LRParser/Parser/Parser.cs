@@ -9,13 +9,13 @@ public enum Action {
 }
 
 public class Parser {
-    private readonly Table table;
     private readonly ContextFreeGrammar cfg;
+    private readonly Table table;
 
     public Parser(ContextFreeGrammar cfg) {
         this.cfg = cfg;
 
-        var states = GenerateStates(new LRItem(cfg.ProductionRules[0], 0, new List<Symbol>() { new Terminal("$") }));
+        var states = GenerateStates(new LRItem(cfg.ProductionRules[0], 0, new List<Symbol> { new Terminal("$") }));
         table = GenerateTable(states);
 
         Console.WriteLine("ALL STATES:");
@@ -49,7 +49,9 @@ public class Parser {
 
                 foreach (var prod in prods) {
                     var deeperItem = new LRItem(prod, 0, curLookahead);
-                    var containedAlready = result.Where(r => r.Production.Equals(deeperItem.Production) && r.DotPosition.Equals(deeperItem.DotPosition)).ToList();
+                    var containedAlready = result
+                        .Where(r => r.Production.Equals(deeperItem.Production) && r.DotPosition.Equals(deeperItem.DotPosition))
+                        .ToList();
 
                     if (containedAlready.Count == 0) {
                         stack.Push(deeperItem);
@@ -73,8 +75,8 @@ public class Parser {
     }
 
     private List<State> GenerateStates(LRItem startItem) {
-        var firstState = new State(Closure(new List<LRItem>() { startItem }), 0);
-        var states = new List<State>() { firstState };
+        var firstState = new State(Closure(new List<LRItem> { startItem }), 0);
+        var states = new List<State> { firstState };
         var count = 0;
         GenerateStates(firstState, states, ref count);
         return states;
@@ -167,19 +169,20 @@ public class Parser {
 
         var stackState = new Stack<int>();
         stackState.Push(0);
-        
+
         var tree = new Stack<TreeNode<Symbol>>();
-        
+
         while (true) {
             if (table.ActionTable.TryGetValue((stackState.Peek(), input[0]), out var action)) {
                 if (action.Item1 == Action.Accept) {
                     Console.WriteLine("ACCEPT");
                     break;
                 }
-                else if (action.Item1 == Action.Shift) {
+
+                if (action.Item1 == Action.Shift) {
                     Console.WriteLine("SHIFT:" + input[0]);
                     stackState.Push(action.Item2);
-                    tree.Push(new TreeNode<Symbol>(input[0],null));
+                    tree.Push(new TreeNode<Symbol>(input[0], null));
                     input.RemoveAt(0);
                 }
                 else if (action.Item1 == Action.Reduce) {
@@ -188,10 +191,10 @@ public class Parser {
 
                     var reduced = new TreeNode<Symbol>(rule.Premise, null);
                     for (var i = 0; i < rule.Conclusion.Count(s => !s.IsEpsilon); i++) {
-                        stackState.Pop(); 
+                        stackState.Pop();
                         reduced.AddChild(tree.Pop());
                     }
-                    
+
                     tree.Push(reduced);
 
                     if (table.GotoTable.TryGetValue((stackState.Peek(), rule.Premise), out var gotoId)) {
@@ -208,7 +211,7 @@ public class Parser {
                 break;
             }
         }
-        
+
         return tree.Pop();
     }
 }

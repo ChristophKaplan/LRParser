@@ -3,10 +3,8 @@ using LRParser.CFG;
 namespace LRParser.Parser;
 
 public class LRItem {
-    public ProductionRule Production { get; }
     public readonly int DotPosition;
-    public List<Symbol> LookAheadSymbols { get; }
-    
+
     public LRItem(ProductionRule production, int dotPosition, List<Symbol> lookAheadSymbols) {
         Production = production;
         DotPosition = dotPosition;
@@ -15,6 +13,14 @@ public class LRItem {
         if (CurrentSymbol != null && CurrentSymbol.IsEpsilon) {
             DotPosition++;
         }
+    }
+
+    public ProductionRule Production {
+        get;
+    }
+
+    public List<Symbol> LookAheadSymbols {
+        get;
     }
 
     public bool IsComplete => DotPosition == Production.Conclusion.Length;
@@ -46,7 +52,7 @@ public class LRItem {
     public override int GetHashCode() {
         return HashCode.Combine(Production, DotPosition, LookAheadSymbols);
     }
-    
+
     public override string ToString() {
         var s = $"{Production.Premise} ->";
         for (var i = 0; i < Production.Conclusion.Length; i++) {
