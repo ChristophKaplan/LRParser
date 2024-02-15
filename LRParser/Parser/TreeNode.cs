@@ -49,6 +49,7 @@ public class TreeNode<T> {
             //veerbten
             child.Eval();
         }
+        
         //synthetischen
 
         var args = new List<object>();
