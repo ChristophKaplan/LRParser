@@ -2,31 +2,31 @@ using LRParser.CFG;
 
 namespace LRParser.Parser;
 
-public enum Action {
+public enum ParserAction {
     Shift,
     Reduce,
     Accept
 }
 
 public class Parser {
-    private readonly ContextFreeGrammar cfg;
-    private readonly Table table;
+    private readonly ContextFreeGrammar _cfg;
+    private readonly Table _table;
 
     public Parser(ContextFreeGrammar cfg) {
-        this.cfg = cfg;
+        this._cfg = cfg;
 
         var states = GenerateStates(new LRItem(cfg.ProductionRules[0], 0, new List<Symbol> { new Terminal("$") }));
-        table = GenerateTable(states);
+        _table = GenerateTable(states);
 
         Console.WriteLine("ALL STATES:");
         foreach (var state in states) {
             Console.WriteLine(state);
         }
 
-        Console.WriteLine(table);
+        Console.WriteLine(_table);
     }
 
-    private List<LRItem> Closure(List<LRItem> lrItems, int k = 1) {
+    private List<LRItem> Closure(List<LRItem> lrItems) {
         var result = new List<LRItem>();
         var stack = new Stack<LRItem>(lrItems);
 
@@ -42,10 +42,10 @@ public class Parser {
             var oldLookahead = cur.LookAheadSymbols;
             rest.AddRange(oldLookahead);
 
-            var curLookahead = cfg.First(rest[0]); //k = 1
+            var curLookahead = _cfg.First(rest[0]); //k = 1, only LL(1) or LR(1)
 
             if (cur.CurrentSymbol is NonTerminal nonTerminal) {
-                var prods = cfg.GetAllProdForNonTerminal(nonTerminal);
+                var prods = _cfg.GetAllProdForNonTerminal(nonTerminal);
 
                 foreach (var prod in prods) {
                     var deeperItem = new LRItem(prod, 0, curLookahead);
@@ -103,7 +103,6 @@ public class Parser {
 
             if (TryGetSameState(states, next, out var sameState)) {
                 current.Transitions.Add(possibleTransitions.Key, sameState);
-                //Console.WriteLine(current.Id+ " add " +group.Key+ " transition to" + sameState );
             }
             else {
                 current.Transitions.Add(possibleTransitions.Key, next);
@@ -131,12 +130,12 @@ public class Parser {
         foreach (var state in states) {
             foreach (var item in state.Items) {
                 if (item.IsComplete) {
-                    if (item.Production.Premise.Equals(cfg.StartSymbol)) {
-                        table.ActionTable[(state.Id, new Terminal("$"))] = (Action.Accept, -1);
+                    if (item.Production.Premise.Equals(_cfg.StartSymbol)) {
+                        table.ActionTable[(state.Id, new Terminal("$"))] = (ParserAction.Accept, -1);
                     }
                     else {
                         foreach (var la in item.LookAheadSymbols) {
-                            table.ActionTable[(state.Id, la)] = (Action.Reduce, cfg.ProductionRules.IndexOf(item.Production));
+                            table.ActionTable[(state.Id, la)] = (ParserAction.Reduce, _cfg.ProductionRules.IndexOf(item.Production));
                         }
                     }
                 }
@@ -148,7 +147,7 @@ public class Parser {
                                 Console.WriteLine($"Conflict at state {state} with symbol {symbol}.");
                             }
 
-                            table.ActionTable[(state.Id, symbol)] = (Action.Shift, nextState.Id);
+                            table.ActionTable[(state.Id, symbol)] = (ParserAction.Shift, nextState.Id);
                             break;
                         }
                         case NonTerminal: {
@@ -164,32 +163,32 @@ public class Parser {
         return table;
     }
 
-    public TreeNode<Symbol> Parse(List<Terminal> input) {
+    public ConcreteSyntaxTreeNode Parse(List<Terminal> input) {
         input.Add(new Terminal("$"));
 
         var stackState = new Stack<int>();
         stackState.Push(0);
 
-        var tree = new Stack<TreeNode<Symbol>>();
+        var tree = new Stack<ConcreteSyntaxTreeNode>();
 
         while (true) {
-            if (table.ActionTable.TryGetValue((stackState.Peek(), input[0]), out var action)) {
-                if (action.Item1 == Action.Accept) {
+            if (_table.ActionTable.TryGetValue((stackState.Peek(), input[0]), out var action)) {
+                if (action.Item1 == ParserAction.Accept) {
                     Console.WriteLine("ACCEPT");
                     break;
                 }
 
-                if (action.Item1 == Action.Shift) {
+                if (action.Item1 == ParserAction.Shift) {
                     Console.WriteLine("SHIFT:" + input[0]);
                     stackState.Push(action.Item2);
-                    tree.Push(new TreeNode<Symbol>(input[0]));
+                    tree.Push(new ConcreteSyntaxTreeNode(input[0]));
                     input.RemoveAt(0);
                 }
-                else if (action.Item1 == Action.Reduce) {
-                    var rule = cfg.ProductionRules[action.Item2];
-                    Console.WriteLine("REDUCE nr:" + action.Item2 + " = " + rule);
+                else if (action.Item1 == ParserAction.Reduce) {
+                    var rule = _cfg.ProductionRules[action.Item2];
+                    Console.WriteLine($"REDUCE ({action.Item2}) Rule: {rule}");
 
-                    var reduced = new TreeNode<Symbol>(rule.Premise, rule);
+                    var reduced = new ConcreteSyntaxTreeNode(rule);
                     
                     for (var i = 0; i < rule.Conclusion.Count(s => !s.IsEpsilon); i++) {
                         stackState.Pop();
@@ -198,18 +197,16 @@ public class Parser {
 
                     tree.Push(reduced);
 
-                    if (table.GotoTable.TryGetValue((stackState.Peek(), rule.Premise), out var gotoId)) {
+                    if (_table.GotoTable.TryGetValue((stackState.Peek(), rule.Premise), out var gotoId)) {
                         stackState.Push(gotoId);
                     }
                     else {
-                        Console.WriteLine("Goto not found:" + (stackState.Peek(), rule.Premise));
-                        break;
+                        throw new Exception("Goto not found:" + (stackState.Peek(), rule.Premise));
                     }
                 }
             }
             else {
-                Console.WriteLine("ERROR");
-                break;
+                throw new Exception($"ERROR: cant parse \"{input}\".");
             }
         }
 

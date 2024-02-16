@@ -3,7 +3,7 @@ using LRParser.CFG;
 namespace LRParser.Parser;
 
 public class Table {
-    public Dictionary<(int, Symbol), (Action, int)> ActionTable {
+    public Dictionary<(int, Symbol), (ParserAction, int)> ActionTable {
         get;
     } = new();
 

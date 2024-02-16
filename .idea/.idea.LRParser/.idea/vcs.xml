@@ -2,5 +2,16 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../ArgumentationFramework" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../ComponentSystemSamples" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../Deferred-Render-Pipeline" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../EntityComponentSystemSamples" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../FirstOrderLogic" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../MySimulation" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../NeuralNetwork" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../PathfindingECS" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../SimpleDependencyInjectionV2" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../SimpleLogic" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../Triangulation" vcs="Git" />
   </component>
 </project>
