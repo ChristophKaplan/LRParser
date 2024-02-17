@@ -1,28 +1,21 @@
-namespace LRParser.PropositionalLogic;
+namespace PropositionalLogic;
 
 public abstract class Sentence
 {
-    private readonly List<Sentence> _children = new();
+    public readonly List<Sentence> _children = new();
     protected void AddChild(Sentence sentence) => _children.Add(sentence);
-    
-    public bool Evaluate() {
-        switch (this) {
-            case AtomicSentence atomicSentence:
-                return true;
-            case ComplexSentence complexSentence:
-                switch (complexSentence.Operator) {
-                    case "NOT":
-                        return !complexSentence._children[0].Evaluate();
-                    case "AND":
-                        return complexSentence._children[0].Evaluate() && complexSentence._children[1].Evaluate();
-                    case "OR":
-                        return complexSentence._children[0].Evaluate() || complexSentence._children[1].Evaluate();
-                }
 
-                break;
+    public override bool Equals(object? obj)
+    {
+        if (obj == null || GetType() != obj.GetType()) {
+            return false;
         }
-
-        throw new Exception($"Error: subtype of {this} not found.");
+        return ToString().Equals(obj.ToString());
+    }
+    
+    public override int GetHashCode()
+    {
+        return ToString().GetHashCode();
     }
 
     public override string ToString() {

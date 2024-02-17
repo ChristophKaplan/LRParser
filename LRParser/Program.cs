@@ -1,5 +1,6 @@
-﻿using LRParser.PropositionalLogic;
+﻿using PropositionalLogic;
 
-PropositionalLogic logic = new PropositionalLogic();
-Sentence sentence = logic.TryParse("P OR NOT Q");
-Console.WriteLine(sentence +" = "+ sentence.Evaluate()); 
+var logic = new PropositionalLogic.PropositionalLogic();
+Sentence sentence = logic.TryParse("Mod(P OR Q)");
+logic.GenerateInterpretations();
+logic.EvaluateTruthTable(sentence);

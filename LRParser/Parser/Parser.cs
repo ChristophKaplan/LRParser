@@ -175,6 +175,8 @@ public class Parser {
             if (_table.ActionTable.TryGetValue((stackState.Peek(), input[0]), out var action)) {
                 if (action.Item1 == ParserAction.Accept) {
                     Console.WriteLine("ACCEPT");
+                    var t = tree; //tree is correct
+                    Console.WriteLine(t);
                     break;
                 }
 
@@ -206,7 +208,7 @@ public class Parser {
                 }
             }
             else {
-                throw new Exception($"ERROR: cant parse \"{input}\".");
+                throw new Exception($"ERROR: cant parse \"{input[0]}\".");
             }
         }
 
