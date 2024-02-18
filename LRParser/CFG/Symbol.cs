@@ -2,9 +2,7 @@ namespace LRParser.CFG;
 
 public abstract class Symbol {
     protected internal readonly string Description;
-    
-    public object _attribut1;
-    public object _attribut2;
+    public object Attribut1;
     
     protected Symbol(string description) {
         Description = description;
@@ -25,14 +23,15 @@ public abstract class Symbol {
     }
 
     public override string ToString() {
-        return $"{Description}, a1= {_attribut1}";
+        
+        return $"{Description}[{Attribut1}]";
     }
 }
 
 public class Terminal : Symbol {
 
     public Terminal(string description, string lexVal) : base(description) {
-        _attribut1 = lexVal;
+        Attribut1 = lexVal;
     }
 
     public Terminal(string description) : base(description) {

@@ -82,9 +82,10 @@ public class PropositionalLogic {
 
             new ProductionRule(new NonTerminal("S"), new Terminal("Function"), new Terminal("("), new NonTerminal("Sentence"), new Terminal(")"))
         };
-        
+        var startSymbol = new NonTerminal("S'");
         
         productionRules[0].SetSemanticAction(input => input[0]);
+        
         productionRules[1].SetSemanticAction(input => input[0]);
         productionRules[2].SetSemanticAction(input =>
         {
@@ -120,7 +121,7 @@ public class PropositionalLogic {
             return "mod";
         });
         
-        var cfg = new ContextFreeGrammar(nonTerminals, terminals, productionRules, new NonTerminal("S"));
+        var cfg = new ContextFreeGrammar(nonTerminals, terminals, productionRules, startSymbol);
         return cfg;
     }
 
@@ -129,9 +130,9 @@ public class PropositionalLogic {
         var tree = _parser.Parse(tokens);
         tree.Evaluate();
 
-        if (tree.Symbol._attribut1 is Sentence sentence) return sentence;
+        if (tree.Symbol.Attribut1 is Sentence sentence) return sentence;
         
-        Console.WriteLine(tree);
-        throw new Exception("Error parsing:" + tree.Symbol._attribut1);
+        Console.WriteLine("temp:"+tree);
+        return (Sentence)tree.Children[1].Symbol.Attribut1;
     }
 }

@@ -4,25 +4,27 @@ namespace LRParser.Parser;
 
 public class ConcreteSyntaxTreeNode {
     private ConcreteSyntaxTreeNode Parent { get; }
-    private readonly List<ConcreteSyntaxTreeNode> _children = new ();
+    public List<ConcreteSyntaxTreeNode> Children { get; }
     private readonly ProductionRule _productionRule;
     public Symbol Symbol { get; }
     
     public ConcreteSyntaxTreeNode(Symbol symbol) {
         Symbol = symbol;
+        Children = new List<ConcreteSyntaxTreeNode>();
     }
     
     public ConcreteSyntaxTreeNode(ProductionRule productionRule) {
         Symbol = productionRule.Premise;
         _productionRule = productionRule;
+        Children = new List<ConcreteSyntaxTreeNode>();
     }
 
     public void AddChild(ConcreteSyntaxTreeNode child) {
-        _children.Add(child);
+        Children.Add(child);
     }
     
     public override string ToString() {
-        return $"{Symbol} - {_children.Aggregate("(", (current, next) => $"{current} {next},")})";
+        return $"\t{Symbol} {Children.Aggregate("\n\t", (current, next) => $"{current} {next}")}";
     }
 
     public ConcreteSyntaxTreeNode GetRoot() {
@@ -31,18 +33,18 @@ public class ConcreteSyntaxTreeNode {
 
     public void PreOrderReverse(Action<ConcreteSyntaxTreeNode> action) {
         action(this);
-        for (var i = _children.Count-1; i >= 0; i--) {
-            var child = _children[i];
+        for (var i = Children.Count-1; i >= 0; i--) {
+            var child = Children[i];
             child.PreOrderReverse(action);
         }
     }
     
     public void Evaluate() {
-        if(_children.Count == 0) {
+        if(Children.Count == 0) {
             return;
         }
         
-        foreach (var child in _children) {
+        foreach (var child in Children) {
             //inherrited
             child.Evaluate();
         }
@@ -50,13 +52,13 @@ public class ConcreteSyntaxTreeNode {
         //synthetic
 
         var args = new List<object>();
-        foreach (var child in _children) {
+        foreach (var child in Children) {
             if (child.Symbol is Symbol s) {
-                args.Add(s._attribut1);
+                args.Add(s.Attribut1);
             }
         }
 
         args.Reverse();
-        Symbol._attribut1 = _productionRule.SemanticAction.Invoke(args.ToArray());
+        Symbol.Attribut1 = _productionRule.SemanticAction.Invoke(args.ToArray());
     }
 }
