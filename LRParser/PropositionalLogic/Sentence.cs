@@ -8,10 +8,12 @@ public class Function:IPropositionalLanguage
 {
     public string func;
     public Sentence sentence;
-    public Function(string func, Sentence sentence)
+    public Sentence[] parameters;
+    public Function(string func, Sentence sentence, params Sentence[] parameters)
     {
         this.func = func;
         this.sentence = sentence;
+        this.parameters = parameters;
     }
 }
 

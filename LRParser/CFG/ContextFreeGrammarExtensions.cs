@@ -17,36 +17,37 @@ public static class ContextFreeGrammarExtensions {
 
         alreadyChecked.Add(nonTerminal);
 
-        var p = cnf.GetAllProdForNonTerminal(nonTerminal);
-        var n = p.Count;
-        var directorSet = new List<Symbol>[n];
+        var allProdForNonTerminal = cnf.GetAllProdForNonTerminal(nonTerminal);
+        var directorSet = new List<Symbol>[allProdForNonTerminal.Count];
 
-        for (var i = 0; i < n; i++) {
+        for (var i = 0; i < allProdForNonTerminal.Count; i++) {
             directorSet[i] = new List<Symbol>();
 
-            if (p[i].Conclusion[0].Equals(new Terminal())) {
+            if (allProdForNonTerminal[i].Conclusion[0].Equals(new Terminal())) {
                 directorSet[i].Add(new Terminal());
             }
             else {
-                var length = p[i].Conclusion.Length;
+                var length = allProdForNonTerminal[i].Conclusion.Length;
 
                 //first symbol no eps
-                AddRangeLikeSet(First(cnf, p[i].Conclusion[0], alreadyChecked), directorSet[i]);
+                var first = First(cnf, allProdForNonTerminal[i].Conclusion[0], alreadyChecked);
+                AddRangeLikeSet(first, directorSet[i]);
                 directorSet[i].Remove(new Terminal());
 
                 if (length == 1) {
+                    AddRangeLikeSet(directorSet[i], result);
                     continue; //first entry already checked
                 }
 
                 //mid symbols,if has eps check next
                 int j;
-                for (j = 1; First(cnf, p[i].Conclusion[j], alreadyChecked).Contains(new Terminal()) && j < length; j++) {
-                    AddRangeLikeSet(First(cnf, p[i].Conclusion[j], alreadyChecked), directorSet[i]);
+                for (j = 1; First(cnf, allProdForNonTerminal[i].Conclusion[j], alreadyChecked).Contains(new Terminal()) && j < length; j++) {
+                    AddRangeLikeSet(First(cnf, allProdForNonTerminal[i].Conclusion[j], alreadyChecked), directorSet[i]);
                     directorSet[i].Remove(new Terminal());
                 }
 
                 //last symbol if mid had no epsilon
-                if (j == length && First(cnf, p[i].Conclusion[length], alreadyChecked).Contains(new Terminal())) {
+                if (j == length && First(cnf, allProdForNonTerminal[i].Conclusion[length], alreadyChecked).Contains(new Terminal())) {
                     directorSet[i].Add(new Terminal());
                 }
             }

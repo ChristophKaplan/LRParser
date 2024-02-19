@@ -38,32 +38,34 @@ public class Parser {
                 continue;
             }
 
-            var rest = cur.GetSymbolsAfterDot();
+            var afterDot = cur.GetSymbolsAfterDot();
             var oldLookahead = cur.LookAheadSymbols;
-            rest.AddRange(oldLookahead);
+            
+            foreach (var symbol in oldLookahead) {
+                List<Symbol> curLookahead = null;
+                curLookahead = _cfg.First(afterDot.Count == 0 ? symbol : afterDot[0]); //k = 1, only LL(1) or LR(1)
 
-            var curLookahead = _cfg.First(rest[0]); //k = 1, only LL(1) or LR(1)
+                if (cur.CurrentSymbol is NonTerminal nonTerminal) {
+                    var prods = _cfg.GetAllProdForNonTerminal(nonTerminal);
 
-            if (cur.CurrentSymbol is NonTerminal nonTerminal) {
-                var prods = _cfg.GetAllProdForNonTerminal(nonTerminal);
+                    foreach (var prod in prods) {
+                        var deeperItem = new LRItem(prod, 0, curLookahead);
+                        var containedAlready = stack
+                            .Where(r => r.Production.Equals(deeperItem.Production) && r.DotPosition.Equals(deeperItem.DotPosition))
+                            .ToList();
 
-                foreach (var prod in prods) {
-                    var deeperItem = new LRItem(prod, 0, curLookahead);
-                    var containedAlready = result
-                        .Where(r => r.Production.Equals(deeperItem.Production) && r.DotPosition.Equals(deeperItem.DotPosition))
-                        .ToList();
-
-                    if (containedAlready.Count == 0) {
-                        stack.Push(deeperItem);
-                    }
-                    else {
-                        if (containedAlready.Count > 1) {
-                            throw new Exception("should not exist more than one time" + containedAlready.Aggregate("", (c, n) => $"{c} {n}, "));
+                        if (containedAlready.Count == 0) {
+                            stack.Push(deeperItem);
                         }
+                        else {
+                            if (containedAlready.Count > 1) {
+                                throw new Exception("should not exist more than one time" + containedAlready.Aggregate("", (c, n) => $"{c} {n}, "));
+                            }
 
-                        foreach (var s in curLookahead) {
-                            if (!containedAlready[0].LookAheadSymbols.Contains(s)) {
-                                containedAlready[0].LookAheadSymbols.Add(s);
+                            foreach (var s in curLookahead) {
+                                if (!containedAlready[0].LookAheadSymbols.Contains(s)) {
+                                    containedAlready[0].LookAheadSymbols.Add(s);
+                                }
                             }
                         }
                     }
@@ -134,6 +136,10 @@ public class Parser {
                         table.ActionTable[(state.Id, new Terminal("$"))] = (ParserAction.Accept, -1);
                     }
                     else {
+                        if (state.Id == 15) {
+                            Console.WriteLine(state.Id);
+                            var l = item.LookAheadSymbols;
+                        }
                         foreach (var la in item.LookAheadSymbols) {
                             table.ActionTable[(state.Id, la)] = (ParserAction.Reduce, _cfg.ProductionRules.IndexOf(item.Production));
                         }

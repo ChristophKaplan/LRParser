@@ -36,7 +36,7 @@ public class PropositionalLogic {
         }
         if(function.func.Equals("Forget"))
         {
-            
+            Console.WriteLine($"Forget {function.parameters[0]} in {function.sentence}");
         }
     }
     
@@ -97,10 +97,12 @@ public class PropositionalLogic {
             new ProductionRule(new NonTerminal("ComplexSentence"), new Terminal("Negation"), new NonTerminal("Sentence")),
             
             new ProductionRule(new NonTerminal("S"), new Terminal("Function"), new Terminal("("), new NonTerminal("Sentence"), new NonTerminal("Ext")),
-            new ProductionRule(new NonTerminal("Ext"), new Terminal(")")), //state 15, erkennt nicht das man reduzieren soll mit regel 2, weil ) nicht in follow
-            new ProductionRule(new NonTerminal("Ext"), new Terminal(","),new NonTerminal("AtomicSentence"), new Terminal(")"))
+            new ProductionRule(new NonTerminal("Ext"), new Terminal(")")),
+            new ProductionRule(new NonTerminal("Ext"), new Terminal(","),new NonTerminal("Sentence"), new Terminal(")"))
         };
         var startSymbol = new NonTerminal("S'");
+        
+        
         
         productionRules[0].SetSemanticAction(input => input[0]);
         
@@ -135,13 +137,15 @@ public class PropositionalLogic {
         {
             var func = (string)input[0];
             var sentence = (Sentence)input[2];
-            return new Function(func, sentence);
+            var parameters = (Sentence)input[3];
+            return new Function(func, sentence, parameters);
         });
         
         productionRules[7].SetSemanticAction(input => input[0]);
-        productionRules[8].SetSemanticAction(input => input[0]);
+        productionRules[8].SetSemanticAction(input => input[1]);
 
         var cfg = new ContextFreeGrammar(nonTerminals, terminals, productionRules, startSymbol);
+        
         return cfg;
     }
 
