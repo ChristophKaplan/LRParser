@@ -16,6 +16,7 @@ public class Parser {
         this._cfg = cfg;
 
         var states = GenerateStates(new LRItem(cfg.ProductionRules[0], 0, new List<Symbol> { new Terminal("$") }));
+        MergeStates(states);
         _table = GenerateTable(states);
 
         Console.WriteLine("ALL STATES:");
@@ -75,7 +76,7 @@ public class Parser {
 
         return result;
     }
-
+   
     private List<State> GenerateStates(LRItem startItem) {
         var firstState = new State(Closure(new List<LRItem> { startItem }), 0);
         var states = new List<State> { firstState };
@@ -114,6 +115,16 @@ public class Parser {
         }
     }
 
+    private void MergeStates(List<State> states) {
+        for (var i = 0; i < states.Count; i++) {
+            for (var j = i + 1; j < states.Count; j++) {
+                if (states[i].HasEqualCore(states[j])) {
+                    Console.WriteLine( $"should merge {i} and {j}" );
+                }
+            }
+        }
+    }
+    
     private static bool TryGetSameState(List<State> states, State state, out State sameState) {
         foreach (var s in states) {
             if (s.HasEqualItems(state)) {

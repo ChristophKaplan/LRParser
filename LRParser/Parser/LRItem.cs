@@ -36,10 +36,14 @@ public class LRItem {
         return symbols;
     }
 
+    public bool CoreEquals(LRItem other) {
+        return Production.Equals(other.Production) && DotPosition == other.DotPosition;
+    }
+    
     private bool LookAheadEquals(List<Symbol> other) {
         return LookAheadSymbols.Count == other.Count && LookAheadSymbols.All(symbol => other.Contains(symbol));
     }
-
+    
     public override bool Equals(object? obj) {
         if (obj == null || obj.GetType() != GetType()) {
             return false;

@@ -25,6 +25,10 @@ public class State {
         return Items.Where(i => !i.IsComplete).ToList();
     }
 
+    public bool HasEqualCore(State other) {
+        return Items.Count == other.Items.Count && Items.All(item => other.Items.Any(otherItem => item.CoreEquals(otherItem)));
+    }
+    
     public bool HasEqualItems(State other) {
         return Items.Count == other.Items.Count && Items.All(item => other.Items.Contains(item));
     }
