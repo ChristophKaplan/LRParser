@@ -12,7 +12,7 @@ public class PropositionalLogic {
     private readonly List<Interpretation> _interpretations = new ();
     
     public PropositionalLogic() {
-        _lexer = new Lexer(new ("Function", "Mod"),new ("(", "\\("),new (")", "\\)"),new ("Connective", "AND|OR"), new ("Negation", "NOT|!"), new ("AtomicSentence", "[A-Z][a-z]*"));
+        _lexer = new Lexer(new ("Function", "Mod|Forget"),new ("(", "\\("),new(",",","),new (")", "\\)"),new ("Connective", "AND|OR"), new ("Negation", "NOT|!"), new ("AtomicSentence", "[A-Z][a-z]*"));
         var cfg = SetUpGrammar();
         _parser = new Parser(cfg);
     }
@@ -21,6 +21,22 @@ public class PropositionalLogic {
         Console.WriteLine($"Interpretations for {sentence}");
         foreach (var interpretation in _interpretations) {
             Console.WriteLine($"{interpretation}, {sentence} = {interpretation.Evaluate(sentence)}");
+        }
+    }
+    
+    public void ExecuteFunction(Function function) {
+        if (function.func.Equals("Mod"))
+        {
+            Console.WriteLine($"Models for {function.sentence}");
+            foreach (var interpretation in _interpretations)
+            {
+                var t = interpretation.Evaluate(function.sentence);
+                if(t) Console.WriteLine($"{interpretation}");
+            }
+        }
+        if(function.func.Equals("Forget"))
+        {
+            
         }
     }
     
@@ -68,8 +84,8 @@ public class PropositionalLogic {
     
     private ContextFreeGrammar SetUpGrammar() {
         
-        List<NonTerminal> nonTerminals = new() {new ("S'"), new ("S"), new ("Sentence"), new ("ComplexSentence")};
-        List<Terminal> terminals = new() { new ("AtomicSentence"), new ("Connective"),new ("Negation"), new ("Function"), new ("("), new (")"), new () };
+        List<NonTerminal> nonTerminals = new() {new ("S'"), new ("S"), new ("Sentence"), new ("ComplexSentence"),new ("Ext")};
+        List<Terminal> terminals = new() { new ("AtomicSentence"), new ("Connective"),new ("Negation"), new ("Function"), new ("("), new (","), new (")"), new () };
 
         List<ProductionRule> productionRules = new() {
             new ProductionRule(new NonTerminal("S'"), new NonTerminal("S")),
@@ -79,8 +95,10 @@ public class PropositionalLogic {
             new ProductionRule(new NonTerminal("Sentence"), new NonTerminal("ComplexSentence")),
             new ProductionRule(new NonTerminal("ComplexSentence"), new NonTerminal("AtomicSentence"), new Terminal("Connective"), new NonTerminal("Sentence")),
             new ProductionRule(new NonTerminal("ComplexSentence"), new Terminal("Negation"), new NonTerminal("Sentence")),
-
-            new ProductionRule(new NonTerminal("S"), new Terminal("Function"), new Terminal("("), new NonTerminal("Sentence"), new Terminal(")"))
+            
+            new ProductionRule(new NonTerminal("S"), new Terminal("Function"), new Terminal("("), new NonTerminal("Sentence"), new NonTerminal("Ext")),
+            new ProductionRule(new NonTerminal("Ext"), new Terminal(")")), //state 15, erkennt nicht das man reduzieren soll mit regel 2, weil ) nicht in follow
+            new ProductionRule(new NonTerminal("Ext"), new Terminal(","),new NonTerminal("AtomicSentence"), new Terminal(")"))
         };
         var startSymbol = new NonTerminal("S'");
         
@@ -117,22 +135,20 @@ public class PropositionalLogic {
         {
             var func = (string)input[0];
             var sentence = (Sentence)input[2];
-            Console.WriteLine($"Function: {func}, Sentence: {sentence}");
-            return "mod";
+            return new Function(func, sentence);
         });
         
+        productionRules[7].SetSemanticAction(input => input[0]);
+        productionRules[8].SetSemanticAction(input => input[0]);
+
         var cfg = new ContextFreeGrammar(nonTerminals, terminals, productionRules, startSymbol);
         return cfg;
     }
 
-    public Sentence TryParse(string input) {
+    public IPropositionalLanguage TryParse(string input) {
         var tokens = _lexer.Tokenize(input);
         var tree = _parser.Parse(tokens);
         tree.Evaluate();
-
-        if (tree.Symbol.Attribut1 is Sentence sentence) return sentence;
-        
-        Console.WriteLine("temp:"+tree);
-        return (Sentence)tree.Children[1].Symbol.Attribut1;
+        return (IPropositionalLanguage)tree.Symbol.Attribut1;
     }
 }

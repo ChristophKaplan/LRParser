@@ -175,13 +175,11 @@ public class Parser {
             if (_table.ActionTable.TryGetValue((stackState.Peek(), input[0]), out var action)) {
                 if (action.Item1 == ParserAction.Accept) {
                     Console.WriteLine("ACCEPT");
-                    var t = tree; //tree is correct
-                    Console.WriteLine(t);
                     break;
                 }
 
                 if (action.Item1 == ParserAction.Shift) {
-                    Console.WriteLine("SHIFT:" + input[0]);
+                    Console.WriteLine($"SHIFT: {input[0]}, next state:{action.Item2}");
                     stackState.Push(action.Item2);
                     tree.Push(new ConcreteSyntaxTreeNode(input[0]));
                     input.RemoveAt(0);
@@ -208,7 +206,7 @@ public class Parser {
                 }
             }
             else {
-                throw new Exception($"ERROR: cant parse \"{input[0]}\".");
+                throw new Exception($"ERROR: cant parse \"{input[0]}\". {stackState.Peek()}");
             }
         }
 

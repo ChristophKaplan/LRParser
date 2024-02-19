@@ -1,6 +1,8 @@
 ﻿using PropositionalLogic;
 
 var logic = new PropositionalLogic.PropositionalLogic();
-Sentence sentence = logic.TryParse("Mod(P OR Q)");
+IPropositionalLanguage langObj = logic.TryParse("Forget(P OR Q,P)");
 logic.GenerateInterpretations();
-logic.EvaluateTruthTable(sentence);
+
+if(langObj is Sentence sentence) logic.EvaluateTruthTable(sentence);
+if(langObj is Function function) logic.ExecuteFunction(function);

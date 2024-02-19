@@ -1,9 +1,24 @@
 namespace PropositionalLogic;
 
-public abstract class Sentence
+public interface IPropositionalLanguage
 {
-    public readonly List<Sentence> _children = new();
-    protected void AddChild(Sentence sentence) => _children.Add(sentence);
+}
+
+public class Function:IPropositionalLanguage
+{
+    public string func;
+    public Sentence sentence;
+    public Function(string func, Sentence sentence)
+    {
+        this.func = func;
+        this.sentence = sentence;
+    }
+}
+
+public abstract class Sentence:IPropositionalLanguage
+{
+    public readonly List<Sentence> Children = new();
+    protected void AddChild(Sentence sentence) => Children.Add(sentence);
 
     public override bool Equals(object? obj)
     {
@@ -24,9 +39,9 @@ public abstract class Sentence
         }
         else if(this is ComplexSentence complexSentence) {
             if (complexSentence.Operator.Equals("NOT")) {
-                return $"{complexSentence.Operator} {complexSentence._children[0]}";
+                return $"{complexSentence.Operator} {complexSentence.Children[0]}";
             }
-            return $"{complexSentence._children[0]} {complexSentence.Operator} {complexSentence._children[1]}";
+            return $"{complexSentence.Children[0]} {complexSentence.Operator} {complexSentence.Children[1]}";
         }
         else {
             return "Sentence";

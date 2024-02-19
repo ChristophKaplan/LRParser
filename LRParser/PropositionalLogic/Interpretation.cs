@@ -24,11 +24,11 @@ public class Interpretation
     {
         switch (complexSentence.Operator) {
             case "NOT":
-                return !Evaluate(complexSentence._children[0]);
+                return !Evaluate(complexSentence.Children[0]);
             case "AND":
-                return Evaluate(complexSentence._children[0]) && Evaluate(complexSentence._children[1]);
+                return Evaluate(complexSentence.Children[0]) && Evaluate(complexSentence.Children[1]);
             case "OR":
-                return Evaluate(complexSentence._children[0]) || Evaluate(complexSentence._children[1]);
+                return Evaluate(complexSentence.Children[0]) || Evaluate(complexSentence.Children[1]);
         }
 
         throw new Exception($"Error: subtype of {this} not found.");

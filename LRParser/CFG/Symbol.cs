@@ -24,7 +24,7 @@ public abstract class Symbol {
 
     public override string ToString() {
         
-        return $"{Description}[{Attribut1}]";
+        return $"{Description}";
     }
 }
 
