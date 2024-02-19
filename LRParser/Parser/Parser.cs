@@ -1,3 +1,4 @@
+using System.Data;
 using LRParser.CFG;
 
 namespace LRParser.Parser;
@@ -33,6 +34,14 @@ public class Parser {
 
         while (stack.Count > 0) {
             var cur = stack.Pop();
+
+            foreach (var res in result) {
+                if (res.CoreEquals(cur)) {
+                    Console.WriteLine($"Conflict: {res} and {cur}");
+                    
+                }
+            }
+            
             result.Add(cur);
 
             if (cur.IsComplete) {
@@ -51,23 +60,22 @@ public class Parser {
 
                     foreach (var prod in prods) {
                         var deeperItem = new LRItem(prod, 0, curLookahead);
-                        var containedAlready = stack
-                            .Where(r => r.Production.Equals(deeperItem.Production) && r.DotPosition.Equals(deeperItem.DotPosition))
-                            .ToList();
 
-                        if (containedAlready.Count == 0) {
-                            stack.Push(deeperItem);
-                        }
-                        else {
-                            if (containedAlready.Count > 1) {
-                                throw new Exception("should not exist more than one time" + containedAlready.Aggregate("", (c, n) => $"{c} {n}, "));
-                            }
-
-                            foreach (var s in curLookahead) {
-                                if (!containedAlready[0].LookAheadSymbols.Contains(s)) {
-                                    containedAlready[0].LookAheadSymbols.Add(s);
+                        bool closedAlready = false;
+                        
+                        foreach (var closedItem in stack) {
+                            if (closedItem.CoreEquals(deeperItem)) {
+                                closedAlready = true;
+                                foreach (var s in curLookahead) {
+                                    if (!closedItem.LookAheadSymbols.Contains(s)) {
+                                        closedItem.LookAheadSymbols.Add(s);
+                                    }
                                 }
-                            }
+                            }  
+                        }
+                        
+                        if (!closedAlready) {
+                            stack.Push(deeperItem);
                         }
                     }
                 }
@@ -82,6 +90,9 @@ public class Parser {
         var states = new List<State> { firstState };
         var count = 0;
         GenerateStates(firstState, states, ref count);
+        if (!ValidateStates(states)) {
+            //throw new Exception("Conflicts, Grammar is not LR(1) parsable.");
+        }
         return states;
     }
 
@@ -115,6 +126,18 @@ public class Parser {
         }
     }
 
+    private bool ValidateStates(List<State> states) {
+        var conflict = false;
+        foreach (var state in states) {
+            conflict = state.HasConflict();
+            if (conflict) {
+                Console.WriteLine($"State {state.Id} has conflict.");
+            }
+        }
+
+        return conflict;
+    }
+    
     private void MergeStates(List<State> states) {
         for (var i = 0; i < states.Count; i++) {
             for (var j = i + 1; j < states.Count; j++) {
