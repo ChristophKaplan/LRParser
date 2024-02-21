@@ -17,7 +17,7 @@ public class Parser {
         this._cfg = cfg;
 
         var states = GenerateStates(new LRItem(cfg.ProductionRules[0], 0, new List<Symbol> { new Terminal("$") }));
-        MergeStates(states);
+        //MergeStates(states);
         _table = GenerateTable(states);
 
         Console.WriteLine("ALL STATES:");
@@ -87,7 +87,7 @@ public class Parser {
         var count = 0;
         GenerateStates(firstState, states, ref count);
         if (!ValidateStates(states)) {
-            throw new Exception("Conflicts, Grammar is not LR(1) parsable.");
+            //throw new Exception("Conflicts, Grammar is not LR(1) parsable.");
         }
         return states;
     }
@@ -163,12 +163,14 @@ public class Parser {
                         table.ActionTable[(state.Id, new Terminal("$"))] = (ParserAction.Accept, -1);
                     }
                     else {
-                        if (state.Id == 15) {
-                            Console.WriteLine(state.Id);
-                            var l = item.LookAheadSymbols;
-                        }
-                        foreach (var la in item.LookAheadSymbols) {
-                            table.ActionTable[(state.Id, la)] = (ParserAction.Reduce, _cfg.ProductionRules.IndexOf(item.Production));
+                        foreach (var symbol in item.LookAheadSymbols) {
+                            if(table.ActionTable.ContainsKey((state.Id, symbol))) {
+                                if (table.ActionTable[(state.Id, symbol)].Item1 == ParserAction.Shift) {
+                                    throw new Exception($"Shift/Reduce conflict at state {state.Id} with symbol {symbol} what: {table.ActionTable[(state.Id, symbol)]} State:{state} !!!");
+                                }
+                            }
+                            
+                            table.ActionTable[(state.Id, symbol)] = (ParserAction.Reduce, _cfg.ProductionRules.IndexOf(item.Production));
                         }
                     }
                 }
@@ -177,9 +179,15 @@ public class Parser {
                     switch (symbol) {
                         case Terminal: {
                             if (!state.Transitions.TryGetValue(symbol, out var nextState)) {
-                                Console.WriteLine($"Conflict at state {state} with symbol {symbol}.");
+                                throw new Exception($"Conflict at state {state} with symbol {symbol}!!!");
                             }
 
+                            if(table.ActionTable.ContainsKey((state.Id, symbol))) {
+                                if (table.ActionTable[(state.Id, symbol)].Item1 == ParserAction.Reduce) {
+                                    throw new Exception($"Shift/Reduce conflict at state {state.Id} with symbol {symbol} what: {table.ActionTable[(state.Id, symbol)]} == {(ParserAction.Shift, nextState.Id)}!!!");
+                                }
+                            }
+                            
                             table.ActionTable[(state.Id, symbol)] = (ParserAction.Shift, nextState.Id);
                             break;
                         }

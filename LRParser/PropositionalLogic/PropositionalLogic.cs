@@ -110,9 +110,10 @@ public class PropositionalLogic {
             new ProductionRule(new NonTerminal("Sentence"), new NonTerminal("ComplexSentence")),
             new ProductionRule(new NonTerminal("ComplexSentence"), new NonTerminal("AtomicSentence"), new Terminal("Connective"), new NonTerminal("Sentence")),
             new ProductionRule(new NonTerminal("ComplexSentence"), new Terminal("Negation"), new NonTerminal("Sentence")),
-            new ProductionRule(new NonTerminal("S"), new Terminal("Function"), new Terminal("("), new NonTerminal("Sentence"), new NonTerminal("Ext")),
-            new ProductionRule(new NonTerminal("Ext"), new Terminal(")")),
-            new ProductionRule(new NonTerminal("Ext"), new Terminal(","), new NonTerminal("Sentence"), new Terminal(")")),
+            
+            new ProductionRule(new NonTerminal("S"), new Terminal("Function"), new Terminal("("), new NonTerminal("Sentence"), new NonTerminal("Ext"),new Terminal(")")),
+            new ProductionRule(new NonTerminal("S"), new Terminal("Function"), new Terminal("("), new NonTerminal("Sentence"), new Terminal(")")),
+            new ProductionRule(new NonTerminal("Ext"), new Terminal(","), new NonTerminal("Sentence")),
             
             new ProductionRule(new NonTerminal("S"), new Terminal("Function"), new Terminal("("), new NonTerminal("S"), new Terminal(")")),
         };
