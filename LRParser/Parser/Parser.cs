@@ -34,15 +34,9 @@ public class Parser {
 
         while (stack.Count > 0) {
             var cur = stack.Pop();
-
-            foreach (var res in result) {
-                if (res.CoreEquals(cur)) {
-                    Console.WriteLine($"Conflict: {res} and {cur}");
-                    
-                }
+            if (!MergeLookAheadIfClosed(result, cur)) {
+                result.Add(cur);
             }
-            
-            result.Add(cur);
 
             if (cur.IsComplete) {
                 continue;
@@ -52,29 +46,14 @@ public class Parser {
             var oldLookahead = cur.LookAheadSymbols;
             
             foreach (var symbol in oldLookahead) {
-                List<Symbol> curLookahead = null;
-                curLookahead = _cfg.First(afterDot.Count == 0 ? symbol : afterDot[0]); //k = 1, only LL(1) or LR(1)
+                 var curLookahead = _cfg.First(afterDot.Count == 0 ? symbol : afterDot[0]); //k = 1, only LL(1) or LR(1)
 
                 if (cur.CurrentSymbol is NonTerminal nonTerminal) {
                     var prods = _cfg.GetAllProdForNonTerminal(nonTerminal);
 
                     foreach (var prod in prods) {
                         var deeperItem = new LRItem(prod, 0, curLookahead);
-
-                        bool closedAlready = false;
-                        
-                        foreach (var closedItem in stack) {
-                            if (closedItem.CoreEquals(deeperItem)) {
-                                closedAlready = true;
-                                foreach (var s in curLookahead) {
-                                    if (!closedItem.LookAheadSymbols.Contains(s)) {
-                                        closedItem.LookAheadSymbols.Add(s);
-                                    }
-                                }
-                            }  
-                        }
-                        
-                        if (!closedAlready) {
+                        if (! MergeLookAheadIfClosed(stack,deeperItem)) {
                             stack.Push(deeperItem);
                         }
                     }
@@ -84,6 +63,23 @@ public class Parser {
 
         return result;
     }
+
+    private bool MergeLookAheadIfClosed(IEnumerable<LRItem> closedSet, LRItem newItem) {
+        var closedAlready = false;
+        foreach (var closedItem in closedSet) {
+            if (!closedItem.CoreEquals(newItem)) {
+                continue;
+            }
+
+            closedAlready = true;
+            foreach (var s in newItem.LookAheadSymbols) {
+                if (!closedItem.LookAheadSymbols.Contains(s)) {
+                    closedItem.LookAheadSymbols.Add(s);
+                }
+            }
+        }
+        return closedAlready;
+    }
    
     private List<State> GenerateStates(LRItem startItem) {
         var firstState = new State(Closure(new List<LRItem> { startItem }), 0);
@@ -91,7 +87,7 @@ public class Parser {
         var count = 0;
         GenerateStates(firstState, states, ref count);
         if (!ValidateStates(states)) {
-            //throw new Exception("Conflicts, Grammar is not LR(1) parsable.");
+            throw new Exception("Conflicts, Grammar is not LR(1) parsable.");
         }
         return states;
     }
@@ -130,9 +126,6 @@ public class Parser {
         var conflict = false;
         foreach (var state in states) {
             conflict = state.HasConflict();
-            if (conflict) {
-                Console.WriteLine($"State {state.Id} has conflict.");
-            }
         }
 
         return conflict;

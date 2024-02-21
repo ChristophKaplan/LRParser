@@ -46,7 +46,7 @@ public class State {
                 
                 foreach (var item2 in Items) {
                     if (item2.IsComplete && !item.Equals(item2) && item2.LookAheadSymbols.Contains(laSym)) {
-                        Console.WriteLine($"Reduce-Reduce conflict: {item} and {item2} on {laSym}");
+                        Console.WriteLine($"Reduce-Reduce conflict: {item} and {item2} contains reduce symbol:{laSym} on State:{this.Id}");
                         return true;
                     }
                 }
@@ -57,10 +57,10 @@ public class State {
     }
 
     private bool HasShiftReduceConflict() {
-        foreach (var trSym in Transitions.Keys) {
+        foreach (var shiftSymbol in Transitions.Keys) {
             foreach (var item in Items) {
-                if (item.LookAheadSymbols.Contains(trSym)) {
-                    Console.WriteLine($"Shift-Reduce conflict: {item} and {Transitions[trSym]} on {trSym}");
+                if (item.IsComplete && item.LookAheadSymbols.Contains(shiftSymbol)) {
+                    Console.WriteLine($"Shift-Reduce conflict: {item} is complete and contains ShiftSymbol:{shiftSymbol} on State:{this.Id}");
                     return true;
                 }
             }    
