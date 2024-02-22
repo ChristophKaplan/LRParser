@@ -3,17 +3,17 @@ using LRParser.CFG;
 
 namespace LRParser.Lexer;
 
-public class Lexer {
-    private readonly List<TokenDefinition> _tokenDefinitions;
+public class Lexer<T> where T : Enum {
+    private readonly List<TokenDefinition<T>> _tokenDefinitions;
 
-    public Lexer(params TokenDefinition[] tokenDefinitions) {
+    public Lexer(params TokenDefinition<T>[] tokenDefinitions) {
         _tokenDefinitions = tokenDefinitions.ToList();
     }
 
-    public List<Terminal> Tokenize(string source) {
-        var result = new List<Terminal>();
+    public List<Symbol<T>> Tokenize(string source) {
+        var result = new List<Symbol<T>>();
         var currentIndex = 0;
-        TokenDefinition tokenDefinition = null;
+        TokenDefinition<T> tokenDefinition = null;
 
         while (currentIndex < source.Length) {
             

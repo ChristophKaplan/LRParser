@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/christoph.kaplan/development/LRParser/LRParser/LRParser.csproj": {}
+    "/Volumes/Data/Development/LRParser/LRParser/LRParser.csproj": {}
   },
   "projects": {
-    "/Users/christoph.kaplan/development/LRParser/LRParser/LRParser.csproj": {
+    "/Volumes/Data/Development/LRParser/LRParser/LRParser.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/christoph.kaplan/development/LRParser/LRParser/LRParser.csproj",
+        "projectUniqueName": "/Volumes/Data/Development/LRParser/LRParser/LRParser.csproj",
         "projectName": "LRParser",
-        "projectPath": "/Users/christoph.kaplan/development/LRParser/LRParser/LRParser.csproj",
-        "packagesPath": "/Users/christoph.kaplan/.nuget/packages/",
-        "outputPath": "/Users/christoph.kaplan/development/LRParser/LRParser/obj/",
+        "projectPath": "/Volumes/Data/Development/LRParser/LRParser/LRParser.csproj",
+        "packagesPath": "/Users/delphicmind/.nuget/packages/",
+        "outputPath": "/Volumes/Data/Development/LRParser/LRParser/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/christoph.kaplan/.nuget/NuGet/NuGet.Config"
+          "/Users/delphicmind/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
@@ -53,7 +53,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/Users/christoph.kaplan/.dotnet/sdk/7.0.101/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.306/RuntimeIdentifierGraph.json"
         }
       }
     }

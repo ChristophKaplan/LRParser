@@ -1,33 +1,31 @@
 namespace LRParser.CFG;
 
-public class ProductionRule {
-    internal readonly Symbol[] Conclusion;
-    internal readonly NonTerminal Premise;
-    
+public class ProductionRule{
+    internal readonly Symbol<Enum> Premise;
+    internal readonly Symbol<Enum>[] Conclusion;
     public Func<object[], object> SemanticAction;
     
-    public ProductionRule(NonTerminal premise, params Symbol[] conclusion) {
+    public ProductionRule(Symbol<Enum> premise, params Symbol<Enum>[] conclusion) {
         Premise = premise;
         Conclusion = conclusion;
     }
-
+    
     public void SetSemanticAction(Func<object[], object> semanticAction){ 
         SemanticAction = semanticAction;
     }
     
     public bool CheckLeftRecursion() {
-        for (var i = 0; i < Conclusion.Length; i++) {
-            if (Conclusion[i] is NonTerminal nonTerminal) {
-                return Premise.Equals(nonTerminal);
+        foreach (var sym in Conclusion) {
+            if (sym.Type.Equals(SymbolType.NonTerminal)) {
+                return Premise.Equals(sym);
             }
         }
-
         return false;
     }
 
-    public int GetMostRightPosOf(NonTerminal nonTerminal) {
+    public int GetMostRightPosOf(Symbol<Enum> symbol) {
         for (var i = Conclusion.Length - 1; i >= 0; i--) {
-            if (Conclusion[i].Equals(nonTerminal)) {
+            if (Conclusion[i].Equals(symbol)) {
                 return i;
             }
         }
@@ -36,7 +34,7 @@ public class ProductionRule {
     }
 
     public bool ContainsNonTerminalConclusion() {
-        return Conclusion.OfType<NonTerminal>().Any();
+        return Conclusion.Any(symbol => symbol.Type.Equals(SymbolType.NonTerminal));
     }
 
     public override int GetHashCode() {

@@ -6,7 +6,7 @@ public class State {
     public State(List<LRItem> items, int id) {
         Id = id;
         Items = items;
-        Transitions = new Dictionary<Symbol, State>();
+        Transitions = new Dictionary<Symbol<Enum>, State>();
     }
 
     public int Id {
@@ -17,7 +17,7 @@ public class State {
         get;
     }
 
-    public Dictionary<Symbol, State> Transitions {
+    public Dictionary<Symbol<Enum>, State> Transitions {
         get;
     }
 
@@ -42,7 +42,7 @@ public class State {
             if(!item.IsComplete) continue;
             
             foreach (var laSym in item.LookAheadSymbols) {
-                if(laSym.Equals(new Terminal("$"))) continue;
+                if(laSym.IsDollar) continue;
                 
                 foreach (var item2 in Items) {
                     if (item2.IsComplete && !item.Equals(item2) && item2.LookAheadSymbols.Contains(laSym)) {

@@ -2,13 +2,13 @@ using LRParser.CFG;
 
 namespace LRParser.Parser;
 
-public class ConcreteSyntaxTreeNode {
+public class ConcreteSyntaxTreeNode{
     private ConcreteSyntaxTreeNode Parent { get; }
     public List<ConcreteSyntaxTreeNode> Children { get; }
     private readonly ProductionRule _productionRule;
-    public Symbol Symbol { get; }
+    public Symbol<Enum> Symbol { get; }
     
-    public ConcreteSyntaxTreeNode(Symbol symbol) {
+    public ConcreteSyntaxTreeNode(Symbol<Enum> symbol) {
         Symbol = symbol;
         Children = new List<ConcreteSyntaxTreeNode>();
     }
@@ -53,7 +53,7 @@ public class ConcreteSyntaxTreeNode {
 
         var args = new List<object>();
         foreach (var child in Children) {
-            if (child.Symbol is Symbol s) {
+            if (child.Symbol is Symbol<Enum> s) {
                 args.Add(s.Attribut1);
             }
         }

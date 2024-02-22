@@ -3,16 +3,16 @@ using LRParser.CFG;
 
 namespace LRParser.Lexer;
 
-public class TokenDefinition {
-    public TokenDefinition(string symbol, string regex) {
+public class TokenDefinition<T> where T : Enum {
+    public TokenDefinition(T symbol, string regex) {
         Symbol = symbol;
         Regex = new Regex(regex);
     }
 
-    private string Symbol { get; }
+    private T Symbol { get; }
     public Regex Regex { get; }
 
-    public Terminal CreateTerminal(string value) {
-        return new Terminal(Symbol, value);
+    public Symbol<T> CreateTerminal(string value) {
+        return new Symbol<T>(Symbol, value, SymbolType.Terminal);
     }
 }
