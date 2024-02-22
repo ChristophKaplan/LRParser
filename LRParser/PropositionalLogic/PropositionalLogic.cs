@@ -35,6 +35,7 @@ public class PropositionalLogic {
 
     public object ExecuteFunction(Function function) {
         if (function.func.Equals("Mod")) {
+            GenerateInterpretations();
             Console.WriteLine($"Models for {function.sentence}");
             foreach (var interpretation in _interpretations) {
                 var t = interpretation.Evaluate(function.sentence);

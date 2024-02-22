@@ -3,6 +3,13 @@ using LRParser.CFG;
 namespace LRParser.Parser;
 
 public class Table {
+    ContextFreeGrammar CFG;
+
+    public Table(ContextFreeGrammar cfg)
+    {
+        CFG = cfg;
+    }
+
     public Dictionary<(int, Symbol), (ParserAction, int)> ActionTable {
         get;
     } = new();
@@ -11,7 +18,11 @@ public class Table {
         get;
     } = new();
 
-    public override string ToString() {
+    
+    
+    public override string ToString()
+    {
+        
         var s = "ACTION\n";
         foreach (var entry in ActionTable) {
             s += $"({entry.Key.Item1}, {entry.Key.Item2}) -> {entry.Value}\n";
