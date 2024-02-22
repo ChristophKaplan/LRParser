@@ -1,11 +1,11 @@
 namespace LRParser.CFG;
 
 public class ProductionRule{
-    internal readonly Symbol<Enum> Premise;
-    internal readonly Symbol<Enum>[] Conclusion;
+    internal readonly Symbol Premise;
+    internal readonly Symbol[] Conclusion;
     public Func<object[], object> SemanticAction;
     
-    public ProductionRule(Symbol<Enum> premise, params Symbol<Enum>[] conclusion) {
+    public ProductionRule(Symbol premise, params Symbol[] conclusion) {
         Premise = premise;
         Conclusion = conclusion;
     }
@@ -23,7 +23,7 @@ public class ProductionRule{
         return false;
     }
 
-    public int GetMostRightPosOf(Symbol<Enum> symbol) {
+    public int GetMostRightPosOf(Symbol symbol) {
         for (var i = Conclusion.Length - 1; i >= 0; i--) {
             if (Conclusion[i].Equals(symbol)) {
                 return i;

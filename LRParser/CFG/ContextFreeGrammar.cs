@@ -10,22 +10,21 @@ public interface IContextFreeGrammar<T,N> where T: Enum where N: Enum {
 }
 
 public class ContextFreeGrammar<T,N> : IContextFreeGrammar<T,N> where T: Enum where N: Enum{
-    public readonly List<Symbol<T>> Terminals = new();
-    public readonly List<Symbol<N>> NonTerminals = new();
+    public readonly List<Symbol> Terminals = new();
+    public readonly List<Symbol> NonTerminals = new();
     public readonly List<ProductionRule> ProductionRules = new();
-    public Symbol<N> StartSymbol;
-
+    public Symbol StartSymbol;
     
     public void AddStartSymbol(N startSymbol) {
-        StartSymbol = new Symbol<N>(startSymbol, SymbolType.NonTerminal);
+        StartSymbol = new Symbol(startSymbol, SymbolType.NonTerminal);
     }
     
     public void AddTerminal(T terminal) {
-        Terminals.Add(new Symbol<T>(terminal, SymbolType.Terminal));
+        Terminals.Add(new Symbol(terminal, SymbolType.Terminal));
     }
     
     public void AddNonTerminal(N nonTerminal) {
-        NonTerminals.Add(new Symbol<N>(nonTerminal, SymbolType.NonTerminal));
+        NonTerminals.Add(new Symbol(nonTerminal, SymbolType.NonTerminal));
     }
     
     public void AddByEnumType(Type enumType) {
@@ -58,14 +57,12 @@ public class ContextFreeGrammar<T,N> : IContextFreeGrammar<T,N> where T: Enum wh
         ProductionRules.Add(rule);
     }
 
-    private Symbol<Enum> EnumToSym(Enum p) {
+    private Symbol EnumToSym(Enum p) {
         if (GetType(p) == SymbolType.Terminal) {
-            var tSym = new Symbol<T>((T)p, SymbolType.Terminal);
-            return (Symbol<Enum>)tSym;
+            return new Symbol((T)p, SymbolType.Terminal);
         }
         if (GetType(p) == SymbolType.NonTerminal) {
-            var nSym = new Symbol<N>((N)p, SymbolType.NonTerminal);
-            return (Symbol<Enum>)nSym;
+            return new Symbol((N)p, SymbolType.NonTerminal);
         }
         throw new Exception($"type {GetType(p)} not found");
     }
@@ -85,7 +82,7 @@ public class ContextFreeGrammar<T,N> : IContextFreeGrammar<T,N> where T: Enum wh
         ProductionRules[ruleId].SetSemanticAction(semanticAction);
     }
 
-    public List<ProductionRule> GetAllProdForNonTerminal(Symbol<N> nonTerminal) {
+    public List<ProductionRule> GetAllProdForNonTerminal(Symbol nonTerminal) {
         return ProductionRules.Where(rule => rule.Premise.Equals(nonTerminal)).ToList();
     }
 

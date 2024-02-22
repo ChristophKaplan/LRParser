@@ -12,7 +12,7 @@ public class TokenDefinition<T> where T : Enum {
     private T Symbol { get; }
     public Regex Regex { get; }
 
-    public Symbol<T> CreateTerminal(string value) {
-        return new Symbol<T>(Symbol, value, SymbolType.Terminal);
+    public Symbol CreateTerminal(string value) {
+        return new Symbol(Symbol, value, SymbolType.Terminal);
     }
 }

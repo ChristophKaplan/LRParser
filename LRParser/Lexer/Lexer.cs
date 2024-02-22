@@ -10,8 +10,8 @@ public class Lexer<T> where T : Enum {
         _tokenDefinitions = tokenDefinitions.ToList();
     }
 
-    public List<Symbol<T>> Tokenize(string source) {
-        var result = new List<Symbol<T>>();
+    public List<Symbol> Tokenize(string source) {
+        var result = new List<Symbol>();
         var currentIndex = 0;
         TokenDefinition<T> tokenDefinition = null;
 

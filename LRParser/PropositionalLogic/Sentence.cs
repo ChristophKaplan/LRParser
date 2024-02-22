@@ -1,19 +1,17 @@
 namespace PropositionalLogic;
 
-public interface IPropositionalLanguage
-{
-}
+public interface IPropositionalLanguage { }
 
 public class Function:IPropositionalLanguage
 {
-    public string func;
-    public Sentence sentence;
-    public Sentence[] parameters;
+    public readonly string Func;
+    public readonly Sentence Sentence;
+    public readonly Sentence[] Parameters;
     public Function(string func, Sentence sentence, params Sentence[] parameters)
     {
-        this.func = func;
-        this.sentence = sentence;
-        this.parameters = parameters;
+        this.Func = func;
+        this.Sentence = sentence;
+        this.Parameters = parameters;
     }
 }
 

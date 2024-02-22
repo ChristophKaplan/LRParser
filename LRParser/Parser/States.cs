@@ -6,7 +6,7 @@ public class State {
     public State(List<LRItem> items, int id) {
         Id = id;
         Items = items;
-        Transitions = new Dictionary<Symbol<Enum>, State>();
+        Transitions = new Dictionary<Symbol, State>();
     }
 
     public int Id {
@@ -17,7 +17,7 @@ public class State {
         get;
     }
 
-    public Dictionary<Symbol<Enum>, State> Transitions {
+    public Dictionary<Symbol, State> Transitions {
         get;
     }
 
@@ -68,8 +68,6 @@ public class State {
 
         return false;
     }
-    
-    
     
     public override string ToString() {
         return Items.Aggregate($"State({Id}):\n", (c, n) => $"{c} {n},\n") +

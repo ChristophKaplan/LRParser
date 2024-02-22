@@ -15,9 +15,8 @@ public enum Terminal {
 }
 
 public enum NonTerminal {
-    Sstrich, S, Sentence,ComplexSentence, Ext
+    StartSymbol, SecondStart, Sentence,ComplexSentence, Ext
 }
-
 
 public class PropositionalLogic: ContextFreeGrammar<Terminal,NonTerminal> {
     private readonly Lexer<Terminal> _lexer;
@@ -52,18 +51,21 @@ public class PropositionalLogic: ContextFreeGrammar<Terminal,NonTerminal> {
     }
 
     public object ExecuteFunction(Function function) {
-        if (function.func.Equals("Mod")) {
+        if (function.Func.Equals("Mod")) {
+            
             GenerateInterpretations();
-            Console.WriteLine($"Models for {function.sentence}");
+            
+            Console.WriteLine($"Models for {function.Sentence}");
+            
             foreach (var interpretation in _interpretations) {
-                var t = interpretation.Evaluate(function.sentence);
+                var t = interpretation.Evaluate(function.Sentence);
                 if (t) Console.WriteLine($"{interpretation}");
             }
         }
 
-        if (function.func.Equals("Forget")) {
-            Console.WriteLine($"Forget {function.parameters[0]} in {function.sentence}");
-            Sentence result = function.sentence;
+        if (function.Func.Equals("Forget")) {
+            Console.WriteLine($"Forget {function.Parameters[0]} in {function.Sentence}");
+            Sentence result = function.Sentence;
             return result;
         }
         
@@ -105,18 +107,18 @@ public class PropositionalLogic: ContextFreeGrammar<Terminal,NonTerminal> {
         AddByEnumType(typeof(Terminal));
         AddByEnumType(typeof(NonTerminal));
         
-        AddProductionRule(NonTerminal.Sstrich, NonTerminal.S);
-        AddProductionRule(NonTerminal.S, NonTerminal.Sentence);
+        AddProductionRule(NonTerminal.StartSymbol, NonTerminal.SecondStart);
+        AddProductionRule(NonTerminal.SecondStart, NonTerminal.Sentence);
         AddProductionRule(NonTerminal.Sentence, Terminal.AtomicSentence);
         AddProductionRule(NonTerminal.Sentence, NonTerminal.ComplexSentence);
         AddProductionRule(NonTerminal.ComplexSentence, Terminal.AtomicSentence, Terminal.Connective, NonTerminal.Sentence);
         AddProductionRule(NonTerminal.ComplexSentence, Terminal.Negation, NonTerminal.Sentence);
-        AddProductionRule(NonTerminal.S, Terminal.Function, Terminal.Open, NonTerminal.Sentence, NonTerminal.Ext,Terminal.Close);
-        AddProductionRule(NonTerminal.S, Terminal.Function, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
+        AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.Sentence, NonTerminal.Ext,Terminal.Close);
+        AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
         AddProductionRule(NonTerminal.Ext, Terminal.Comma, NonTerminal.Sentence);
-        AddProductionRule(NonTerminal.S, Terminal.Function, Terminal.Open, NonTerminal.S, Terminal.Close);
+        AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.SecondStart, Terminal.Close);
         
-        AddStartSymbol(NonTerminal.Sstrich);
+        AddStartSymbol(NonTerminal.StartSymbol);
         
         AddSemanticAction(0, input => input[0]);
         AddSemanticAction(1, input => input[0]);
@@ -165,7 +167,7 @@ public class PropositionalLogic: ContextFreeGrammar<Terminal,NonTerminal> {
     }
 
     public IPropositionalLanguage TryParse(string input) {
-        List<Symbol<Terminal>> tokens = _lexer.Tokenize(input);
+        List<Symbol> tokens = _lexer.Tokenize(input);
         var tree = _parser.Parse(tokens);
         tree.Evaluate();
         return (IPropositionalLanguage)tree.Symbol.Attribut1;

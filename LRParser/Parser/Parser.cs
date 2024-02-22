@@ -15,7 +15,7 @@ public class Parser<T,N> where T : Enum where N : Enum{
     public Parser(ContextFreeGrammar<T,N> cfg) {
         _cfg = cfg;
 
-        var states = GenerateStates(new LRItem(cfg.ProductionRules[0], 0, new List<Symbol<Enum>> { Symbol<Enum>.Dollar }));
+        var states = GenerateStates(new LRItem(cfg.ProductionRules[0], 0, new List<Symbol> { Symbol.Dollar }));
         //MergeStates(states);
         _table = GenerateTable(states);
 
@@ -48,7 +48,7 @@ public class Parser<T,N> where T : Enum where N : Enum{
                 var curLookahead = _cfg.First(afterDot.Count == 0 ? symbol : afterDot[0]); //k = 1, only LL(1) or LR(1)
 
                 if (currentItem.CurrentSymbol.Type == SymbolType.NonTerminal) {
-                    var prods = _cfg.GetAllProdForNonTerminal(currentItem.CurrentSymbol as Symbol<N>);
+                    var prods = _cfg.GetAllProdForNonTerminal(currentItem.CurrentSymbol);
 
                     foreach (var prod in prods) {
                         var deeperItem = new LRItem(prod, 0, curLookahead);
@@ -99,7 +99,7 @@ public class Parser<T,N> where T : Enum where N : Enum{
         var possibleTransitionGroups = currentState.GetIncompleteItems().GroupBy(i => i.CurrentSymbol);
 
         foreach (var possibleTransitions in possibleTransitionGroups) {
-            if (possibleTransitions.Key.Equals(Symbol<T>.Epsilon)) {
+            if (possibleTransitions.Key.Equals(Symbol.Epsilon)) {
                 continue;
             }
 
@@ -163,7 +163,7 @@ public class Parser<T,N> where T : Enum where N : Enum{
     private void CreateEntry(Table table, State state, LRItem item) {
         if (item.IsComplete) {
             if (item.Production.Premise.Equals(_cfg.StartSymbol)) {
-                table.ActionTable[(state.Id, Symbol<Enum>.Dollar)] = (ParserAction.Accept, -1);
+                table.ActionTable[(state.Id, Symbol.Dollar)] = (ParserAction.Accept, -1);
             }
             else {
                 foreach (var symbol in item.LookAheadSymbols) {
@@ -204,8 +204,8 @@ public class Parser<T,N> where T : Enum where N : Enum{
         }
     }
 
-    public ConcreteSyntaxTreeNode Parse(List<Symbol<T>> input) {
-        input.Add(Symbol<T>.Dollar as Symbol<T>);
+    public ConcreteSyntaxTreeNode Parse(List<Symbol> input) {
+        input.Add(Symbol.Dollar);
 
         var stateStack = new Stack<int>();
         stateStack.Push(0);
@@ -213,7 +213,7 @@ public class Parser<T,N> where T : Enum where N : Enum{
         var treeStack = new Stack<ConcreteSyntaxTreeNode>();
 
         while (true) {
-            if (!_table.ActionTable.TryGetValue((stateStack.Peek(), input[0] as Symbol<Enum>), out var action)) {
+            if (!_table.ActionTable.TryGetValue((stateStack.Peek(), input[0]), out var action)) {
                 return treeStack.Pop();
             }
 
@@ -239,14 +239,14 @@ public class Parser<T,N> where T : Enum where N : Enum{
         Console.WriteLine("ACCEPT");
     }
 
-    private void Error(List<Symbol<T>> input, Stack<int> stateStack) {
+    private void Error(List<Symbol> input, Stack<int> stateStack) {
         throw new Exception($"ERROR: cant parse \"{input[0]}\". {stateStack.Peek()}");
     }
 
-    private void Shift(List<Symbol<T>> input, Stack<int> stateStack, Stack<ConcreteSyntaxTreeNode> treeStack, int shiftState) {
+    private void Shift(List<Symbol> input, Stack<int> stateStack, Stack<ConcreteSyntaxTreeNode> treeStack, int shiftState) {
         Console.WriteLine($"SHIFT: {input[0]}, next state:{shiftState}");
         stateStack.Push(shiftState);
-        treeStack.Push(new ConcreteSyntaxTreeNode(input[0] as Symbol<Enum>));
+        treeStack.Push(new ConcreteSyntaxTreeNode(input[0]));
         input.RemoveAt(0);
     }
 

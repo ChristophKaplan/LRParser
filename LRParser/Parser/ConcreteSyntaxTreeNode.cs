@@ -6,9 +6,9 @@ public class ConcreteSyntaxTreeNode{
     private ConcreteSyntaxTreeNode Parent { get; }
     public List<ConcreteSyntaxTreeNode> Children { get; }
     private readonly ProductionRule _productionRule;
-    public Symbol<Enum> Symbol { get; }
+    public Symbol Symbol { get; }
     
-    public ConcreteSyntaxTreeNode(Symbol<Enum> symbol) {
+    public ConcreteSyntaxTreeNode(Symbol symbol) {
         Symbol = symbol;
         Children = new List<ConcreteSyntaxTreeNode>();
     }
@@ -53,7 +53,7 @@ public class ConcreteSyntaxTreeNode{
 
         var args = new List<object>();
         foreach (var child in Children) {
-            if (child.Symbol is Symbol<Enum> s) {
+            if (child.Symbol is Symbol s) {
                 args.Add(s.Attribut1);
             }
         }

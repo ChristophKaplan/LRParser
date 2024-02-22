@@ -5,11 +5,11 @@ namespace LRParser.Parser;
 public class Table {
     public Table() { }
 
-    public Dictionary<(int, Symbol<Enum>), (ParserAction, int)> ActionTable {
+    public Dictionary<(int, Symbol), (ParserAction, int)> ActionTable {
         get;
     } = new();
 
-    public Dictionary<(int, Symbol<Enum>), int> GotoTable {
+    public Dictionary<(int, Symbol), int> GotoTable {
         get;
     } = new();
     

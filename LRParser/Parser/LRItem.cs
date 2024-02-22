@@ -5,7 +5,7 @@ namespace LRParser.Parser;
 public class LRItem{
     public readonly int DotPosition;
 
-    public LRItem(ProductionRule production, int dotPosition, List<Symbol<Enum>> lookAheadSymbols) {
+    public LRItem(ProductionRule production, int dotPosition, List<Symbol> lookAheadSymbols) {
         Production = production;
         DotPosition = dotPosition;
         LookAheadSymbols = lookAheadSymbols;
@@ -19,16 +19,16 @@ public class LRItem{
         get;
     }
 
-    public List<Symbol<Enum>> LookAheadSymbols {
+    public List<Symbol> LookAheadSymbols {
         get;
     }
 
     public bool IsComplete => DotPosition == Production.Conclusion.Length;
-    public Symbol<Enum> CurrentSymbol => IsComplete ? null : Production.Conclusion[DotPosition];
+    public Symbol CurrentSymbol => IsComplete ? null : Production.Conclusion[DotPosition];
     public LRItem NextItem => IsComplete ? null : new LRItem(Production, DotPosition + 1, LookAheadSymbols);
 
-    public List<Symbol<Enum>> GetSymbolsAfterDot() {
-        List<Symbol<Enum>> symbols = new();
+    public List<Symbol> GetSymbolsAfterDot() {
+        List<Symbol> symbols = new();
         for (var i = DotPosition + 1; i < Production.Conclusion.Length; i++) {
             symbols.Add(Production.Conclusion[i]);
         }
@@ -40,7 +40,7 @@ public class LRItem{
         return Production.Equals(other.Production) && DotPosition == other.DotPosition;
     }
     
-    private bool LookAheadEquals(List<Symbol<Enum>> other) {
+    private bool LookAheadEquals(List<Symbol> other) {
         return LookAheadSymbols.Count == other.Count && LookAheadSymbols.All(symbol => other.Contains(symbol));
     }
     
