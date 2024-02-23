@@ -28,7 +28,7 @@ public class Symbol {
     public SymbolType Type {
         get;
     }
-
+    
     public static Symbol Epsilon => new(SpecialTerminal.epsilon, SymbolType.Terminal);
     public static Symbol Dollar => new(SpecialTerminal.dollar, SymbolType.Terminal);
     public bool IsEpsilon => Type == SymbolType.Terminal && Description.Equals(SpecialTerminal.epsilon);

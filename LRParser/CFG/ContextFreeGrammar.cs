@@ -1,20 +1,11 @@
 namespace LRParser.CFG;
 
-public interface IContextFreeGrammar<T, N> where T : Enum where N : Enum {
-    public void AddByEnumType(Type enumType);
-    public void AddTerminal(T terminal);
-    public void AddNonTerminal(N nonTerminal);
-    public void AddStartSymbol(N startSymbol);
-    public void AddProductionRule(Enum premise, params Enum[] conclusions);
-    public void AddSemanticAction(int ruleId, Func<object[], object> semanticAction);
-}
-
-public class ContextFreeGrammar<T, N> : IContextFreeGrammar<T, N> where T : Enum where N : Enum {
+public class ContextFreeGrammar<T, N>  where T : Enum where N : Enum {
     private readonly List<Symbol> NonTerminals = new();
     public readonly List<Production> Productions = new();
     private readonly List<Symbol> Terminals = new();
     public Symbol StartSymbol;
-
+    
     public void AddStartSymbol(N startSymbol) {
         StartSymbol = new Symbol(startSymbol, SymbolType.NonTerminal);
     }

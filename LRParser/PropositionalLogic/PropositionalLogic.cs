@@ -1,4 +1,5 @@
 using LRParser.CFG;
+using LRParser.Language;
 using LRParser.Lexer;
 using LRParser.Parser;
 
@@ -12,29 +13,22 @@ public enum Terminal {
     Connective,
     Negation,
     AtomicSentence,
-    Bool
 }
 
 public enum NonTerminal {
     StartSymbol, SecondStart, Sentence, ComplexSentence, Ext
 }
 
-public class PropositionalLogic : ContextFreeGrammar<Terminal, NonTerminal> {
-    private readonly Lexer<Terminal> _lexer;
-    private readonly Parser<Terminal, NonTerminal> _parser;
+public class PropositionalLogic : Language<Terminal, NonTerminal> {
 
-    public PropositionalLogic() {
-        _lexer = new Lexer<Terminal>(new TokenDefinition<Terminal>(Terminal.Function, "Mod|Forget|Int"),
-            new TokenDefinition<Terminal>(Terminal.Open, "\\("),
-            new TokenDefinition<Terminal>(Terminal.Comma, ","),
-            new TokenDefinition<Terminal>(Terminal.Close, "\\)"),
-            new TokenDefinition<Terminal>(Terminal.Connective, "AND|OR"),
-            new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!"),
-            new TokenDefinition<Terminal>(Terminal.AtomicSentence, "[A-Z][a-z]*"));
-
-        SetUpGrammar();
-
-        _parser = new Parser<Terminal, NonTerminal>(this);
+    public PropositionalLogic(): base(
+        new TokenDefinition<Terminal>(Terminal.Function, "Mod|Forget|Int"),
+        new TokenDefinition<Terminal>(Terminal.Open, "\\("),
+        new TokenDefinition<Terminal>(Terminal.Comma, ","),
+        new TokenDefinition<Terminal>(Terminal.Close, "\\)"),
+        new TokenDefinition<Terminal>(Terminal.Connective, "AND|OR"),
+        new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!"),
+        new TokenDefinition<Terminal>(Terminal.AtomicSentence, "[A-Z][a-z]*")) {
     }
 
     public object ExecuteFunction(Function function) {
@@ -121,7 +115,7 @@ public class PropositionalLogic : ContextFreeGrammar<Terminal, NonTerminal> {
         }
     }
 
-    private void SetUpGrammar() {
+    protected override void SetUpGrammar() {
         AddByEnumType(typeof(Terminal));
         AddByEnumType(typeof(NonTerminal));
 
@@ -186,8 +180,8 @@ public class PropositionalLogic : ContextFreeGrammar<Terminal, NonTerminal> {
     }
 
     public IPropositionalLanguage TryParse(string input) {
-        var tokens = _lexer.Tokenize(input);
-        var tree = _parser.Parse(tokens);
+        var tokens = Lexer.Tokenize(input);
+        var tree = Parser.Parse(tokens);
         tree.EvaluateTree();
         return (IPropositionalLanguage)tree.Symbol.Attribut1;
     }
