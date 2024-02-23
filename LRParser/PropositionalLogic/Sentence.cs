@@ -1,9 +1,8 @@
+using LRParser.Language;
+
 namespace PropositionalLogic;
 
-public interface IPropositionalLanguage {
-}
-
-public class Function : IPropositionalLanguage {
+public class Function : ILanguageObject {
     public readonly string Func;
     public readonly Sentence[] Parameters;
     public readonly Sentence Sentence;
@@ -15,7 +14,7 @@ public class Function : IPropositionalLanguage {
     }
 }
 
-public abstract class Sentence : IPropositionalLanguage {
+public abstract class Sentence : ILanguageObject {
     public readonly List<Sentence> Children = new();
 
     public void AddChild(Sentence sentence) {

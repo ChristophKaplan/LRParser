@@ -1,7 +1,5 @@
-using LRParser.CFG;
 using LRParser.Language;
 using LRParser.Lexer;
-using LRParser.Parser;
 
 namespace PropositionalLogic;
 
@@ -177,12 +175,5 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
                 var sentence = (Sentence)ExecuteFunction(f);
                 return new Function(func, sentence);
             });
-    }
-
-    public IPropositionalLanguage TryParse(string input) {
-        var tokens = Lexer.Tokenize(input);
-        var tree = Parser.Parse(tokens);
-        tree.EvaluateTree();
-        return (IPropositionalLanguage)tree.Symbol.Attribut1;
     }
 }

@@ -46,17 +46,18 @@ public class ConcreteSyntaxTree {
     }
 
     private void Inherit() {
+        Console.WriteLine("Inherit:" + _production + " s:" + Symbol.SyntheticAttribute + " v:" + Symbol.InheritetAttribute);
     }
 
     private void Synthesize() {
         var args = new List<object>();
         foreach (var child in Children) {
-            if (child.Symbol is Symbol s) {
-                args.Add(s.Attribut1);
+            if (child.Symbol.Type == SymbolType.Terminal) {
+                args.Add(child.Symbol.SyntheticAttribute);
             }
         }
 
         args.Reverse();
-        Symbol.Attribut1 = _production.SemanticAction.Invoke(args.ToArray());
+        Symbol.SyntheticAttribute = _production.SemanticAction.Invoke(args.ToArray());
     }
 }
