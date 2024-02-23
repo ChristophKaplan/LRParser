@@ -1,8 +1,8 @@
 namespace LRParser.CFG;
 
-public static class ContextFreeGrammarExtensions{
-    
-    public static List<Symbol> First<T,N> (this ContextFreeGrammar<T,N> cnf, Symbol Symbol, List<Symbol> alreadyChecked = null) where T : Enum where N : Enum {
+public static class ContextFreeGrammarExtensions {
+    public static List<Symbol> First<T, N>(this ContextFreeGrammar<T, N> cnf, Symbol Symbol, List<Symbol> alreadyChecked = null)
+        where T : Enum where N : Enum {
         var result = new List<Symbol>();
 
         if (Symbol.Type == SymbolType.Terminal) {
@@ -15,9 +15,10 @@ public static class ContextFreeGrammarExtensions{
             //Console.WriteLine("recursion: " + nonTerminal);
             return result;
         }
+
         alreadyChecked.Add(Symbol);
 
-        
+
         var allProdForNonTerminal = cnf.GetAllProdForNonTerminal(Symbol);
         var directorSet = new List<Symbol>[allProdForNonTerminal.Count];
 
@@ -59,7 +60,7 @@ public static class ContextFreeGrammarExtensions{
         return result;
     }
 
-    private static bool AddRangeLikeSet(List<Symbol> from, List<Symbol> to){
+    private static bool AddRangeLikeSet(List<Symbol> from, List<Symbol> to) {
         var changed = false;
         foreach (var s in from) {
             if (to.Contains(s)) {

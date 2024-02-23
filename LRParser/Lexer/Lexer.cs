@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using LRParser.CFG;
+﻿using LRParser.CFG;
 
 namespace LRParser.Lexer;
 
@@ -16,7 +15,6 @@ public class Lexer<T> where T : Enum {
         TokenDefinition<T> tokenDefinition = null;
 
         while (currentIndex < source.Length) {
-            
             var matchLength = 0;
 
             foreach (var rule in _tokenDefinitions) {

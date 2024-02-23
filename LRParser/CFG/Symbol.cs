@@ -1,37 +1,39 @@
 namespace LRParser.CFG;
 
-
 public enum SymbolType {
     Terminal,
-    NonTerminal,
+    NonTerminal
 }
 
-public enum SpecialType {
+public enum SpecialTerminal {
     epsilon,
     dollar
 }
 
 public class Symbol {
-    public SymbolType Type { get; }
-    internal readonly Enum Description;
+    private readonly Enum Description;
     public object Attribut1;
-    
+
     public Symbol(Enum description, SymbolType type) {
         Description = description;
         Type = type;
     }
-    
+
     public Symbol(Enum description, string lexValue, SymbolType type) {
         Description = description;
         Type = type;
         Attribut1 = lexValue;
     }
 
-    public static Symbol Epsilon => new (SpecialType.epsilon, SymbolType.Terminal);
-    public static Symbol Dollar => new (SpecialType.dollar, SymbolType.Terminal);
-    public bool IsEpsilon => Type == SymbolType.Terminal && Description.Equals(SpecialType.epsilon);
-    public bool IsDollar => Type == SymbolType.Terminal && Description.Equals(SpecialType.dollar);
-    
+    public SymbolType Type {
+        get;
+    }
+
+    public static Symbol Epsilon => new(SpecialTerminal.epsilon, SymbolType.Terminal);
+    public static Symbol Dollar => new(SpecialTerminal.dollar, SymbolType.Terminal);
+    public bool IsEpsilon => Type == SymbolType.Terminal && Description.Equals(SpecialTerminal.epsilon);
+    public bool IsDollar => Type == SymbolType.Terminal && Description.Equals(SpecialTerminal.dollar);
+
     public override int GetHashCode() {
         return Description.GetHashCode();
     }

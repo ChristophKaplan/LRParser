@@ -12,82 +12,100 @@ public enum Terminal {
     Connective,
     Negation,
     AtomicSentence,
+    Bool
 }
 
 public enum NonTerminal {
-    StartSymbol, SecondStart, Sentence,ComplexSentence, Ext
+    StartSymbol, SecondStart, Sentence, ComplexSentence, Ext
 }
 
-public class PropositionalLogic: ContextFreeGrammar<Terminal,NonTerminal> {
+public class PropositionalLogic : ContextFreeGrammar<Terminal, NonTerminal> {
     private readonly Lexer<Terminal> _lexer;
-    private readonly Parser<Terminal,NonTerminal> _parser;
-
-    private readonly List<AtomicSentence> _universe = new();
-    private readonly List<Interpretation> _interpretations = new();
+    private readonly Parser<Terminal, NonTerminal> _parser;
 
     public PropositionalLogic() {
-    
-        _lexer = new Lexer<Terminal>(
-            new(Terminal.Function, "Mod|Forget"),
-            new(Terminal.Open, "\\("),
-            new(Terminal.Comma, ","),
-            new(Terminal.Close, "\\)"),
-            new(Terminal.Connective, "AND|OR"),
-            new(Terminal.Negation, "NOT|!"),
-            new(Terminal.AtomicSentence, "[A-Z][a-z]*")
-            );
-        
+        _lexer = new Lexer<Terminal>(new TokenDefinition<Terminal>(Terminal.Function, "Mod|Forget|Int"),
+            new TokenDefinition<Terminal>(Terminal.Open, "\\("),
+            new TokenDefinition<Terminal>(Terminal.Comma, ","),
+            new TokenDefinition<Terminal>(Terminal.Close, "\\)"),
+            new TokenDefinition<Terminal>(Terminal.Connective, "AND|OR"),
+            new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!"),
+            new TokenDefinition<Terminal>(Terminal.AtomicSentence, "[A-Z][a-z]*"));
+
         SetUpGrammar();
-        _parser = new Parser<Terminal,NonTerminal>(this);
-    }
 
-    public void EvaluateTruthTable(Sentence sentence) {
-        GenerateInterpretations();
-
-        Console.WriteLine($"Interpretations for {sentence}");
-        foreach (var interpretation in _interpretations) {
-            Console.WriteLine($"{interpretation}, {sentence} = {interpretation.Evaluate(sentence)}");
-        }
+        _parser = new Parser<Terminal, NonTerminal>(this);
     }
 
     public object ExecuteFunction(Function function) {
+        if (function.Func.Equals("Int")) {
+            Console.WriteLine($"Interpretations for {function.Sentence}");
+            var interpretations = GenerateInterpretations(function.Sentence);
+            
+            foreach (var interpretation in interpretations) {
+                Console.WriteLine($"{interpretation}");
+            }
+        }
+        
         if (function.Func.Equals("Mod")) {
-            
-            GenerateInterpretations();
-            
             Console.WriteLine($"Models for {function.Sentence}");
+            var interpretations = GenerateInterpretations(function.Sentence);
             
-            foreach (var interpretation in _interpretations) {
+            foreach (var interpretation in interpretations) {
                 var t = interpretation.Evaluate(function.Sentence);
-                if (t) Console.WriteLine($"{interpretation}");
+                if (t) {
+                    Console.WriteLine($"{interpretation}");
+                }
             }
         }
 
         if (function.Func.Equals("Forget")) {
             Console.WriteLine($"Forget {function.Parameters[0]} in {function.Sentence}");
-            Sentence result = function.Sentence;
+            var result = Forget(function.Sentence,(AtomicSentence)function.Parameters[0]);
             return result;
         }
-        
+
         return null;
     }
 
-    private void AddToUniverse(AtomicSentence atomicSentence) {
-        if (!_universe.Contains(atomicSentence)) _universe.Add(atomicSentence);
+    private Sentence Forget(Sentence sentence, AtomicSentence forgetMe) {
+        var lhs = sentence.GetCopy();
+        var rhs = sentence.GetCopy();
+        lhs.ReplaceAtom(forgetMe, "True");
+        rhs.ReplaceAtom(forgetMe, "False");
+        var n = new ComplexSentence(lhs, "OR", rhs);
+        return n;
     }
 
-    public void GenerateInterpretations() {
-        var truthTable = GenerateTruthTable(_universe.Count);
+    private List<Interpretation> GenerateInterpretations(Sentence sentence) {
+        var interpretations = new List<Interpretation>();
+        
+        var atoms = sentence.GetAtoms();
+        var truthTable = GenerateTruthTable(atoms.Count);
 
         foreach (var truthValues in truthTable) {
             var interpretation = new Interpretation();
             var list = truthValues.ToArray();
-            for (int i = 0; i < _universe.Count; i++) {
-                interpretation.Add(_universe[i], list[i]);
+            for (var i = 0; i < atoms.Count; i++) {
+                
+                //validate, tautologies/contradictions
+                if (atoms[i].Symbol.Equals("True")) {
+                    list[i] = true;
+                }
+
+                if (atoms[i].Symbol.Equals("False")) {
+                    list[i] = false;
+                }
+
+                interpretation.Add(atoms[i], list[i]);
             }
 
-            _interpretations.Add(interpretation);
+            if (!interpretations.Contains(interpretation)) {
+                interpretations.Add(interpretation);
+            }
         }
+
+        return interpretations;
     }
 
     private IEnumerable<IEnumerable<bool>> GenerateTruthTable(int n) {
@@ -106,59 +124,60 @@ public class PropositionalLogic: ContextFreeGrammar<Terminal,NonTerminal> {
     private void SetUpGrammar() {
         AddByEnumType(typeof(Terminal));
         AddByEnumType(typeof(NonTerminal));
-        
+
         AddProductionRule(NonTerminal.StartSymbol, NonTerminal.SecondStart);
         AddProductionRule(NonTerminal.SecondStart, NonTerminal.Sentence);
         AddProductionRule(NonTerminal.Sentence, Terminal.AtomicSentence);
         AddProductionRule(NonTerminal.Sentence, NonTerminal.ComplexSentence);
         AddProductionRule(NonTerminal.ComplexSentence, Terminal.AtomicSentence, Terminal.Connective, NonTerminal.Sentence);
         AddProductionRule(NonTerminal.ComplexSentence, Terminal.Negation, NonTerminal.Sentence);
-        AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.Sentence, NonTerminal.Ext,Terminal.Close);
+        AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.Sentence, NonTerminal.Ext, Terminal.Close);
         AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
         AddProductionRule(NonTerminal.Ext, Terminal.Comma, NonTerminal.Sentence);
         AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.SecondStart, Terminal.Close);
-        
+
         AddStartSymbol(NonTerminal.StartSymbol);
-        
+
         AddSemanticAction(0, input => input[0]);
         AddSemanticAction(1, input => input[0]);
-        
-        AddSemanticAction(2, input => {
-            var p = new AtomicSentence((string)input[0]);
-            AddToUniverse(p);
-            return p;
-        });
+
+        AddSemanticAction(2,
+            input => {
+                var p = new AtomicSentence((string)input[0]);
+                return p;
+            });
 
         AddSemanticAction(3, input => input[0]);
-        AddSemanticAction(4, input => {
-            if ((string)input[1] == "OR") {
-                var p = new AtomicSentence((string)input[0]);
-                AddToUniverse(p);
-                return new ComplexSentence(p, "OR", (Sentence)input[2]);
-            }
+        AddSemanticAction(4,
+            input => {
+                if ((string)input[1] == "OR") {
+                    var p = new AtomicSentence((string)input[0]);
+                    return new ComplexSentence(p, "OR", (Sentence)input[2]);
+                }
 
-            if ((string)input[1] == "AND") {
-                var p = new AtomicSentence((string)input[0]);
-                AddToUniverse(p);
-                return new ComplexSentence(p, "AND", (Sentence)input[2]);
-            }
+                if ((string)input[1] == "AND") {
+                    var p = new AtomicSentence((string)input[0]);
+                    return new ComplexSentence(p, "AND", (Sentence)input[2]);
+                }
 
-            throw new Exception("Error:");
-        });
-        
+                throw new Exception("Error:");
+            });
+
         AddSemanticAction(5, input => new ComplexSentence("NOT", (Sentence)input[1]));
 
-        AddSemanticAction(6, input => {
-            var func = (string)input[0];
-            var sentence = (Sentence)input[2];
-            var parameters = (Sentence)input[3];
-            return new Function(func, sentence, parameters);
-        });
-        
+        AddSemanticAction(6,
+            input => {
+                var func = (string)input[0];
+                var sentence = (Sentence)input[2];
+                var parameters = (Sentence)input[3];
+                return new Function(func, sentence, parameters);
+            });
+
         AddSemanticAction(7, input => input[0]);
         AddSemanticAction(8, input => input[1]);
-        
-        AddSemanticAction(9, input => {
+
+        AddSemanticAction(9,
+            input => {
                 var func = (string)input[0];
                 var f = (Function)input[2];
                 var sentence = (Sentence)ExecuteFunction(f);
@@ -167,9 +186,9 @@ public class PropositionalLogic: ContextFreeGrammar<Terminal,NonTerminal> {
     }
 
     public IPropositionalLanguage TryParse(string input) {
-        List<Symbol> tokens = _lexer.Tokenize(input);
+        var tokens = _lexer.Tokenize(input);
         var tree = _parser.Parse(tokens);
-        tree.Evaluate();
+        tree.EvaluateTree();
         return (IPropositionalLanguage)tree.Symbol.Attribut1;
     }
 }

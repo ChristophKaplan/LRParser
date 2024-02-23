@@ -2,10 +2,10 @@ using LRParser.CFG;
 
 namespace LRParser.Parser;
 
-public class LRItem{
+public class LRItem {
     public readonly int DotPosition;
 
-    public LRItem(ProductionRule production, int dotPosition, List<Symbol> lookAheadSymbols) {
+    public LRItem(Production production, int dotPosition, List<Symbol> lookAheadSymbols) {
         Production = production;
         DotPosition = dotPosition;
         LookAheadSymbols = lookAheadSymbols;
@@ -15,7 +15,7 @@ public class LRItem{
         }
     }
 
-    public ProductionRule Production {
+    public Production Production {
         get;
     }
 
@@ -39,11 +39,11 @@ public class LRItem{
     public bool CoreEquals(LRItem other) {
         return Production.Equals(other.Production) && DotPosition == other.DotPosition;
     }
-    
+
     private bool LookAheadEquals(List<Symbol> other) {
         return LookAheadSymbols.Count == other.Count && LookAheadSymbols.All(symbol => other.Contains(symbol));
     }
-    
+
     public override bool Equals(object? obj) {
         if (obj == null || obj.GetType() != GetType()) {
             return false;

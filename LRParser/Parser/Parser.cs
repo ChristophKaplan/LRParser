@@ -8,14 +8,14 @@ public enum ParserAction {
     Accept
 }
 
-public class Parser<T,N> where T : Enum where N : Enum{
-    private readonly ContextFreeGrammar<T,N> _cfg;
+public class Parser<T, N> where T : Enum where N : Enum {
+    private readonly ContextFreeGrammar<T, N> _cfg;
     private readonly Table _table;
 
-    public Parser(ContextFreeGrammar<T,N> cfg) {
+    public Parser(ContextFreeGrammar<T, N> cfg) {
         _cfg = cfg;
 
-        var states = GenerateStates(new LRItem(cfg.ProductionRules[0], 0, new List<Symbol> { Symbol.Dollar }));
+        var states = GenerateStates(new LRItem(cfg.Productions[0], 0, new List<Symbol> { Symbol.Dollar }));
         //MergeStates(states);
         _table = GenerateTable(states);
 
@@ -176,14 +176,14 @@ public class Parser<T,N> where T : Enum where N : Enum{
                         throw new Exception($"reduce/reduce conflict : {symbol}");
                     }
 
-                    table.ActionTable[(state.Id, symbol)] = (ParserAction.Reduce, _cfg.ProductionRules.IndexOf(item.Production));
+                    table.ActionTable[(state.Id, symbol)] = (ParserAction.Reduce, _cfg.Productions.IndexOf(item.Production));
                 }
             }
         }
         else {
             var symbol = item.CurrentSymbol;
             switch (symbol.Type) {
-                case SymbolType.Terminal : {
+                case SymbolType.Terminal: {
                     if (table.ActionTable.ContainsKey((state.Id, symbol)) && table.ActionTable[(state.Id, symbol)].Item1 == ParserAction.Reduce) {
                         Console.WriteLine($"shift reduce conflict, default to shift : {symbol}");
                     }
@@ -204,13 +204,13 @@ public class Parser<T,N> where T : Enum where N : Enum{
         }
     }
 
-    public ConcreteSyntaxTreeNode Parse(List<Symbol> input) {
+    public ConcreteSyntaxTree Parse(List<Symbol> input) {
         input.Add(Symbol.Dollar);
 
         var stateStack = new Stack<int>();
         stateStack.Push(0);
 
-        var treeStack = new Stack<ConcreteSyntaxTreeNode>();
+        var treeStack = new Stack<ConcreteSyntaxTree>();
 
         while (true) {
             if (!_table.ActionTable.TryGetValue((stateStack.Peek(), input[0]), out var action)) {
@@ -221,7 +221,8 @@ public class Parser<T,N> where T : Enum where N : Enum{
                 Accept();
                 break;
             }
-            else if (action.Item1 == ParserAction.Shift) {
+
+            if (action.Item1 == ParserAction.Shift) {
                 Shift(input, stateStack, treeStack, action.Item2);
             }
             else if (action.Item1 == ParserAction.Reduce) {
@@ -243,18 +244,18 @@ public class Parser<T,N> where T : Enum where N : Enum{
         throw new Exception($"ERROR: cant parse \"{input[0]}\". {stateStack.Peek()}");
     }
 
-    private void Shift(List<Symbol> input, Stack<int> stateStack, Stack<ConcreteSyntaxTreeNode> treeStack, int shiftState) {
+    private void Shift(List<Symbol> input, Stack<int> stateStack, Stack<ConcreteSyntaxTree> treeStack, int shiftState) {
         Console.WriteLine($"SHIFT: {input[0]}, next state:{shiftState}");
         stateStack.Push(shiftState);
-        treeStack.Push(new ConcreteSyntaxTreeNode(input[0]));
+        treeStack.Push(new ConcreteSyntaxTree(input[0]));
         input.RemoveAt(0);
     }
 
-    private void Reduce(Stack<int> stateStack, Stack<ConcreteSyntaxTreeNode> treeStack, int ruleId) {
-        var rule = _cfg.ProductionRules[ruleId];
+    private void Reduce(Stack<int> stateStack, Stack<ConcreteSyntaxTree> treeStack, int ruleId) {
+        var rule = _cfg.Productions[ruleId];
         Console.WriteLine($"REDUCE ({ruleId}) Rule: {rule}");
 
-        var reduced = new ConcreteSyntaxTreeNode(rule);
+        var reduced = new ConcreteSyntaxTree(rule);
 
         for (var i = 0; i < rule.Conclusion.Count(s => !s.IsEpsilon); i++) {
             stateStack.Pop();

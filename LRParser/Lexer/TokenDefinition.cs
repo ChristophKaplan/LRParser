@@ -9,8 +9,13 @@ public class TokenDefinition<T> where T : Enum {
         Regex = new Regex(regex);
     }
 
-    private T Symbol { get; }
-    public Regex Regex { get; }
+    private T Symbol {
+        get;
+    }
+
+    public Regex Regex {
+        get;
+    }
 
     public Symbol CreateTerminal(string value) {
         return new Symbol(Symbol, value, SymbolType.Terminal);
