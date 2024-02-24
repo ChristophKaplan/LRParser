@@ -17,7 +17,7 @@ public class Parser<T, N> where T : Enum where N : Enum {
 
         var startItem = new LRItem(cfg.Productions[0], 0, new List<Symbol> { Symbol.Dollar });
         var states = new States<T, N>(startItem,_cfg);
-        Console.WriteLine(states);
+        //Console.WriteLine(states);
         _table = new Table<T, N>(states,_cfg);
     }
 

@@ -12,7 +12,7 @@ public class Table <T, N> where T : Enum where N : Enum{
             }
         }
         
-        Console.WriteLine(this);
+        //Console.WriteLine(this);
     }
     
     public Dictionary<(int, Symbol), (ParserAction, int)> ActionTable {

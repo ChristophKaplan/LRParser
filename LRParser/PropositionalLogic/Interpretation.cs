@@ -3,8 +3,8 @@ using System.Text;
 namespace PropositionalLogic;
 
 public class Interpretation {
-    private readonly Dictionary<AtomicSentence, bool> _truthValues = new();
-
+    public readonly Dictionary<AtomicSentence, bool> _truthValues = new();
+    
     public void Add(AtomicSentence atom, bool truthValue) {
         _truthValues.TryAdd(atom, truthValue);
     }
@@ -41,8 +41,9 @@ public class Interpretation {
     public override int GetHashCode() {
         return ToString().GetHashCode();
     }
-
-    public override string ToString() {
+    
+    public override string ToString()
+    {
         var sb = new StringBuilder();
         foreach (var (key, value) in _truthValues) {
             sb.Append($"{key}={value}, ");

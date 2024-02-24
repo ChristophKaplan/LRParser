@@ -64,8 +64,8 @@ public class OtherLang: Language<Terminal, NonTerminal>
             if (!TypeTable.TryGetValue(variable, out var type)) {
                 throw new Exception($"Variable: {variable} not declared ");
             }
-            rhs[0].InheritetAttribute = type;
             
+            rhs[0].InheritetAttribute = type;
             
             lhs.InheritetAttribute = type;
             lhs.SyntheticAttribute = num;

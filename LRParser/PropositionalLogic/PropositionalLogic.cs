@@ -1,3 +1,4 @@
+using System.Text;
 using LRParser.CFG;
 using LRParser.Language;
 using LRParser.Lexer;
@@ -30,26 +31,52 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         new TokenDefinition<Terminal>(Terminal.AtomicSentence, "[A-Z][a-z]*")) {
     }
 
+    private string ToTable(List<Interpretation> interpretations, List<Sentence> sentences) {
+        var tab = new StringBuilder();
+        var keys = new StringBuilder();
+        
+        foreach (var (key, value) in interpretations[0]._truthValues) {
+            keys.Append($"|{key}\t");
+        }
+
+        foreach (var sentence in sentences)
+        {
+            keys.Append($"|{sentence}\t");
+        }
+        
+        tab.Append($"{keys}\n");
+        
+        foreach (var interpretation in interpretations) {
+            var values = new StringBuilder();
+            foreach (var (key, value) in interpretation._truthValues) {
+                values.Append($"|{value}\t");
+            }
+
+            foreach (var sentence in sentences)
+            { 
+                values.Append($"|{interpretation.Evaluate(sentence)}\t");   
+            }
+            
+            tab.Append($"{values}\n");
+        }
+        
+        return tab.ToString();
+    }
+    
     public object ExecuteFunction(Function function) {
         if (function.Func.Equals("Int")) {
-            Console.WriteLine($"Interpretations for {function.Sentence}");
             var interpretations = GenerateInterpretations(function.Sentence);
-            
-            foreach (var interpretation in interpretations) {
-                Console.WriteLine($"{interpretation}");
-            }
+            Console.WriteLine($"Interpretations for {function.Sentence}\n{ToTable(interpretations, new List<Sentence>(){function.Sentence})}");
         }
         
         if (function.Func.Equals("Mod")) {
-            Console.WriteLine($"Models for {function.Sentence}");
             var interpretations = GenerateInterpretations(function.Sentence);
-            
+            var models = new List<Interpretation>();
             foreach (var interpretation in interpretations) {
-                var t = interpretation.Evaluate(function.Sentence);
-                if (t) {
-                    Console.WriteLine($"{interpretation}");
-                }
+                var mod = interpretation.Evaluate(function.Sentence);
+                if (mod) { models.Add(interpretation); }
             }
+            Console.WriteLine($"Models for {function.Sentence}\n{ToTable(models, new List<Sentence>(){function.Sentence})}");
         }
 
         if (function.Func.Equals("Forget")) {
@@ -129,7 +156,6 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
         AddProductionRule(NonTerminal.Ext, Terminal.Comma, NonTerminal.Sentence);
         AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.SecondStart, Terminal.Close);
-
         
         AddSemanticAction(0, (lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
         AddSemanticAction(1, (lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
@@ -165,7 +191,13 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
                 lhs.SyntheticAttribute = new Function(func, sentence, parameters);
             });
 
-        AddSemanticAction(7, (lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
+        AddSemanticAction(7,
+            (lhs, rhs) => {
+                var func = (string)rhs[0].SyntheticAttribute;
+                var sentence = (Sentence)rhs[2].SyntheticAttribute;
+                lhs.SyntheticAttribute = new Function(func, sentence);
+            });
+        
         AddSemanticAction(8, (lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
 
         AddSemanticAction(9,

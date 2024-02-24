@@ -33,8 +33,6 @@ public class ConcreteSyntaxTree {
     }
 
     public void EvaluateTree() {
-        Console.WriteLine(ToString());
-            
         if (Children.Count == 0) {
             return;
         }
