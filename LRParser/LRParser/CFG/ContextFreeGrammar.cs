@@ -46,7 +46,7 @@ public class ContextFreeGrammar<T, N>  where T : Enum where N : Enum {
         Productions.Add(rule);
     }
 
-    public void AddSemanticAction(int ruleId, Func<object[], object> semanticAction) {
+    public void AddSemanticAction(int ruleId, Action<Symbol,Symbol[]> semanticAction) {
         Productions[ruleId].SetSemanticAction(semanticAction);
     }
 

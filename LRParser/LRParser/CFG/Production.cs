@@ -3,14 +3,14 @@ namespace LRParser.CFG;
 public class Production {
     internal readonly Symbol[] Conclusion;
     internal readonly Symbol Premise;
-    public Func<object[], object> SemanticAction;
+    public Action<Symbol,Symbol[]> SemanticAction;
 
     public Production(Symbol premise, params Symbol[] conclusion) {
         Premise = premise;
         Conclusion = conclusion;
     }
 
-    public void SetSemanticAction(Func<object[], object> semanticAction) {
+    public void SetSemanticAction(Action<Symbol,Symbol[]> semanticAction) {
         SemanticAction = semanticAction;
     }
 

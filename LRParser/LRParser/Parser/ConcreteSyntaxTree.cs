@@ -25,7 +25,7 @@ public class ConcreteSyntaxTree {
     }
 
     public void AddChild(ConcreteSyntaxTree child) {
-        Children.Add(child);
+        Children.Insert(0, child);
     }
 
     public override string ToString() {
@@ -33,31 +33,21 @@ public class ConcreteSyntaxTree {
     }
 
     public void EvaluateTree() {
+        Console.WriteLine(ToString());
+            
         if (Children.Count == 0) {
             return;
         }
 
         foreach (var child in Children) {
-            Inherit();
             child.EvaluateTree();
         }
 
-        Synthesize();
+        Semantic();
     }
 
-    private void Inherit() {
-        Console.WriteLine("Inherit:" + _production + " s:" + Symbol.SyntheticAttribute + " v:" + Symbol.InheritetAttribute);
-    }
-
-    private void Synthesize() {
-        var args = new List<object>();
-        foreach (var child in Children) {
-            if (child.Symbol.Type == SymbolType.Terminal) {
-                args.Add(child.Symbol.SyntheticAttribute);
-            }
-        }
-
-        args.Reverse();
-        Symbol.SyntheticAttribute = _production.SemanticAction.Invoke(args.ToArray());
+    private void Semantic() {
+        var parameters = Children.Select(child => child.Symbol).ToArray();
+        _production.SemanticAction.Invoke(Symbol,parameters);
     }
 }

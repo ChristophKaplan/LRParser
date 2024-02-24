@@ -1,3 +1,4 @@
+using LRParser.CFG;
 using LRParser.Language;
 using LRParser.Lexer;
 
@@ -116,7 +117,8 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
     protected override void SetUpGrammar() {
         AddByEnumType(typeof(Terminal));
         AddByEnumType(typeof(NonTerminal));
-
+        AddStartSymbol(NonTerminal.StartSymbol);
+        
         AddProductionRule(NonTerminal.StartSymbol, NonTerminal.SecondStart);
         AddProductionRule(NonTerminal.SecondStart, NonTerminal.Sentence);
         AddProductionRule(NonTerminal.Sentence, Terminal.AtomicSentence);
@@ -128,52 +130,50 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         AddProductionRule(NonTerminal.Ext, Terminal.Comma, NonTerminal.Sentence);
         AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.SecondStart, Terminal.Close);
 
-        AddStartSymbol(NonTerminal.StartSymbol);
+        
+        AddSemanticAction(0, (lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
+        AddSemanticAction(1, (lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
 
-        AddSemanticAction(0, input => input[0]);
-        AddSemanticAction(1, input => input[0]);
+        AddSemanticAction(2, (lhs, rhs) => { lhs.SyntheticAttribute = new AtomicSentence((string)rhs[0].SyntheticAttribute); });
 
-        AddSemanticAction(2,
-            input => {
-                var p = new AtomicSentence((string)input[0]);
-                return p;
-            });
-
-        AddSemanticAction(3, input => input[0]);
+        AddSemanticAction(3, (lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
+        
         AddSemanticAction(4,
-            input => {
-                if ((string)input[1] == "OR") {
-                    var p = new AtomicSentence((string)input[0]);
-                    return new ComplexSentence(p, "OR", (Sentence)input[2]);
+            (lhs, rhs) => {
+                if ((string)rhs[1].SyntheticAttribute == "OR") {
+                    var p = new AtomicSentence((string)rhs[0].SyntheticAttribute);
+                    lhs.SyntheticAttribute = new ComplexSentence(p, "OR", (Sentence)rhs[2].SyntheticAttribute);
+                    return;
                 }
 
-                if ((string)input[1] == "AND") {
-                    var p = new AtomicSentence((string)input[0]);
-                    return new ComplexSentence(p, "AND", (Sentence)input[2]);
+                if ((string)rhs[1].SyntheticAttribute == "AND") {
+                    var p = new AtomicSentence((string)rhs[0].SyntheticAttribute);
+                    lhs.SyntheticAttribute = new ComplexSentence(p, "AND", (Sentence)rhs[2].SyntheticAttribute);
+                    return;
                 }
 
-                throw new Exception("Error:");
+                throw new Exception($"Error: {rhs[1].SyntheticAttribute} operator not found!");
             });
 
-        AddSemanticAction(5, input => new ComplexSentence("NOT", (Sentence)input[1]));
+        AddSemanticAction(5, (lhs, rhs) => lhs.SyntheticAttribute = new ComplexSentence("NOT", (Sentence)rhs[1].SyntheticAttribute));
 
         AddSemanticAction(6,
-            input => {
-                var func = (string)input[0];
-                var sentence = (Sentence)input[2];
-                var parameters = (Sentence)input[3];
-                return new Function(func, sentence, parameters);
+            (lhs, rhs) => {
+                var func = (string)rhs[0].SyntheticAttribute;
+                var sentence = (Sentence)rhs[2].SyntheticAttribute;
+                var parameters = (Sentence)rhs[3].SyntheticAttribute;
+                lhs.SyntheticAttribute = new Function(func, sentence, parameters);
             });
 
-        AddSemanticAction(7, input => input[0]);
-        AddSemanticAction(8, input => input[1]);
+        AddSemanticAction(7, (lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
+        AddSemanticAction(8, (lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
 
         AddSemanticAction(9,
-            input => {
-                var func = (string)input[0];
-                var f = (Function)input[2];
+            (lhs, rhs) => {
+                var func = (string)rhs[0].SyntheticAttribute;
+                var f = (Function)rhs[2].SyntheticAttribute;
                 var sentence = (Sentence)ExecuteFunction(f);
-                return new Function(func, sentence);
+                lhs.SyntheticAttribute = new Function(func, sentence);
             });
     }
 }

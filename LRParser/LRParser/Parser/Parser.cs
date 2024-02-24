@@ -17,6 +17,7 @@ public class Parser<T, N> where T : Enum where N : Enum {
 
         var startItem = new LRItem(cfg.Productions[0], 0, new List<Symbol> { Symbol.Dollar });
         var states = new States<T, N>(startItem,_cfg);
+        Console.WriteLine(states);
         _table = new Table<T, N>(states,_cfg);
     }
 
@@ -30,15 +31,14 @@ public class Parser<T, N> where T : Enum where N : Enum {
 
         while (true) {
             if (!_table.ActionTable.TryGetValue((stateStack.Peek(), input[0]), out var action)) {
-                return treeStack.Pop();
+                Error(input, stateStack);
             }
 
             if (action.Item1 == ParserAction.Accept) {
-                Accept();
+                Accept(); 
                 break;
             }
-
-            if (action.Item1 == ParserAction.Shift) {
+            else if (action.Item1 == ParserAction.Shift) {
                 Shift(input, stateStack, treeStack, action.Item2);
             }
             else if (action.Item1 == ParserAction.Reduce) {

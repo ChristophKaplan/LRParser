@@ -120,6 +120,7 @@ public class States <T, N> where T : Enum where N : Enum{
         var stack = new Stack<LRItem>(lrItems);
 
         while (stack.Count > 0) {
+            
             var currentItem = stack.Pop();
             if (!FormUnionIfClosed(result, currentItem)) {
                 result.Add(currentItem);
