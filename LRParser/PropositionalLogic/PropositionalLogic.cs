@@ -20,7 +20,6 @@ public enum NonTerminal {
 }
 
 public class PropositionalLogic : Language<Terminal, NonTerminal> {
-
     public PropositionalLogic(): base(
         new TokenDefinition<Terminal>(Terminal.Function, "Mod|Forget|Int|Simplify"),
         new TokenDefinition<Terminal>(Terminal.Open, "\\("),
@@ -30,78 +29,41 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!"),
         new TokenDefinition<Terminal>(Terminal.AtomicSentence, "[A-Z][a-z]*")) {
     }
-
-    private string ToTable(List<Interpretation> interpretations, List<Sentence> sentences) {
-        var tab = new StringBuilder();
-        var keys = new StringBuilder();
-        
-        foreach (var (key, value) in interpretations[0]._truthValues) {
-            keys.Append($"|{key}\t");
-        }
-
-        foreach (var sentence in sentences)
-        {
-            keys.Append($"||{sentence}\t");
-        }
-        
-        tab.Append($"{keys}\n");
-        
-        foreach (var interpretation in interpretations) {
-            var values = new StringBuilder();
-            foreach (var (key, value) in interpretation._truthValues) {
-                values.Append($"|{value}\t");
-            }
-
-            foreach (var sentence in sentences)
-            { 
-                values.Append($"||{interpretation.Evaluate(sentence)}\t");   
-            }
-            
-            tab.Append($"{values}\n");
-        }
-        
-        return tab.ToString();
-    }
     
     public object ExecuteFunction(Function function) {
-        if (function.Func.Equals("Int")) {
-            var interpretations = GenerateInterpretations(function.Sentence);
-            Console.WriteLine($"Interpretations for {function.Sentence}\n{ToTable(interpretations, new List<Sentence>(){function.Sentence})}");
-        }
-        
-        if (function.Func.Equals("Mod")) {
-            var interpretations = GenerateInterpretations(function.Sentence);
-            var models = new List<Interpretation>();
-            foreach (var interpretation in interpretations) {
-                var mod = interpretation.Evaluate(function.Sentence);
-                if (mod) { models.Add(interpretation); }
+        switch (function.Func) {
+            case "Int": {
+                var interpretations = GenerateInterpretations(function.Sentence);
+                Console.WriteLine($"Interpretations for {function.Sentence}\n{ToTable(interpretations, new List<Sentence>(){function.Sentence})}");
+                break;
             }
-            Console.WriteLine($"Models for {function.Sentence}\n{ToTable(models, new List<Sentence>(){function.Sentence})}");
+            case "Mod": {
+                var interpretations = GenerateInterpretations(function.Sentence);
+                var models = new List<Interpretation>();
+                foreach (var interpretation in interpretations) {
+                    var mod = interpretation.Evaluate(function.Sentence);
+                    if (mod) { models.Add(interpretation); }
+                }
+                Console.WriteLine($"Models for {function.Sentence}\n{ToTable(models, new List<Sentence>(){function.Sentence})}");
+                break;
+            }
+            case "Forget": {
+                Console.WriteLine($"Forget {function.Parameters[0]} in {function.Sentence}");
+                var result = this.Forget(function.Sentence,(AtomicSentence)function.Parameters[0]);
+                return result;
+            }
+            case "Simplify": {
+                var result = function.Sentence.GetCopy(); 
+                this.Simplify(result);
+                this.Simplify(result);
+                Console.WriteLine($"Simplify: {function.Sentence} to: {result}");
+                
+                return result;
+            }
         }
 
-        if (function.Func.Equals("Forget")) {
-            Console.WriteLine($"Forget {function.Parameters[0]} in {function.Sentence}");
-            var result = Forget(function.Sentence,(AtomicSentence)function.Parameters[0]);
-            return result;
-        }
-        
-        if (function.Func.Equals("Simplify"))
-        {
-            var result = function.Sentence.GetCopy(); this.Simplify(result);
-            Console.WriteLine($"Simplify: {function.Sentence} to {result}");
-           return result;
-        }
-        
+        Console.WriteLine($"No return value for: {function.Func}");
         return null;
-    }
-    
-    private Sentence Forget(Sentence sentence, AtomicSentence forgetMe) {
-        var lhs = sentence.GetCopy();
-        var rhs = sentence.GetCopy();
-        lhs.FindReplaceAtom(forgetMe, "True");
-        rhs.FindReplaceAtom(forgetMe, "False");
-        var n = new ComplexSentence(lhs, "OR", rhs);
-        return n;
     }
 
     private List<Interpretation> GenerateInterpretations(Sentence sentence) {
@@ -235,5 +197,37 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
                 var sentence = (Sentence)ExecuteFunction(f);
                 lhs.SyntheticAttribute = new Function(func, sentence);
             });
+    }
+
+    private string ToTable(List<Interpretation> interpretations, List<Sentence> sentences) {
+        var tab = new StringBuilder();
+        var keys = new StringBuilder();
+        
+        foreach (var (key, value) in interpretations[0]._truthValues) {
+            keys.Append($"|{key}\t");
+        }
+
+        foreach (var sentence in sentences)
+        {
+            keys.Append($"||{sentence}\t");
+        }
+        
+        tab.Append($"{keys}\n");
+        
+        foreach (var interpretation in interpretations) {
+            var values = new StringBuilder();
+            foreach (var (key, value) in interpretation._truthValues) {
+                values.Append($"|{value}\t");
+            }
+
+            foreach (var sentence in sentences)
+            { 
+                values.Append($"||{interpretation.Evaluate(sentence)}\t");   
+            }
+            
+            tab.Append($"{values}\n");
+        }
+        
+        return tab.ToString();
     }
 }

@@ -2,22 +2,6 @@ namespace PropositionalLogic;
 
 public static class SentenceExtensions {
 
-    public static void ReplaceMeWith(this Sentence sentence, Sentence replaceWith)
-    {
-
-        Sentence found = null;
-        foreach (var childInParent in sentence.Parent.Children)
-        {
-            if (childInParent.Equals(sentence))
-            {
-                found = childInParent;
-            }
-        }
-        sentence.Parent.Children.Remove(found);
-        sentence.Parent.AddChild(replaceWith);
-        sentence = replaceWith;
-    }
-    
     public static void FindReplaceAtom(this Sentence sentence, AtomicSentence replaceMe, string replaceWith) {
         foreach (var child in sentence.Children) {
             child.FindReplaceAtom(replaceMe, replaceWith);
@@ -27,12 +11,12 @@ public static class SentenceExtensions {
             atomicSentence.Symbol = replaceWith;
         }
     }
-    
+
     public static List<AtomicSentence> GetAtoms(this Sentence sentence) {
-        if(sentence is AtomicSentence atomicSentence) {
-            return new List<AtomicSentence> {atomicSentence};
+        if (sentence is AtomicSentence atomicSentence) {
+            return new List<AtomicSentence> { atomicSentence };
         }
-        
+
         var atoms = new List<AtomicSentence>();
         foreach (var child in sentence.Children) {
             atoms.AddRange(child.GetAtoms());

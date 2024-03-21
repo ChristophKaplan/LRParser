@@ -23,6 +23,30 @@ public abstract class Sentence : ILanguageObject {
         sentence.Parent = this;
     }
     
+    public void InsertChild(int index, Sentence sentence) {
+        Children.Insert(index,sentence);
+        sentence.Parent = this;
+    }
+    
+    public void Reparent(Sentence parentOfThis) {
+        
+        if (parentOfThis.Parent == null) {
+            return;
+        }
+        
+        Sentence parent = parentOfThis.Parent;
+        Sentence found = null;
+        foreach (var childInParent in parent.Children) {
+            if (childInParent.Equals(parentOfThis)) {
+                found = childInParent;
+            }
+        }
+
+        var index = parent.Children.IndexOf(found);
+        parent.Children.RemoveAt(index);
+        parent.InsertChild(index, this);
+    }
+
     public override bool Equals(object? obj) {
         if (obj == null || GetType() != obj.GetType()) {
             return false;
