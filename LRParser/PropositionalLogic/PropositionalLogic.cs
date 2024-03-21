@@ -53,11 +53,8 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
                 return result;
             }
             case "Simplify": {
-                var result = function.Sentence.GetCopy(); 
-                this.Simplify(result);
-                this.Simplify(result);
+                var result = this.Simplify(function.Sentence);
                 Console.WriteLine($"Simplify: {function.Sentence} to: {result}");
-                
                 return result;
             }
         }

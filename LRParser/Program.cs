@@ -2,7 +2,7 @@
 var input = Console.ReadLine();
 
 if (string.IsNullOrEmpty(input)) {
-    input = "Int(Simplify(Forget((P OR Q) AND Z, Z)))";
+    input = "Int(Simplify(Forget((P AND Q) OR Z, Z)))";
 }
 
 var langObj = logic.TryParse(input);
