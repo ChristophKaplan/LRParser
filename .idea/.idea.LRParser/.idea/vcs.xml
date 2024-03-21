@@ -2,9 +2,15 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../ngx-merge-boards" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../ngx-prototype-solitaire" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../solitaire-island" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../ui-toolkit-manual-code-examples" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../ArgumentationFramework" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../CSharpParserGenerator" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../EntityComponentSystemSamples" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../MySimulation" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../NeuralNetwork" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../RetroTVFX" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../SimpleLogic" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../cpptest/bgfx" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../cpptest/bimg" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../cpptest/bx" vcs="Git" />
   </component>
 </project>

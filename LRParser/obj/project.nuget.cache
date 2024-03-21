@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "NEfKQDUdae8ycpMr9AWF4v6TC21c6ErQYxNZhNKEIpag8oDB8fn+DxpWedj4fuSz67tw6lt0a5fwhJNBgTnlqw==",
+  "dgSpecHash": "nGlSNeiMGQ7FE6efEZzx1xlFerwObPXC56niNt8mghQpxPmnx8GzZlQ0RNl876oHrRlri4N9MpUkF9cojda8ag==",
   "success": true,
-  "projectFilePath": "/Users/christoph.kaplan/development/LRParser/LRParser/LRParser.csproj",
+  "projectFilePath": "E:\\Development\\LRParser\\LRParser\\LRParser.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

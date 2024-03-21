@@ -1,9 +1,8 @@
-﻿
-var logic = new PropositionalLogic.PropositionalLogic();
+﻿var logic = new PropositionalLogic.PropositionalLogic();
 var input = Console.ReadLine();
 
 if (string.IsNullOrEmpty(input)) {
-    input = "Int(Forget(P OR Q AND Z, Z))";
+    input = "Int(Simplify(Forget((P OR Q) AND Z, Z)))";
 }
 
 var langObj = logic.TryParse(input);

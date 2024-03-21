@@ -15,12 +15,14 @@ public class Function : ILanguageObject {
 }
 
 public abstract class Sentence : ILanguageObject {
+    public Sentence Parent;
     public readonly List<Sentence> Children = new();
 
     public void AddChild(Sentence sentence) {
         Children.Add(sentence);
+        sentence.Parent = this;
     }
-
+    
     public override bool Equals(object? obj) {
         if (obj == null || GetType() != obj.GetType()) {
             return false;
@@ -43,7 +45,7 @@ public abstract class Sentence : ILanguageObject {
                 return $"{complexSentence.Operator} {complexSentence.Children[0]}";
             }
 
-            return $"{complexSentence.Children[0]} {complexSentence.Operator} {complexSentence.Children[1]}";
+            return $"({complexSentence.Children[0]} {complexSentence.Operator} {complexSentence.Children[1]})";
         }
 
         return "Sentence";
@@ -52,7 +54,7 @@ public abstract class Sentence : ILanguageObject {
 
 public class AtomicSentence : Sentence {
     public string Symbol;
-
+    public bool IsTruthValue { get => Symbol.Equals("True") || Symbol.Equals("False"); }
     public AtomicSentence(string symbol) {
         Symbol = symbol;
     }
