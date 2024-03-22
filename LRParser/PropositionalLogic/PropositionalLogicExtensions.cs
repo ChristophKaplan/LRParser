@@ -1,6 +1,14 @@
-﻿namespace PropositionalLogic;
+﻿using LRParser.Language;
+
+namespace PropositionalLogic;
 
 public static class PropositionalLogicExtensions {
+    
+    public static LogicSymbols AsLogicSymbol(this LexValue lexValue)
+    {
+        Enum.TryParse<LogicSymbols>(lexValue.Value, out var symbol);
+        return symbol;
+    }
     
     public static InterpretationSet Mod(this PropositionalLogic logic, Sentence sentence) {
         var interpretations = logic.GenerateInterpretations(sentence);
@@ -34,7 +42,16 @@ public static class PropositionalLogicExtensions {
         var rhs = sentence.GetCopy();
         lhs.FindReplaceAtom(forgetMe, "True");
         rhs.FindReplaceAtom(forgetMe, "False");
-        var n = new ComplexSentence(lhs, "OR", rhs);
+        var n = new ComplexSentence(lhs, LogicSymbols.OR, rhs);
+        return n;
+    }
+    
+    public static Sentence SkepForget(this PropositionalLogic logic, Sentence sentence, AtomicSentence forgetMe) {
+        var lhs = sentence.GetCopy();
+        var rhs = sentence.GetCopy();
+        lhs.FindReplaceAtom(forgetMe, "True");
+        rhs.FindReplaceAtom(forgetMe, "False");
+        var n = new ComplexSentence(lhs, LogicSymbols.AND, rhs);
         return n;
     }
     
@@ -78,16 +95,16 @@ public static class PropositionalLogicExtensions {
         (AtomicSentence truthValueSide, Sentence otherSide) _= MapLhsRhs();
         
         switch (((ComplexSentence)sentence).Operator) {
-            case "AND" when _.truthValueSide.Symbol.Equals("True"):
+            case LogicSymbols.AND when _.truthValueSide.Tautology:
                 Replace(ref sentence, _.otherSide);
                 break;
-            case "AND" when _.truthValueSide.Symbol.Equals("False"):
+            case LogicSymbols.AND when _.truthValueSide.Falsum:
                 Replace(ref sentence, _.truthValueSide);
                 break;
-            case "OR" when _.truthValueSide.Symbol.Equals("True"):
+            case LogicSymbols.OR when _.truthValueSide.Tautology:
                 Replace(ref sentence, _.truthValueSide);
                 break;
-            case "OR" when _.truthValueSide.Symbol.Equals("False"):
+            case LogicSymbols.OR when _.truthValueSide.Falsum:
                 Replace(ref sentence, _.otherSide);
                 break;
             default:

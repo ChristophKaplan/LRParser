@@ -2,6 +2,12 @@ using LRParser.Language;
 
 namespace PropositionalLogic;
 
+public enum LogicSymbols {
+    AND,
+    OR,
+    NOT
+}
+
 public class Function : ILanguageObject {
     public readonly string Func;
     public readonly ILanguageObject[] Parameters;
@@ -89,20 +95,20 @@ public class AtomicSentence : Sentence {
 }
 
 public class ComplexSentence : Sentence {
-    public readonly string Operator;
+    public readonly LogicSymbols Operator;
 
-    public ComplexSentence(Sentence p, string @operator, Sentence q) {
+    public ComplexSentence(Sentence p, LogicSymbols @operator, Sentence q) {
         Operator = @operator;
         AddChild(p);
         AddChild(q);
     }
 
-    public ComplexSentence(string @operator, Sentence p) {
+    public ComplexSentence(LogicSymbols @operator, Sentence p) {
         Operator = @operator;
         AddChild(p);
     }
     
-    public ComplexSentence(string @operator) {
+    public ComplexSentence(LogicSymbols @operator) {
         Operator = @operator;
     }
 }

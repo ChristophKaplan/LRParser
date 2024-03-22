@@ -37,9 +37,9 @@ public class Interpretation : ILanguageObject{
 
     private bool Evaluate(ComplexSentence complexSentence) {
         return complexSentence.Operator switch {
-            "NOT" => !Evaluate(complexSentence.Children[0]),
-            "AND" => Evaluate(complexSentence.Children[0]) && Evaluate(complexSentence.Children[1]),
-            "OR" => Evaluate(complexSentence.Children[0]) || Evaluate(complexSentence.Children[1]),
+            LogicSymbols.NOT => !Evaluate(complexSentence.Children[0]),
+            LogicSymbols.AND => Evaluate(complexSentence.Children[0]) && Evaluate(complexSentence.Children[1]),
+            LogicSymbols.OR => Evaluate(complexSentence.Children[0]) || Evaluate(complexSentence.Children[1]),
             _ => throw new Exception($"Error: subtype of {this} not found.")
         };
     }

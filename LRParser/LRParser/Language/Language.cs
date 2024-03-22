@@ -6,7 +6,7 @@ namespace LRParser.Language;
 
 public interface ILanguageObject { }
 
-public struct LexValue : ILanguageObject {
+public class LexValue : ILanguageObject {
     public readonly string Value;
 
     public LexValue(string value) {
@@ -15,6 +15,11 @@ public struct LexValue : ILanguageObject {
 
     public override string ToString() {
         return Value;
+    }
+    
+    public static implicit operator string(LexValue value)
+    {
+        return value.Value;
     }
 }
 

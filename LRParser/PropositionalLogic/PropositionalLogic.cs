@@ -18,7 +18,8 @@ public enum NonTerminal {
 }
 
 public class PropositionalLogic : Language<Terminal, NonTerminal> {
-    public PropositionalLogic() : base(new TokenDefinition<Terminal>(Terminal.Function, "Mod|Forget|Int|Simplify|SwitchMany"),
+    public PropositionalLogic() : base(
+        new TokenDefinition<Terminal>(Terminal.Function, "Mod|Forget|SkepForget|Int|Simplify|SwitchMany"),
         new TokenDefinition<Terminal>(Terminal.Open, "\\("),
         new TokenDefinition<Terminal>(Terminal.Comma, ","),
         new TokenDefinition<Terminal>(Terminal.Close, "\\)"),
@@ -56,15 +57,15 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         rule05.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
 
         rule06.SetSemanticAction((lhs, rhs) => {
-            switch (((LexValue)rhs[1].SyntheticAttribute).Value) {
-                case "OR": {
+            switch (((LexValue)rhs[1].SyntheticAttribute).AsLogicSymbol()) {
+                case LogicSymbols.OR: {
                     var p = new AtomicSentence((LexValue)rhs[0].SyntheticAttribute);
-                    lhs.SyntheticAttribute = new ComplexSentence(p, "OR", (Sentence)rhs[2].SyntheticAttribute);
+                    lhs.SyntheticAttribute = new ComplexSentence(p, LogicSymbols.OR, (Sentence)rhs[2].SyntheticAttribute);
                     return;
                 }
-                case "AND": {
+                case LogicSymbols.AND: {
                     var p = new AtomicSentence((LexValue)rhs[0].SyntheticAttribute);
-                    lhs.SyntheticAttribute = new ComplexSentence(p, "AND", (Sentence)rhs[2].SyntheticAttribute);
+                    lhs.SyntheticAttribute = new ComplexSentence(p, LogicSymbols.AND, (Sentence)rhs[2].SyntheticAttribute);
                     return;
                 }
                 default:
@@ -73,19 +74,19 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         });
 
         rule07.SetSemanticAction((lhs, rhs) => {
-            switch (((LexValue)rhs[3].SyntheticAttribute).Value) {
-                case "OR":
-                    lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, "OR", (Sentence)rhs[4].SyntheticAttribute);
+            switch (((LexValue)rhs[3].SyntheticAttribute).AsLogicSymbol()) {
+                case LogicSymbols.OR:
+                    lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, LogicSymbols.OR, (Sentence)rhs[4].SyntheticAttribute);
                     return;
-                case "AND":
-                    lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, "AND", (Sentence)rhs[4].SyntheticAttribute);
+                case LogicSymbols.AND:
+                    lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, LogicSymbols.AND, (Sentence)rhs[4].SyntheticAttribute);
                     return;
                 default:
                     throw new Exception($"Error: {rhs[3].SyntheticAttribute} operator not found!");
             }
         });
 
-        rule08.SetSemanticAction((lhs, rhs) => lhs.SyntheticAttribute = new ComplexSentence("NOT", (Sentence)rhs[1].SyntheticAttribute));
+        rule08.SetSemanticAction((lhs, rhs) => lhs.SyntheticAttribute = new ComplexSentence(LogicSymbols.NOT, (Sentence)rhs[1].SyntheticAttribute));
 
         rule09.SetSemanticAction((lhs, rhs) => {
             var func = (LexValue)rhs[0].SyntheticAttribute;
@@ -124,11 +125,15 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
             }
             case "Simplify": {
                 var result = this.Simplify((Sentence)function.Parameters[0]);
-                Console.WriteLine($"Simplify: {function.Parameters[0]} equals: {result}");
+                //Console.WriteLine($"Simplify: {function.Parameters[0]} equals: {result}");
                 return result;
             }
             case "Forget": {
                 var result = this.Forget((Sentence)function.Parameters[0], (AtomicSentence)function.Parameters[1]);
+                return result;
+            }
+            case "SkepForget": {
+                var result = this.SkepForget((Sentence)function.Parameters[0], (AtomicSentence)function.Parameters[1]);
                 return result;
             }
             case "SwitchMany": {
