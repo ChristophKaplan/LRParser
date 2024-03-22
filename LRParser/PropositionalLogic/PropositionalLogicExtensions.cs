@@ -15,13 +15,13 @@ public static class PropositionalLogicExtensions {
     }
     
     public static InterpretationSet SwitchMany(this PropositionalLogic logic, InterpretationSet set, AtomicSentence variable) { 
+        
         var list = new List<Interpretation>();
-        foreach (var model in set._interpretations) {
-            var i = set.Switch(model, variable);
-            list.Add(i);
+        foreach (var model in set.Interpretations) {
+            list.Add(model.Switch(variable));
         }
         
-        return new InterpretationSet(list, set._sentence);
+        return new InterpretationSet(list, set.Sentence);
     }
     
     public static InterpretationSet Int(this PropositionalLogic logic, Sentence sentence) {

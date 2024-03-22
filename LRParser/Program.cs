@@ -1,8 +1,9 @@
 ﻿var logic = new PropositionalLogic.PropositionalLogic();
 
 logic.Interpret(new []{
-    "Int(A OR B)",
-    "SwitchMany(Int(A OR B),B)",
+    "Mod(Forget(A AND B,B))",
+    "Mod(A AND B)",
+    "SwitchMany(Mod(A AND B),B)",
 });
 
 /*

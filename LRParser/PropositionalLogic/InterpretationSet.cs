@@ -4,40 +4,17 @@ using LRParser.Language;
 namespace PropositionalLogic;
 
 public class InterpretationSet : ILanguageObject{
-    public readonly List<Interpretation> _interpretations;
-    public Sentence _sentence;
+    public readonly List<Interpretation> Interpretations;
+    public readonly Sentence Sentence;
 
     public InterpretationSet(List<Interpretation> interpretations, Sentence sentence) {
-        _interpretations = interpretations;
-        _sentence = sentence;
-    }
-    
-    public Interpretation Switch(Interpretation switchMe, AtomicSentence variable) { 
-        /* where Switch(w, x) denotes the interpretation that maintains the same truth value as w for all variables except x,
-        and assigns to x the opposite truth value given by w.*/
-        
-        bool IsSwitchable(Interpretation interpretation, Interpretation switchMe, AtomicSentence x) {
-            if (!interpretation.EqualVariables(switchMe)) return false;
-
-            foreach (var key in interpretation._truthValues.Keys) {
-                if (interpretation._truthValues[key] != switchMe._truthValues[key]) {
-                    return key.Equals(x);
-                }
-            }
-
-            return false;
-        }
-        
-        foreach (var interpretation in _interpretations) {
-            if (IsSwitchable(interpretation, switchMe, variable)) {
-                return interpretation;
-            }
-        }
-
-        throw new Exception($"No switchable interpretation found for Switch({switchMe}, {variable})");
+        Interpretations = interpretations;
+        Sentence = sentence;
     }
     
     private string ToTable(List<Interpretation> interpretations, List<Sentence> sentences) {
+        if(interpretations.Count == 0) return $"No interpretations for this set ?";
+        
         var tab = new StringBuilder();
         var keys = new StringBuilder();
         
@@ -70,6 +47,6 @@ public class InterpretationSet : ILanguageObject{
     }
 
     public override string ToString() {
-        return ToTable(_interpretations, new List<Sentence>() { _sentence });
+        return ToTable(Interpretations, new List<Sentence>() { Sentence });
     }
 }

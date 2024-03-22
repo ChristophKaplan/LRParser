@@ -130,7 +130,7 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
             }
             case "Forget": {
                 var result = this.Forget((Sentence)function.Parameters[0], (AtomicSentence)function.Parameters[1]);
-                Console.WriteLine($"Forget {function.Parameters[0]} in {function.Parameters[0]} equals: {result}");
+                //Console.WriteLine($"Forget {function.Parameters[0]} in {function.Parameters[0]} equals: {result}");
                 return result;
             }
             case "SwitchMany": {
@@ -146,23 +146,22 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
     public List<Interpretation> GenerateInterpretations(Sentence sentence) {
         var interpretations = new List<Interpretation>();
 
+        var cleanAtoms = new List<AtomicSentence>();
         var atoms = sentence.GetAtoms();
-        var truthTable = GenerateTruthTable(atoms.Count);
+        for (var i = 0; i < atoms.Count; i++) {
+            if (atoms[i].Tautology || atoms[i].Falsum) {
+                continue;
+            }
+            if(!cleanAtoms.Contains(atoms[i])) cleanAtoms.Add(atoms[i]);
+        }
+        
+        var truthTable = GenerateTruthTable(cleanAtoms.Count);
 
         foreach (var truthValues in truthTable) {
             var interpretation = new Interpretation();
             var list = truthValues.ToArray();
-            for (var i = 0; i < atoms.Count; i++) {
-                //validate, tautologies/contradictions
-                if (atoms[i].Symbol.Equals("True")) {
-                    list[i] = true;
-                }
-
-                if (atoms[i].Symbol.Equals("False")) {
-                    list[i] = false;
-                }
-
-                interpretation.Add(atoms[i], list[i]);
+            for (var i = 0; i < cleanAtoms.Count; i++) {
+                interpretation.Add(cleanAtoms[i], list[i]);
             }
 
             if (!interpretations.Contains(interpretation)) {

@@ -4,9 +4,7 @@ using LRParser.Parser;
 
 namespace LRParser.Language;
 
-public interface ILanguageObject {
-    
-}
+public interface ILanguageObject { }
 
 public struct LexValue : ILanguageObject {
     public readonly string Value;

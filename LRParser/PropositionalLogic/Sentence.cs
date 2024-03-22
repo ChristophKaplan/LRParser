@@ -76,7 +76,10 @@ public abstract class Sentence : ILanguageObject {
 
 public class AtomicSentence : Sentence {
     public string Symbol;
-    public bool IsTruthValue { get => Symbol.Equals("True") || Symbol.Equals("False"); }
+    public bool IsTruthValue { get => Tautology || Falsum; }
+    public bool Tautology { get => Symbol.Equals("True"); }
+    public bool Falsum { get => Symbol.Equals("False"); }
+    
     public AtomicSentence(string symbol) {
         Symbol = symbol;
     }
