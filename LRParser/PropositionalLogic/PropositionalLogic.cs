@@ -1,5 +1,3 @@
-using System.Text;
-using LRParser.CFG;
 using LRParser.Language;
 using LRParser.Lexer;
 
@@ -20,8 +18,7 @@ public enum NonTerminal {
 }
 
 public class PropositionalLogic : Language<Terminal, NonTerminal> {
-    public PropositionalLogic(): base(
-        new TokenDefinition<Terminal>(Terminal.Function, "Mod|Forget|Int|Simplify"),
+    public PropositionalLogic() : base(new TokenDefinition<Terminal>(Terminal.Function, "Mod|Forget|Int|Simplify|SwitchMany"),
         new TokenDefinition<Terminal>(Terminal.Open, "\\("),
         new TokenDefinition<Terminal>(Terminal.Comma, ","),
         new TokenDefinition<Terminal>(Terminal.Close, "\\)"),
@@ -29,32 +26,111 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!"),
         new TokenDefinition<Terminal>(Terminal.AtomicSentence, "[A-Z][a-z]*")) {
     }
-    
-    public object ExecuteFunction(Function function) {
+
+    protected override void SetUpGrammar() {
+        AddByEnumType(typeof(Terminal));
+        AddByEnumType(typeof(NonTerminal));
+        AddStartSymbol(NonTerminal.StartSymbol);
+
+        var rule01 = AddProductionRule(NonTerminal.StartSymbol, NonTerminal.SecondStart);
+        var rule02 = AddProductionRule(NonTerminal.SecondStart, NonTerminal.Sentence);
+        var rule03 = AddProductionRule(NonTerminal.SecondStart, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
+        var rule04 = AddProductionRule(NonTerminal.Sentence, Terminal.AtomicSentence);
+        var rule05 = AddProductionRule(NonTerminal.Sentence, NonTerminal.ComplexSentence);
+        var rule06 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.AtomicSentence, Terminal.Connective, NonTerminal.Sentence);
+        var rule07 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close, Terminal.Connective, NonTerminal.Sentence);
+        var rule08 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Negation, NonTerminal.Sentence);
+
+        var rule09 = AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.Sentence, NonTerminal.Ext, Terminal.Close);
+        var rule10 = AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
+        var rule11 = AddProductionRule(NonTerminal.Ext, Terminal.Comma, NonTerminal.Sentence);
+        var rule12 = AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.SecondStart, Terminal.Close);
+
+
+        rule01.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
+        rule02.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
+        rule03.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
+
+        rule04.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = new AtomicSentence((LexValue)rhs[0].SyntheticAttribute); });
+
+        rule05.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
+
+        rule06.SetSemanticAction((lhs, rhs) => {
+            switch (((LexValue)rhs[1].SyntheticAttribute).Value) {
+                case "OR": {
+                    var p = new AtomicSentence((LexValue)rhs[0].SyntheticAttribute);
+                    lhs.SyntheticAttribute = new ComplexSentence(p, "OR", (Sentence)rhs[2].SyntheticAttribute);
+                    return;
+                }
+                case "AND": {
+                    var p = new AtomicSentence((LexValue)rhs[0].SyntheticAttribute);
+                    lhs.SyntheticAttribute = new ComplexSentence(p, "AND", (Sentence)rhs[2].SyntheticAttribute);
+                    return;
+                }
+                default:
+                    throw new Exception($"Error: {rhs[1].SyntheticAttribute} operator not found!");
+            }
+        });
+
+        rule07.SetSemanticAction((lhs, rhs) => {
+            switch (((LexValue)rhs[3].SyntheticAttribute).Value) {
+                case "OR":
+                    lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, "OR", (Sentence)rhs[4].SyntheticAttribute);
+                    return;
+                case "AND":
+                    lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, "AND", (Sentence)rhs[4].SyntheticAttribute);
+                    return;
+                default:
+                    throw new Exception($"Error: {rhs[3].SyntheticAttribute} operator not found!");
+            }
+        });
+
+
+        rule08.SetSemanticAction((lhs, rhs) => lhs.SyntheticAttribute = new ComplexSentence("NOT", (Sentence)rhs[1].SyntheticAttribute));
+
+        rule09.SetSemanticAction((lhs, rhs) => {
+            var func = (LexValue)rhs[0].SyntheticAttribute;
+            var sentence = (Sentence)rhs[2].SyntheticAttribute;
+            var parameters = (Sentence)rhs[3].SyntheticAttribute;
+            lhs.SyntheticAttribute = new Function(func.Value, sentence, parameters);
+        });
+
+        rule10.SetSemanticAction((lhs, rhs) => {
+            var func = (LexValue)rhs[0].SyntheticAttribute;
+            var sentence = (Sentence)rhs[2].SyntheticAttribute;
+            lhs.SyntheticAttribute = new Function(func.Value, sentence);
+        });
+
+        rule11.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
+
+        rule12.SetSemanticAction((lhs, rhs) => {
+            var func = (LexValue)rhs[0].SyntheticAttribute;
+            var f = (Function)rhs[2].SyntheticAttribute;
+            var sentence = (Sentence)ExecuteFunction(f);
+            lhs.SyntheticAttribute = new Function(func.Value, sentence);
+        });
+    }
+
+    private ILanguageObject ExecuteFunction(Function function) {
         switch (function.Func) {
             case "Int": {
-                var interpretations = GenerateInterpretations(function.Sentence);
-                Console.WriteLine($"Interpretations for {function.Sentence}\n{ToTable(interpretations, new List<Sentence>(){function.Sentence})}");
-                break;
+                return this.Int((Sentence)function.Parameters[0]);
             }
             case "Mod": {
-                var interpretations = GenerateInterpretations(function.Sentence);
-                var models = new List<Interpretation>();
-                foreach (var interpretation in interpretations) {
-                    var mod = interpretation.Evaluate(function.Sentence);
-                    if (mod) { models.Add(interpretation); }
-                }
-                Console.WriteLine($"Models for {function.Sentence}\n{ToTable(models, new List<Sentence>(){function.Sentence})}");
-                break;
-            }
-            case "Forget": {
-                Console.WriteLine($"Forget {function.Parameters[0]} in {function.Sentence}");
-                var result = this.Forget(function.Sentence,(AtomicSentence)function.Parameters[0]);
-                return result;
+                return this.Mod((Sentence)function.Parameters[0]);
             }
             case "Simplify": {
-                var result = this.Simplify(function.Sentence);
-                Console.WriteLine($"Simplify: {function.Sentence} to: {result}");
+                var result = this.Simplify((Sentence)function.Parameters[0]);
+                Console.WriteLine($"Simplify: {function.Parameters[0]} equals: {result}");
+                return result;
+            }
+            case "Forget": {
+                var result = this.Forget((Sentence)function.Parameters[0], (AtomicSentence)function.Parameters[1]);
+                Console.WriteLine($"Forget {function.Parameters[0]} in {function.Parameters[0]} equals: {result}");
+                return result;
+            }
+            case "SwitchMany": {
+                var result = this.SwitchMany((InterpretationSet)function.Parameters[0], (AtomicSentence)function.Parameters[1]);
                 return result;
             }
         }
@@ -63,9 +139,9 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         return null;
     }
 
-    private List<Interpretation> GenerateInterpretations(Sentence sentence) {
+    public List<Interpretation> GenerateInterpretations(Sentence sentence) {
         var interpretations = new List<Interpretation>();
-        
+
         var atoms = sentence.GetAtoms();
         var truthTable = GenerateTruthTable(atoms.Count);
 
@@ -73,7 +149,6 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
             var interpretation = new Interpretation();
             var list = truthValues.ToArray();
             for (var i = 0; i < atoms.Count; i++) {
-                
                 //validate, tautologies/contradictions
                 if (atoms[i].Symbol.Equals("True")) {
                     list[i] = true;
@@ -107,124 +182,18 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         }
     }
 
-    protected override void SetUpGrammar() {
-        AddByEnumType(typeof(Terminal));
-        AddByEnumType(typeof(NonTerminal));
-        AddStartSymbol(NonTerminal.StartSymbol);
-        
-        var rule01 = AddProductionRule(NonTerminal.StartSymbol, NonTerminal.SecondStart);
-        var rule02 =AddProductionRule(NonTerminal.SecondStart, NonTerminal.Sentence);
-        var rule03 =AddProductionRule(NonTerminal.SecondStart,Terminal.Open, NonTerminal.Sentence, Terminal.Close);
-        var rule04 =AddProductionRule(NonTerminal.Sentence, Terminal.AtomicSentence);
-        var rule05 =AddProductionRule(NonTerminal.Sentence, NonTerminal.ComplexSentence);
-        var rule06 =AddProductionRule(NonTerminal.ComplexSentence, Terminal.AtomicSentence, Terminal.Connective, NonTerminal.Sentence);
-        var rule07 =AddProductionRule(NonTerminal.ComplexSentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close, Terminal.Connective, NonTerminal.Sentence);
-        var rule08 =AddProductionRule(NonTerminal.ComplexSentence, Terminal.Negation, NonTerminal.Sentence);
-        
-        var rule09 =AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.Sentence, NonTerminal.Ext, Terminal.Close);
-        var rule10 =AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
-        var rule11 =AddProductionRule(NonTerminal.Ext, Terminal.Comma, NonTerminal.Sentence);
-        var rule12 =AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.SecondStart, Terminal.Close);
-        
-        
-        rule01.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
-        rule02.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
-        rule03.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
+    protected override ILanguageObject TryParse(string input) {
+        var langObj = base.TryParse(input);
+        if (langObj is Function function) {
+            return ExecuteFunction(function);
+        }
 
-        rule04.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = new AtomicSentence((string)rhs[0].SyntheticAttribute); });
-
-        rule05.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
-        
-        rule06.SetSemanticAction(
-            (lhs, rhs) => {
-                switch ((string)rhs[1].SyntheticAttribute) {
-                    case "OR": {
-                        var p = new AtomicSentence((string)rhs[0].SyntheticAttribute);
-                        lhs.SyntheticAttribute = new ComplexSentence(p, "OR", (Sentence)rhs[2].SyntheticAttribute);
-                        return;
-                    }
-                    case "AND": {
-                        var p = new AtomicSentence((string)rhs[0].SyntheticAttribute);
-                        lhs.SyntheticAttribute = new ComplexSentence(p, "AND", (Sentence)rhs[2].SyntheticAttribute);
-                        return;
-                    }
-                    default:
-                        throw new Exception($"Error: {rhs[1].SyntheticAttribute} operator not found!");
-                }
-            });
-
-        rule07.SetSemanticAction(
-            (lhs, rhs) => {
-                switch ((string)rhs[3].SyntheticAttribute) {
-                    case "OR":
-                        lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, "OR", (Sentence)rhs[4].SyntheticAttribute);
-                        return;
-                    case "AND":
-                        lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, "AND", (Sentence)rhs[4].SyntheticAttribute);
-                        return;
-                    default:
-                        throw new Exception($"Error: {rhs[3].SyntheticAttribute} operator not found!");
-                }
-            });
-
-        
-        rule08.SetSemanticAction((lhs, rhs) => lhs.SyntheticAttribute = new ComplexSentence("NOT", (Sentence)rhs[1].SyntheticAttribute));
-
-        rule09.SetSemanticAction(
-            (lhs, rhs) => {
-                var func = (string)rhs[0].SyntheticAttribute;
-                var sentence = (Sentence)rhs[2].SyntheticAttribute;
-                var parameters = (Sentence)rhs[3].SyntheticAttribute;
-                lhs.SyntheticAttribute = new Function(func, sentence, parameters);
-            });
-
-        rule10.SetSemanticAction(
-            (lhs, rhs) => {
-                var func = (string)rhs[0].SyntheticAttribute;
-                var sentence = (Sentence)rhs[2].SyntheticAttribute;
-                lhs.SyntheticAttribute = new Function(func, sentence);
-            });
-        
-        rule11.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
-
-        rule12.SetSemanticAction(
-            (lhs, rhs) => {
-                var func = (string)rhs[0].SyntheticAttribute;
-                var f = (Function)rhs[2].SyntheticAttribute;
-                var sentence = (Sentence)ExecuteFunction(f);
-                lhs.SyntheticAttribute = new Function(func, sentence);
-            });
+        return langObj;
     }
 
-    private string ToTable(List<Interpretation> interpretations, List<Sentence> sentences) {
-        var tab = new StringBuilder();
-        var keys = new StringBuilder();
-        
-        foreach (var (key, value) in interpretations[0]._truthValues) {
-            keys.Append($"|{key}\t");
+    public void Interpret(string[] input) {
+        foreach (var s in input) {
+            Console.WriteLine(TryParse(s));
         }
-
-        foreach (var sentence in sentences)
-        {
-            keys.Append($"||{sentence}\t");
-        }
-        
-        tab.Append($"{keys}\n");
-        
-        foreach (var interpretation in interpretations) {
-            var values = new StringBuilder();
-            foreach (var (key, value) in interpretation._truthValues) {
-                values.Append($"|{value}\t");
-            }
-
-            foreach (var sentence in sentences)
-            { 
-                values.Append($"||{interpretation.Evaluate(sentence)}\t");   
-            }
-            
-            tab.Append($"{values}\n");
-        }
-        
-        return tab.ToString();
     }
 }

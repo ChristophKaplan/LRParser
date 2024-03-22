@@ -4,7 +4,17 @@ using LRParser.Parser;
 
 namespace LRParser.Language;
 
-public interface ILanguageObject { }
+public interface ILanguageObject {
+    
+}
+
+public class LexValue : ILanguageObject {
+    public string Value { get; }
+
+    public LexValue(string value) {
+        Value = value;
+    }
+}
 
 public abstract class Language<T,N>: ContextFreeGrammar<T,N> where T : Enum where N : Enum{
     private readonly Lexer<T> Lexer;
@@ -16,11 +26,11 @@ public abstract class Language<T,N>: ContextFreeGrammar<T,N> where T : Enum wher
         SetUpGrammar();
         Parser = new Parser<T, N>(this);
     }
-    
-    public object TryParse(string input) {
+
+    protected virtual ILanguageObject TryParse(string input) {
         var tokens = Lexer.Tokenize(input);
         var tree = Parser.Parse(tokens);
         tree.EvaluateTree();
-        return tree.Symbol.SyntheticAttribute;
+        return (ILanguageObject)tree.Symbol.SyntheticAttribute;
     }
 }

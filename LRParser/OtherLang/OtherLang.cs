@@ -15,6 +15,13 @@ public enum NonTerminal {
     StartSymbol,SecondStart, Declaration, Assigment,
 }
 
+public class IntValue : ILanguageObject {
+    public int Value { get; set; }
+    public IntValue(int value) {
+        Value = value;
+    }
+}
+
 public class OtherLang: Language<Terminal, NonTerminal>
 {
     public OtherLang(): base(
@@ -46,22 +53,23 @@ public class OtherLang: Language<Terminal, NonTerminal>
         
         rule04.SetSemanticAction((lhs, rhs) =>
         {
-            var typeDeclaration = (string)rhs[0].SyntheticAttribute;
-            var variable = (string)rhs[1].SyntheticAttribute;
+            var typeDeclaration = (LexValue)rhs[0].SyntheticAttribute;
+            var variable = (LexValue)rhs[1].SyntheticAttribute;
             
             rhs[1].InheritetAttribute = typeDeclaration;
+            TypeTable.Add(variable.Value, typeDeclaration.Value);
             
-            TypeTable.Add(variable, typeDeclaration);
-            
-            lhs.SyntheticAttribute = rhs[0].SyntheticAttribute + " " + rhs[1].SyntheticAttribute;
+            Console.WriteLine(typeDeclaration.Value + " " + variable.Value);
+            lhs.InheritetAttribute = typeDeclaration;
+            lhs.SyntheticAttribute = variable;
         });
         
         rule05.SetSemanticAction((lhs, rhs) =>
         {
-            var variable = (string)rhs[0].SyntheticAttribute;
-            var num =  (string)rhs[2].SyntheticAttribute;
+            var variable = (LexValue)rhs[0].SyntheticAttribute;
+            var num =  (LexValue)rhs[2].SyntheticAttribute;
 
-            if (!TypeTable.TryGetValue(variable, out var type)) {
+            if (!TypeTable.TryGetValue(variable.Value, out var type)) {
                 throw new Exception($"Variable: {variable} not declared ");
             }
             
@@ -72,7 +80,7 @@ public class OtherLang: Language<Terminal, NonTerminal>
             
             if (type.Equals("Int")) {
                 lhs.InheritetAttribute = typeof(int);
-                lhs.SyntheticAttribute = int.Parse(num);
+                lhs.SyntheticAttribute = new IntValue(int.Parse(num.Value));
             }
         });
     }

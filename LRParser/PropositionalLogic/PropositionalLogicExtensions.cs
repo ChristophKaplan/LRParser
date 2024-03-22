@@ -1,6 +1,34 @@
 ﻿namespace PropositionalLogic;
 
 public static class PropositionalLogicExtensions {
+    
+    public static InterpretationSet Mod(this PropositionalLogic logic, Sentence sentence) {
+        var interpretations = logic.GenerateInterpretations(sentence);
+        var models = new List<Interpretation>();
+        
+        foreach (var interpretation in interpretations) {
+            var mod = interpretation.Evaluate(sentence);
+            if (mod) { models.Add(interpretation); }
+        }
+        
+        return new InterpretationSet(models, sentence);
+    }
+    
+    public static InterpretationSet SwitchMany(this PropositionalLogic logic, InterpretationSet set, AtomicSentence variable) { 
+        var list = new List<Interpretation>();
+        foreach (var model in set._interpretations) {
+            var i = set.Switch(model, variable);
+            list.Add(i);
+        }
+        
+        return new InterpretationSet(list, set._sentence);
+    }
+    
+    public static InterpretationSet Int(this PropositionalLogic logic, Sentence sentence) {
+        var interpretations = logic.GenerateInterpretations(sentence);
+        return new InterpretationSet(interpretations, sentence);
+    }
+
     public static Sentence Forget(this PropositionalLogic logic, Sentence sentence, AtomicSentence forgetMe) {
         var lhs = sentence.GetCopy();
         var rhs = sentence.GetCopy();

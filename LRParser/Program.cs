@@ -1,15 +1,15 @@
 ﻿var logic = new PropositionalLogic.PropositionalLogic();
-var input = Console.ReadLine();
 
-if (string.IsNullOrEmpty(input)) {
-    input = "Int(Simplify(Forget((P AND Q) OR Z, Z)))";
-}
+logic.Interpret(new []{
+    "Int(P AND Q)",
+    "Switch(Int(P AND Q),Q)",
+});
 
-var langObj = logic.TryParse(input);
-
-if (langObj is PropositionalLogic.Function function) {
-    logic.ExecuteFunction(function);
-}
+/*
+     "Int((P AND Q) OR Z)",
+   "Int(Forget((P AND Q) OR Z, Z))",
+   "Int(Simplify(Forget((P AND Q) OR Z, Z)))",
+*/
 
 /*    
 var other = new OtherLang.OtherLang();

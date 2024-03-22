@@ -1,3 +1,5 @@
+using LRParser.Language;
+
 namespace LRParser.CFG;
 
 public enum SymbolType {
@@ -12,7 +14,7 @@ public enum SpecialTerminal {
 
 public class Symbol {
     private readonly Enum _enum;
-    public object SyntheticAttribute;
+    public ILanguageObject SyntheticAttribute;
     public object InheritetAttribute;
     public Symbol(Enum @enum, SymbolType type) {
         _enum = @enum;
@@ -22,7 +24,7 @@ public class Symbol {
     public Symbol(Enum @enum, string lexValue, SymbolType type) {
         _enum = @enum;
         Type = type;
-        SyntheticAttribute = lexValue;
+        SyntheticAttribute = new LexValue(lexValue);
     }
 
     public SymbolType Type {

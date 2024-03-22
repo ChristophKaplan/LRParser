@@ -4,37 +4,35 @@ namespace PropositionalLogic;
 
 public class Function : ILanguageObject {
     public readonly string Func;
-    public readonly Sentence[] Parameters;
-    public readonly Sentence Sentence;
+    public readonly ILanguageObject[] Parameters;
 
-    public Function(string func, Sentence sentence, params Sentence[] parameters) {
+    public Function(string func, params ILanguageObject[] parameters) {
         Func = func;
-        Sentence = sentence;
         Parameters = parameters;
     }
 }
 
 public abstract class Sentence : ILanguageObject {
-    public Sentence Parent;
+    private Sentence _parent;
     public readonly List<Sentence> Children = new();
 
     public void AddChild(Sentence sentence) {
         Children.Add(sentence);
-        sentence.Parent = this;
+        sentence._parent = this;
     }
     
     public void InsertChild(int index, Sentence sentence) {
         Children.Insert(index,sentence);
-        sentence.Parent = this;
+        sentence._parent = this;
     }
     
     public void Reparent(Sentence parentOfThis) {
         
-        if (parentOfThis.Parent == null) {
+        if (parentOfThis._parent == null) {
             return;
         }
         
-        Sentence parent = parentOfThis.Parent;
+        Sentence parent = parentOfThis._parent;
         Sentence found = null;
         foreach (var childInParent in parent.Children) {
             if (childInParent.Equals(parentOfThis)) {
@@ -81,6 +79,9 @@ public class AtomicSentence : Sentence {
     public bool IsTruthValue { get => Symbol.Equals("True") || Symbol.Equals("False"); }
     public AtomicSentence(string symbol) {
         Symbol = symbol;
+    }
+    public AtomicSentence(LexValue symbol) {
+        Symbol = symbol.Value;
     }
 }
 

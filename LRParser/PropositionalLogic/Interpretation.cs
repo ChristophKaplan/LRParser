@@ -1,8 +1,9 @@
 using System.Text;
+using LRParser.Language;
 
 namespace PropositionalLogic;
 
-public class Interpretation {
+public class Interpretation : ILanguageObject{
     public readonly Dictionary<AtomicSentence, bool> _truthValues = new();
     
     public void Add(AtomicSentence atom, bool truthValue) {
@@ -34,12 +35,31 @@ public class Interpretation {
         };
     }
 
+    public bool EqualVariables(Interpretation other) {
+        if (_truthValues.Count != other._truthValues.Count) {
+            return false;
+        }
+        foreach (var kv in _truthValues) {
+            if (!other._truthValues.TryGetValue(kv.Key, out var value)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
     public override bool Equals(object? obj) {
-        return ToString().Equals(obj.ToString());
+        return GetHashCode().Equals(obj?.GetHashCode());
     }
 
     public override int GetHashCode() {
-        return ToString().GetHashCode();
+        var hash = 17;
+        foreach (var kv in _truthValues) {
+            var (key, value) = kv;
+            hash = HashCode.Combine(hash ,key, value);
+        }
+
+        return hash;
     }
     
     public override string ToString()
