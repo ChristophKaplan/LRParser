@@ -25,6 +25,7 @@ public class States<T, N> where T : Enum where N : Enum {
         _statesOutput += $"LALR, States reduced from: {stateCountBefore} to: {StateList.Count}\n";
 
         if (showOutput) Console.WriteLine(_statesOutput);
+        
         //Console.WriteLine(this);
     }
 

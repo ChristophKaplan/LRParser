@@ -26,10 +26,15 @@ public class Symbol {
         Type = type;
         SyntheticAttribute = new LexValue(lexValue);
     }
-
-    public SymbolType Type {
-        get;
+    
+    public Symbol(Symbol symbol) {
+        _enum = symbol._enum;
+        Type = symbol.Type;
+        SyntheticAttribute = symbol.SyntheticAttribute;
+        InheritetAttribute = symbol.InheritetAttribute;
     }
+
+    public SymbolType Type { get; }
     
     public static Symbol Epsilon => new(SpecialTerminal.Epsilon, SymbolType.Terminal);
     public static Symbol Dollar => new(SpecialTerminal.Dollar, SymbolType.Terminal);

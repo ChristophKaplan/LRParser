@@ -1,3 +1,4 @@
+using LRParser.CFG;
 using LRParser.Language;
 using LRParser.Lexer;
 
@@ -41,17 +42,17 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         var rule07 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close, Terminal.Connective, NonTerminal.Sentence);
         var rule08 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Negation, NonTerminal.Sentence);
 
-        var rule09 = AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.Sentence, NonTerminal.Ext, Terminal.Close);
-        var rule10 = AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
-        var rule11 = AddProductionRule(NonTerminal.Ext, Terminal.Comma, NonTerminal.Sentence);
-        var rule12 = AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.SecondStart, Terminal.Close);
-
-
+        var rule09 = AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.SecondStart, NonTerminal.Ext);
+        var rule10 = AddProductionRule(NonTerminal.Ext, Terminal.Comma, NonTerminal.SecondStart, NonTerminal.Ext);
+        var rule11 = AddProductionRule(NonTerminal.Ext, Terminal.Close);
+        
         rule01.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
         rule02.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
         rule03.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
 
-        rule04.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = new AtomicSentence((LexValue)rhs[0].SyntheticAttribute); });
+        rule04.SetSemanticAction((lhs, rhs) => {
+            lhs.SyntheticAttribute = new AtomicSentence((LexValue)rhs[0].SyntheticAttribute);
+        });
 
         rule05.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
 
@@ -85,29 +86,32 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
             }
         });
 
-
         rule08.SetSemanticAction((lhs, rhs) => lhs.SyntheticAttribute = new ComplexSentence("NOT", (Sentence)rhs[1].SyntheticAttribute));
 
         rule09.SetSemanticAction((lhs, rhs) => {
             var func = (LexValue)rhs[0].SyntheticAttribute;
-            var sentence = (Sentence)rhs[2].SyntheticAttribute;
-            var parameters = (Sentence)rhs[3].SyntheticAttribute;
-            lhs.SyntheticAttribute = new Function(func.Value, sentence, parameters);
-        });
+            var ext = (ArrayValue)rhs[3].SyntheticAttribute;
+            ext.Insert(rhs[2].SyntheticAttribute,0);
 
+            for (var i = 0; i < ext.Value.Length; i++) {
+                if (ext.Value[i] is Function f) {
+                    ext.Value[i] = ExecuteFunction(f);
+                }
+            }
+
+            lhs.SyntheticAttribute = new Function(func.Value, ext.Value);
+        });
+        
         rule10.SetSemanticAction((lhs, rhs) => {
-            var func = (LexValue)rhs[0].SyntheticAttribute;
-            var sentence = (Sentence)rhs[2].SyntheticAttribute;
-            lhs.SyntheticAttribute = new Function(func.Value, sentence);
+            var second = (AtomicSentence)rhs[1].SyntheticAttribute;
+            var ext = (ArrayValue)rhs[2].SyntheticAttribute;
+            
+            ext.Add(second);
+            lhs.SyntheticAttribute = ext;
         });
-
-        rule11.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
-
-        rule12.SetSemanticAction((lhs, rhs) => {
-            var func = (LexValue)rhs[0].SyntheticAttribute;
-            var f = (Function)rhs[2].SyntheticAttribute;
-            var sentence = (Sentence)ExecuteFunction(f);
-            lhs.SyntheticAttribute = new Function(func.Value, sentence);
+        
+        rule11.SetSemanticAction((lhs, rhs) => {
+            lhs.SyntheticAttribute = new ArrayValue(Array.Empty<ILanguageObject>());
         });
     }
 

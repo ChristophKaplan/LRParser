@@ -8,11 +8,50 @@ public interface ILanguageObject {
     
 }
 
-public class LexValue : ILanguageObject {
-    public string Value { get; }
+public struct LexValue : ILanguageObject {
+    public readonly string Value;
 
     public LexValue(string value) {
         Value = value;
+    }
+
+    public override string ToString() {
+        return Value;
+    }
+}
+
+public class ArrayValue : ILanguageObject {
+    public ILanguageObject[] Value { get;
+        set;
+    }
+
+    public ArrayValue(ILanguageObject[] value) {
+        Value = value;
+    }
+    
+    public void Add(ILanguageObject value) {
+        var temp = new ILanguageObject[Value.Length + 1];
+        for (var i = 0; i < Value.Length; i++) {
+            temp[i] = Value[i];
+        }
+
+        temp[^1] = value;
+        Value = temp;
+    }
+    
+    public void Insert(ILanguageObject value, int index) {
+        var temp = new ILanguageObject[Value.Length + 1];
+        for (var i = 0; i < index; i++) {
+            temp[i] = Value[i];
+        }
+
+        temp[index] = value;
+
+        for (var i = index + 1; i < temp.Length; i++) {
+            temp[i] = Value[i - 1];
+        }
+
+        Value = temp;
     }
 }
 
@@ -31,6 +70,6 @@ public abstract class Language<T,N>: ContextFreeGrammar<T,N> where T : Enum wher
         var tokens = Lexer.Tokenize(input);
         var tree = Parser.Parse(tokens);
         tree.EvaluateTree();
-        return (ILanguageObject)tree.Symbol.SyntheticAttribute;
+        return tree.Symbol.SyntheticAttribute;
     }
 }
