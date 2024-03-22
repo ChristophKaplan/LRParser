@@ -1,4 +1,3 @@
-using LRParser.CFG;
 using LRParser.Language;
 using LRParser.Lexer;
 
@@ -130,7 +129,6 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
             }
             case "Forget": {
                 var result = this.Forget((Sentence)function.Parameters[0], (AtomicSentence)function.Parameters[1]);
-                //Console.WriteLine($"Forget {function.Parameters[0]} in {function.Parameters[0]} equals: {result}");
                 return result;
             }
             case "SwitchMany": {

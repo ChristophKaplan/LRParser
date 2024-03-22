@@ -37,7 +37,7 @@ public static class PropositionalLogicExtensions {
         var n = new ComplexSentence(lhs, "OR", rhs);
         return n;
     }
-
+    
     public static Sentence Simplify(this PropositionalLogic logic, Sentence sentence) {
         var old = sentence;
         var copy = sentence.GetCopy(); 
