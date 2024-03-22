@@ -3,6 +3,7 @@ namespace LRParser.CFG;
 public class Production {
     internal readonly Symbol[] Conclusion;
     internal readonly Symbol Premise;
+    
     public Action<Symbol,Symbol[]> SemanticAction;
 
     public Production(Symbol premise, params Symbol[] conclusion) {
@@ -15,15 +16,30 @@ public class Production {
     }
 
     public override int GetHashCode() {
-        return ToString().GetHashCode();
+        var hash = Premise.GetHashCode();
+        foreach (var conc in Conclusion) {
+            hash = HashCode.Combine(hash, conc.GetHashCode());
+        }
+
+        return hash;
     }
 
     public override bool Equals(object? obj) {
-        if (obj is Production other) {
-            return ToString().Equals(other.ToString());
+        if (obj is not Production other) {
+            return false;
         }
 
-        return false;
+        if (!Premise.Equals(other.Premise) || Conclusion.Length != other.Conclusion.Length) {
+            return false;
+        }
+
+        for (var i = 0; i < Conclusion.Length; i++) {
+            if (!Conclusion[i].Equals(other.Conclusion[i])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public override string ToString() {

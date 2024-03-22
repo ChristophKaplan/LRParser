@@ -3,15 +3,15 @@ using LRParser.CFG;
 namespace LRParser.Parser;
 
 public class LRItem {
-    public readonly int DotPosition;
+    private readonly int _dotPosition;
 
     public LRItem(Production production, int dotPosition, List<Symbol> lookAheadSymbols) {
         Production = production;
-        DotPosition = dotPosition;
+        _dotPosition = dotPosition;
         LookAheadSymbols = lookAheadSymbols;
 
         if (CurrentSymbol != null && CurrentSymbol.IsEpsilon) {
-            DotPosition++;
+            _dotPosition++;
         }
     }
 
@@ -23,13 +23,13 @@ public class LRItem {
         get;
     }
 
-    public bool IsComplete => DotPosition == Production.Conclusion.Length;
-    public Symbol CurrentSymbol => IsComplete ? null : Production.Conclusion[DotPosition];
-    public LRItem NextItem => IsComplete ? null : new LRItem(Production, DotPosition + 1, LookAheadSymbols);
+    public bool IsComplete => _dotPosition == Production.Conclusion.Length;
+    public Symbol CurrentSymbol => IsComplete ? null : Production.Conclusion[_dotPosition];
+    public LRItem NextItem => IsComplete ? null : new LRItem(Production, _dotPosition + 1, LookAheadSymbols);
 
     public List<Symbol> GetSymbolsAfterDot() {
         List<Symbol> symbols = new();
-        for (var i = DotPosition + 1; i < Production.Conclusion.Length; i++) {
+        for (var i = _dotPosition + 1; i < Production.Conclusion.Length; i++) {
             symbols.Add(Production.Conclusion[i]);
         }
 
@@ -37,7 +37,7 @@ public class LRItem {
     }
 
     public bool CoreEquals(LRItem other) {
-        return Production.Equals(other.Production) && DotPosition == other.DotPosition;
+        return Production.Equals(other.Production) && _dotPosition == other._dotPosition;
     }
 
     private bool LookAheadEquals(List<Symbol> other) {
@@ -50,24 +50,24 @@ public class LRItem {
         }
 
         var other = (LRItem)obj;
-        return Production.Equals(other.Production) && DotPosition == other.DotPosition && LookAheadEquals(other.LookAheadSymbols);
+        return Production.Equals(other.Production) && _dotPosition == other._dotPosition && LookAheadEquals(other.LookAheadSymbols);
     }
 
     public override int GetHashCode() {
-        return HashCode.Combine(Production, DotPosition, LookAheadSymbols);
+        return HashCode.Combine(Production, _dotPosition, LookAheadSymbols);
     }
 
     public override string ToString() {
         var s = $"{Production.Premise} ->";
         for (var i = 0; i < Production.Conclusion.Length; i++) {
-            if (i == DotPosition) {
+            if (i == _dotPosition) {
                 s += " .";
             }
 
             s += $" {Production.Conclusion[i]}";
         }
 
-        if (DotPosition == Production.Conclusion.Length) {
+        if (_dotPosition == Production.Conclusion.Length) {
             s += " .";
         }
 

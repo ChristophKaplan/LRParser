@@ -30,21 +30,21 @@ public class OtherLang: Language<Terminal, NonTerminal>
     {
         AddByEnumType(typeof(Terminal));
         AddByEnumType(typeof(NonTerminal));
-
-        AddProductionRule(NonTerminal.StartSymbol, NonTerminal.SecondStart);
-        AddProductionRule(NonTerminal.SecondStart, NonTerminal.Declaration);
-        AddProductionRule(NonTerminal.SecondStart, NonTerminal.Declaration, NonTerminal.Assigment);
-        
-        AddProductionRule(NonTerminal.Declaration, Terminal.Type, Terminal.Variable, Terminal.SemiColon);
-        AddProductionRule(NonTerminal.Assigment, Terminal.Variable, Terminal.Equals, Terminal.Num, Terminal.SemiColon);
-        
         AddStartSymbol(NonTerminal.StartSymbol);
-
-        AddSemanticAction(0, (lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
-        AddSemanticAction(1, (lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
-        AddSemanticAction(2, (lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
         
-        AddSemanticAction(3, (lhs, rhs) =>
+        var rule01 = AddProductionRule(NonTerminal.StartSymbol, NonTerminal.SecondStart);
+        var rule02 = AddProductionRule(NonTerminal.SecondStart, NonTerminal.Declaration);
+        var rule03 = AddProductionRule(NonTerminal.SecondStart, NonTerminal.Declaration, NonTerminal.Assigment);
+        
+        var rule04 = AddProductionRule(NonTerminal.Declaration, Terminal.Type, Terminal.Variable, Terminal.SemiColon);
+        var rule05 = AddProductionRule(NonTerminal.Assigment, Terminal.Variable, Terminal.Equals, Terminal.Num, Terminal.SemiColon);
+        
+        
+        rule01.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
+        rule02.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
+        rule03.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
+        
+        rule04.SetSemanticAction((lhs, rhs) =>
         {
             var typeDeclaration = (string)rhs[0].SyntheticAttribute;
             var variable = (string)rhs[1].SyntheticAttribute;
@@ -56,7 +56,7 @@ public class OtherLang: Language<Terminal, NonTerminal>
             lhs.SyntheticAttribute = rhs[0].SyntheticAttribute + " " + rhs[1].SyntheticAttribute;
         });
         
-        AddSemanticAction(4, (lhs, rhs) =>
+        rule05.SetSemanticAction((lhs, rhs) =>
         {
             var variable = (string)rhs[0].SyntheticAttribute;
             var num =  (string)rhs[2].SyntheticAttribute;

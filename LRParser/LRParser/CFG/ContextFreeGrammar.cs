@@ -1,24 +1,24 @@
 namespace LRParser.CFG;
 
 public class ContextFreeGrammar<T, N>  where T : Enum where N : Enum {
-    private readonly List<Symbol> NonTerminals = new();
+    private readonly List<Symbol> _nonTerminals = new();
     public readonly List<Production> Productions = new();
-    private readonly List<Symbol> Terminals = new();
+    private readonly List<Symbol> _terminals = new();
     public Symbol StartSymbol;
-    
-    public void AddStartSymbol(N startSymbol) {
+
+    protected void AddStartSymbol(N startSymbol) {
         StartSymbol = new Symbol(startSymbol, SymbolType.NonTerminal);
     }
 
-    public void AddTerminal(T terminal) {
-        Terminals.Add(new Symbol(terminal, SymbolType.Terminal));
+    private void AddTerminal(T terminal) {
+        _terminals.Add(new Symbol(terminal, SymbolType.Terminal));
     }
 
-    public void AddNonTerminal(N nonTerminal) {
-        NonTerminals.Add(new Symbol(nonTerminal, SymbolType.NonTerminal));
+    private void AddNonTerminal(N nonTerminal) {
+        _nonTerminals.Add(new Symbol(nonTerminal, SymbolType.NonTerminal));
     }
 
-    public void AddByEnumType(Type enumType) {
+    protected void AddByEnumType(Type enumType) {
         foreach (int i in Enum.GetValues(enumType)) {
             if (Enum.IsDefined(enumType, i)) {
                 if (typeof(T).IsAssignableFrom(enumType)) {
@@ -31,23 +31,20 @@ public class ContextFreeGrammar<T, N>  where T : Enum where N : Enum {
         }
     }
 
-    public void AddProductionRule(Enum premise, params Enum[] conclusions) {
-        var a = EnumToSym(premise);
-        if (a == null) {
+    protected Production AddProductionRule(Enum premise, params Enum[] conclusions) {
+        var prem = EnumToSym(premise);
+        if (prem == null) {
             Console.WriteLine("Premise is null");
         }
 
-        var rule = new Production(a, conclusions.Select(conclusion => EnumToSym(conclusion)).ToArray());
+        var rule = new Production(prem, conclusions.Select(conclusion => EnumToSym(conclusion)).ToArray());
 
         if (rule.Premise == null) {
             Console.WriteLine("Premise is null");
         }
 
         Productions.Add(rule);
-    }
-
-    public void AddSemanticAction(int ruleId, Action<Symbol,Symbol[]> semanticAction) {
-        Productions[ruleId].SetSemanticAction(semanticAction);
+        return rule;
     }
 
     private Symbol EnumToSym(Enum p) {
@@ -79,8 +76,8 @@ public class ContextFreeGrammar<T, N>  where T : Enum where N : Enum {
     }
 
     public override string ToString() {
-        var n = NonTerminals.Aggregate("", (current, next) => $"{current} {next},");
-        var sigma = Terminals.Aggregate("", (current, next) => $"{current} {next},");
+        var n = _nonTerminals.Aggregate("", (current, next) => $"{current} {next},");
+        var sigma = _terminals.Aggregate("", (current, next) => $"{current} {next},");
         var p = Productions.Aggregate("", (current, next) => $"{current} {next},");
         var s = StartSymbol;
 

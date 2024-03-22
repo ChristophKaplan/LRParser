@@ -11,14 +11,15 @@ public enum ParserAction {
 public class Parser<T, N> where T : Enum where N : Enum {
     private readonly ContextFreeGrammar<T, N> _cfg;
     private readonly Table<T, N> _table;
+    private string _parsingOutput = string.Empty;
+    private readonly bool _showOutput;
     
-    public Parser(ContextFreeGrammar<T, N> cfg) {
+    public Parser(ContextFreeGrammar<T, N> cfg, bool showOutput = false) {
         _cfg = cfg;
-
+        _showOutput = showOutput;
         var startItem = new LRItem(cfg.Productions[0], 0, new List<Symbol> { Symbol.Dollar });
         var states = new States<T, N>(startItem,_cfg);
-        //Console.WriteLine(states);
-        _table = new Table<T, N>(states,_cfg);
+        _table = new Table<T, N>(states,_cfg, true);
     }
 
     public ConcreteSyntaxTree Parse(List<Symbol> input) {
@@ -46,6 +47,7 @@ public class Parser<T, N> where T : Enum where N : Enum {
             }
             else {
                 Error(input, stateStack);
+                break;
             }
         }
 
@@ -53,15 +55,17 @@ public class Parser<T, N> where T : Enum where N : Enum {
     }
 
     private void Accept() {
-        Console.WriteLine("ACCEPT");
+        _parsingOutput += "ACCEPT\n";
+        if(_showOutput) Console.WriteLine(_parsingOutput);
     }
 
     private void Error(List<Symbol> input, Stack<int> stateStack) {
-        throw new Exception($"ERROR: cant parse \"{input[0]}\". {stateStack.Peek()}");
+        _parsingOutput += $"ERROR: cant parse \"{input[0]}\". {stateStack.Peek()}\n";
+        throw new Exception(_parsingOutput);
     }
 
     private void Shift(List<Symbol> input, Stack<int> stateStack, Stack<ConcreteSyntaxTree> treeStack, int shiftState) {
-        Console.WriteLine($"SHIFT: {input[0]}, next state:{shiftState}");
+        _parsingOutput += $"SHIFT: {input[0]}, next state:{shiftState}\n";
         stateStack.Push(shiftState);
         treeStack.Push(new ConcreteSyntaxTree(input[0]));
         input.RemoveAt(0);
@@ -69,7 +73,7 @@ public class Parser<T, N> where T : Enum where N : Enum {
 
     private void Reduce(Stack<int> stateStack, Stack<ConcreteSyntaxTree> treeStack, int ruleId) {
         var rule = _cfg.Productions[ruleId];
-        Console.WriteLine($"REDUCE ({ruleId}) Rule: {rule}");
+        _parsingOutput += $"REDUCE ({ruleId}), Rule: {rule}\n";
 
         var reduced = new ConcreteSyntaxTree(rule);
 

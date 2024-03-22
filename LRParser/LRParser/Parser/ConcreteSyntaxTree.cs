@@ -7,6 +7,7 @@ public class ConcreteSyntaxTree {
 
     public ConcreteSyntaxTree(Symbol symbol) {
         Symbol = symbol;
+        _production = null;
         Children = new List<ConcreteSyntaxTree>();
     }
 

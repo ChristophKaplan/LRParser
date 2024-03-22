@@ -19,7 +19,6 @@ public abstract class Language<T,N>: ContextFreeGrammar<T,N> where T : Enum wher
     
     public object TryParse(string input) {
         var tokens = Lexer.Tokenize(input);
-        Console.WriteLine("Tokens: " + string.Join(", ", tokens));
         var tree = Parser.Parse(tokens);
         tree.EvaluateTree();
         return tree.Symbol.SyntheticAttribute;

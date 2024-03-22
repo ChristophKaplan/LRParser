@@ -3,25 +3,25 @@ using LRParser.CFG;
 namespace LRParser.Parser;
 
 public class Table <T, N> where T : Enum where N : Enum{
+    public Dictionary<(int, Symbol), (ParserAction, int)> ActionTable { get; } = new();
+    public Dictionary<(int, Symbol), int> GotoTable { get; } = new();
+    
     private readonly ContextFreeGrammar<T, N> _cfg;
-    public Table(States<T, N> states, ContextFreeGrammar<T, N> cfg) {
+    private string _tableOutput = string.Empty;
+    
+    public Table(States<T, N> states, ContextFreeGrammar<T, N> cfg, bool showOutput = false) {
         _cfg = cfg;
+        CreateTable(states);
+        if(showOutput) Console.WriteLine($"Table:\n{_tableOutput}");
+    }
+
+    private void CreateTable(States<T, N> states) {
         foreach (var state in states.StateList) {
             foreach (var item in state.Items) {
                 CreateEntry(state, item);
             }
         }
-        
-        //Console.WriteLine(this);
     }
-    
-    public Dictionary<(int, Symbol), (ParserAction, int)> ActionTable {
-        get;
-    } = new();
-
-    public Dictionary<(int, Symbol), int> GotoTable {
-        get;
-    } = new();
 
     private void CreateEntry(State state, LRItem item) {
         if (item.IsComplete) {
@@ -31,12 +31,13 @@ public class Table <T, N> where T : Enum where N : Enum{
             else {
                 foreach (var symbol in item.LookAheadSymbols) {
                     if (ActionTable.ContainsKey((state.Id, symbol)) && ActionTable[(state.Id, symbol)].Item1 == ParserAction.Shift) {
-                        Console.WriteLine($"shift reduce conflict, default to shift: {symbol}");
+                        _tableOutput += $"Shift reduce conflict, default to shift: {symbol}\n";
                         continue;
                     }
 
                     if (ActionTable.ContainsKey((state.Id, symbol)) && ActionTable[(state.Id, symbol)].Item1 == ParserAction.Reduce) {
-                        throw new Exception($"reduce/reduce conflict : {symbol}");
+                        _tableOutput += $"Reduce/reduce conflict: {symbol}\n";
+                        throw new Exception(_tableOutput);
                     }
 
                     ActionTable[(state.Id, symbol)] = (ParserAction.Reduce, _cfg.Productions.IndexOf(item.Production));
@@ -48,11 +49,12 @@ public class Table <T, N> where T : Enum where N : Enum{
             switch (symbol.Type) {
                 case SymbolType.Terminal: {
                     if (ActionTable.ContainsKey((state.Id, symbol)) && ActionTable[(state.Id, symbol)].Item1 == ParserAction.Reduce) {
-                        Console.WriteLine($"shift reduce conflict, default to shift : {symbol}");
+                        _tableOutput += $"Shift reduce conflict, default to shift : {symbol}\n";
                     }
 
                     if (!state.Transitions.TryGetValue(symbol, out var nextState)) {
-                        throw new Exception($"cant find shift symbol {symbol} at state {state}!");
+                        _tableOutput += $"Cant find shift symbol {symbol} at state {state}!\n";
+                        throw new Exception(_tableOutput);
                     }
 
                     ActionTable[(state.Id, symbol)] = (ParserAction.Shift, nextState.Id);

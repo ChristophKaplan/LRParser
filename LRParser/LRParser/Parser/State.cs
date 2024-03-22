@@ -26,18 +26,18 @@ public class State {
     }
 
     public bool HasEqualCore(State other) {
-        return Items.Count == other.Items.Count && Items.All(item => other.Items.Any(otherItem => item.CoreEquals(otherItem)));
+        return Items.Count == other.Items.Count && Items.All(item => other.Items.Any(item.CoreEquals));
     }
 
     public bool HasEqualItems(State other) {
         return Items.Count == other.Items.Count && Items.All(item => other.Items.Contains(item));
     }
 
-    public bool HasConflict() {
-        return HasReduceReduceConflict() || HasShiftReduceConflict();
+    public bool HasConflict(ref string output) {
+        return HasReduceReduceConflict(ref output) || HasShiftReduceConflict(ref output);
     }
 
-    private bool HasReduceReduceConflict() {
+    private bool HasReduceReduceConflict(ref string output) {
         foreach (var item in Items) {
             if (!item.IsComplete) {
                 continue;
@@ -50,7 +50,7 @@ public class State {
 
                 foreach (var item2 in Items) {
                     if (item2.IsComplete && !item.Equals(item2) && item2.LookAheadSymbols.Contains(laSym)) {
-                        Console.WriteLine($"Reduce-Reduce conflict: {item} and {item2} contains reduce symbol:{laSym} on State:{Id}");
+                        output += $"Reduce-Reduce conflict: {item} and {item2} contains reduce symbol:{laSym} on State:{Id}\n";
                         return true;
                     }
                 }
@@ -60,11 +60,11 @@ public class State {
         return false;
     }
 
-    private bool HasShiftReduceConflict() {
+    private bool HasShiftReduceConflict(ref string output) {
         foreach (var shiftSymbol in Transitions.Keys) {
             foreach (var item in Items) {
                 if (item.IsComplete && item.LookAheadSymbols.Contains(shiftSymbol)) {
-                    Console.WriteLine($"Shift-Reduce conflict: {item} is complete and contains ShiftSymbol:{shiftSymbol} on State:{Id}");
+                    output += $"Shift-Reduce conflict: {item} is complete and contains ShiftSymbol:{shiftSymbol} on State:{Id}\n";
                     return true;
                 }
             }

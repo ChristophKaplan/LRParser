@@ -37,7 +37,7 @@ public class Lexer<T> where T : Enum {
 
             currentIndex += matchLength;
         }
-
+        
         return result;
     }
 }
