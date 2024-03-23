@@ -106,9 +106,8 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         });
         
         rule10.SetSemanticAction((lhs, rhs) => {
-            var second = (Sentence)rhs[1].SyntheticAttribute;
+            var second = rhs[1].SyntheticAttribute;
             var ext = (ArrayValue)rhs[2].SyntheticAttribute;
-            
             ext.Add(second);
             lhs.SyntheticAttribute = ext;
         });
