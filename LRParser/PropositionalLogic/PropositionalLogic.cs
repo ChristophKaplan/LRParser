@@ -14,12 +14,12 @@ public enum Terminal {
 }
 
 public enum NonTerminal {
-    StartSymbol, SecondStart, Sentence, ComplexSentence, Ext
+    StartSymbol, LangObject, Sentence, ComplexSentence, Ext
 }
 
 public class PropositionalLogic : Language<Terminal, NonTerminal> {
     public PropositionalLogic() : base(
-        new TokenDefinition<Terminal>(Terminal.Function, "Mod|Forget|SkepForget|Int|Simplify|SwitchMany"),
+        new TokenDefinition<Terminal>(Terminal.Function, "Mod|Forget|SkepForget|MyForget|Int|Simplify|SwitchMany"),
         new TokenDefinition<Terminal>(Terminal.Open, "\\("),
         new TokenDefinition<Terminal>(Terminal.Comma, ","),
         new TokenDefinition<Terminal>(Terminal.Close, "\\)"),
@@ -33,17 +33,20 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         AddByEnumType(typeof(NonTerminal));
         AddStartSymbol(NonTerminal.StartSymbol);
 
-        var rule01 = AddProductionRule(NonTerminal.StartSymbol, NonTerminal.SecondStart);
-        var rule02 = AddProductionRule(NonTerminal.SecondStart, NonTerminal.Sentence);
-        var rule03 = AddProductionRule(NonTerminal.SecondStart, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
+        var rule01 = AddProductionRule(NonTerminal.StartSymbol, NonTerminal.LangObject);
+        var rule02 = AddProductionRule(NonTerminal.LangObject, NonTerminal.Sentence);
+        
+        var rule03 = AddProductionRule(NonTerminal.Sentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
         var rule04 = AddProductionRule(NonTerminal.Sentence, Terminal.AtomicSentence);
         var rule05 = AddProductionRule(NonTerminal.Sentence, NonTerminal.ComplexSentence);
+        
         var rule06 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.AtomicSentence, Terminal.Connective, NonTerminal.Sentence);
         var rule07 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close, Terminal.Connective, NonTerminal.Sentence);
+        
         var rule08 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Negation, NonTerminal.Sentence);
 
-        var rule09 = AddProductionRule(NonTerminal.SecondStart, Terminal.Function, Terminal.Open, NonTerminal.SecondStart, NonTerminal.Ext);
-        var rule10 = AddProductionRule(NonTerminal.Ext, Terminal.Comma, NonTerminal.SecondStart, NonTerminal.Ext);
+        var rule09 = AddProductionRule(NonTerminal.LangObject, Terminal.Function, Terminal.Open, NonTerminal.LangObject, NonTerminal.Ext);
+        var rule10 = AddProductionRule(NonTerminal.Ext, Terminal.Comma, NonTerminal.LangObject, NonTerminal.Ext);
         var rule11 = AddProductionRule(NonTerminal.Ext, Terminal.Close);
         
         rule01.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
@@ -103,7 +106,7 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         });
         
         rule10.SetSemanticAction((lhs, rhs) => {
-            var second = (AtomicSentence)rhs[1].SyntheticAttribute;
+            var second = (Sentence)rhs[1].SyntheticAttribute;
             var ext = (ArrayValue)rhs[2].SyntheticAttribute;
             
             ext.Add(second);
@@ -118,7 +121,13 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
     private ILanguageObject ExecuteFunction(Function function) {
         switch (function.Func) {
             case "Int": {
-                return this.Int((Sentence)function.Parameters[0]);
+
+                Sentence[] a = new Sentence[function.Parameters.Length];
+                for (var i = 0; i < function.Parameters.Length; i++) {
+                    a[i] = (Sentence)function.Parameters[i];
+                }
+
+                return this.Int(a);
             }
             case "Mod": {
                 return this.Mod((Sentence)function.Parameters[0]);
@@ -136,6 +145,10 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
                 var result = this.SkepForget((Sentence)function.Parameters[0], (AtomicSentence)function.Parameters[1]);
                 return result;
             }
+            case "MyForget": {
+                var result = this.MyForget((Sentence)function.Parameters[0], (AtomicSentence)function.Parameters[1]);
+                return result;
+            }
             case "SwitchMany": {
                 var result = this.SwitchMany((InterpretationSet)function.Parameters[0], (AtomicSentence)function.Parameters[1]);
                 return result;
@@ -146,20 +159,11 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         return null;
     }
 
-    public List<Interpretation> GenerateInterpretations(Sentence sentence) {
+    public List<Interpretation> GenerateInterpretations(params Sentence[] sentences) {
         var interpretations = new List<Interpretation>();
-
-        var cleanAtoms = new List<AtomicSentence>();
-        var atoms = sentence.GetAtoms();
-        for (var i = 0; i < atoms.Count; i++) {
-            if (atoms[i].Tautology || atoms[i].Falsum) {
-                continue;
-            }
-            if(!cleanAtoms.Contains(atoms[i])) cleanAtoms.Add(atoms[i]);
-        }
-        
+        var cleanAtoms = GetAtoms(sentences);        
         var truthTable = GenerateTruthTable(cleanAtoms.Count);
-
+        
         foreach (var truthValues in truthTable) {
             var interpretation = new Interpretation();
             var list = truthValues.ToArray();
@@ -173,6 +177,24 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         }
 
         return interpretations;
+
+        List<AtomicSentence> GetAtoms(params Sentence[] sentences) {
+            var reducedAtoms = new List<AtomicSentence>();
+            var collectedAtoms = new List<AtomicSentence>();
+            
+            foreach (var s in sentences) {
+                collectedAtoms.AddRange(s.GetAtoms());
+            }
+            
+            foreach (var atom in collectedAtoms) {
+                if (atom.Tautology || atom.Falsum) {
+                    continue;
+                }
+                if(!reducedAtoms.Contains(atom)) reducedAtoms.Add(atom);
+            }
+
+            return reducedAtoms;
+        }
     }
 
     private IEnumerable<IEnumerable<bool>> GenerateTruthTable(int n) {
