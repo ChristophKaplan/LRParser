@@ -1,6 +1,4 @@
 using LRParser.CFG;
-using LRParser.Language;
-using PropositionalLogic;
 
 namespace LRParser.Parser;
 
