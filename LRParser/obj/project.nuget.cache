@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "okp5T+tT4MYz/GuqhYHValUSQEbRa0Z6yDZ/yxfTJmIvJa0t8CnZ2ckhIA6Jo8XKbpa6NCWLotdsNZUgJtBx0Q==",
+  "dgSpecHash": "kXmYeCb32f3WK4MxwRFpByT3RcefnBT06N4tezf4Xrj25MuhZmzbsFkgggoYqxMJvu3vx4Ps4arIbdygME3e7w==",
   "success": true,
-  "projectFilePath": "/Volumes/Data/Development/LRParser/LRParser/LRParser.csproj",
+  "projectFilePath": "E:\\Development\\LRParser\\LRParser\\LRParser.csproj",
   "expectedPackageFiles": [
-    "/Users/delphicmind/.nuget/packages/consoletables/2.6.1/consoletables.2.6.1.nupkg.sha512"
+    "C:\\Users\\delphicmind\\.nuget\\packages\\consoletables\\2.6.1\\consoletables.2.6.1.nupkg.sha512"
   ],
   "logs": []
 }

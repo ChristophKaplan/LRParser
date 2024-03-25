@@ -7,10 +7,9 @@
     <mapping directory="$PROJECT_DIR$/../EntityComponentSystemSamples" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../MySimulation" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../NeuralNetwork" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../PropositionalLogic" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../PropositionalLogic/LRParser" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../RetroTVFX" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../SimpleLogic" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../cpptest/bgfx" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../cpptest/bimg" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../cpptest/bx" vcs="Git" />
   </component>
 </project>
