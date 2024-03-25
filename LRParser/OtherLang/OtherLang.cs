@@ -87,6 +87,6 @@ public class OtherLang: Language<Terminal, NonTerminal>
     
     public ILanguageObject TryParse(string input)
     {
-        return TryParse(input);
+        return base.TryParse(input);
     }
 }

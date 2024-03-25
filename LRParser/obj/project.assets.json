@@ -40,27 +40,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\delphicmind\\.nuget\\packages\\": {}
+    "/Users/delphicmind/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\Development\\LRParser\\LRParser\\LRParser.csproj",
+      "projectUniqueName": "/Volumes/Data/Development/LRParser/LRParser/LRParser.csproj",
       "projectName": "LRParser",
-      "projectPath": "E:\\Development\\LRParser\\LRParser\\LRParser.csproj",
-      "packagesPath": "C:\\Users\\delphicmind\\.nuget\\packages\\",
-      "outputPath": "E:\\Development\\LRParser\\LRParser\\obj\\",
+      "projectPath": "/Volumes/Data/Development/LRParser/LRParser/LRParser.csproj",
+      "packagesPath": "/Users/delphicmind/.nuget/packages/",
+      "outputPath": "/Volumes/Data/Development/LRParser/LRParser/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\delphicmind\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "/Users/delphicmind/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net7.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -100,7 +97,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.403\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.306/RuntimeIdentifierGraph.json"
       }
     }
   }
