@@ -1,7 +1,7 @@
 using LRParser.Language;
 using LRParser.Lexer;
 
-namespace OtherLang;
+namespace ExampleLang;
 
 public enum Terminal {
     Type,
@@ -22,9 +22,9 @@ public class IntValue : ILanguageObject {
     }
 }
 
-public class OtherLang: Language<Terminal, NonTerminal>
+public class ExampleLang: Language<Terminal, NonTerminal>
 {
-    public OtherLang(): base(
+    public ExampleLang(): base(
         new TokenDefinition<Terminal>(Terminal.SemiColon, ";"),
         new TokenDefinition<Terminal>(Terminal.Equals, "="),
         new TokenDefinition<Terminal>(Terminal.Num, "\\d+"),
