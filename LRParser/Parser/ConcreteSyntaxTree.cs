@@ -3,19 +3,19 @@ using LRParser.CFG;
 namespace LRParser.Parser;
 
 public class ConcreteSyntaxTree {
-    public Action<Symbol,Symbol[]> SemanticAction;
+    private readonly Action<Symbol,Symbol[]> _semanticAction;
     public Symbol Symbol { get; }
     private List<ConcreteSyntaxTree> Children { get; }
     
     public ConcreteSyntaxTree(Symbol symbol) {
         Symbol = symbol;
-        SemanticAction = null;
+        _semanticAction = null;
         Children = new List<ConcreteSyntaxTree>();
     }
 
     public ConcreteSyntaxTree(Symbol symbol, Action<Symbol,Symbol[]> semanticAction) {
         Symbol = symbol;
-        SemanticAction = semanticAction;
+        _semanticAction = semanticAction;
         Children = new List<ConcreteSyntaxTree>();
     }
 
@@ -41,6 +41,6 @@ public class ConcreteSyntaxTree {
 
     private void Semantic() {
         var parameters = Children.Select(child => child.Symbol).ToArray();
-        SemanticAction.Invoke(Symbol, parameters);
+        _semanticAction.Invoke(Symbol, parameters);
     }
 }

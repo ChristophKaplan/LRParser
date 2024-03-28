@@ -4,11 +4,7 @@ public class ContextFreeGrammar<T, N>  where T : Enum where N : Enum {
     private readonly List<Symbol> _nonTerminals = new();
     public readonly List<Production> Productions = new();
     private readonly List<Symbol> _terminals = new();
-    public Symbol StartSymbol;
-
-    protected void AddStartSymbol(N startSymbol) {
-        StartSymbol = new Symbol(startSymbol, SymbolType.NonTerminal);
-    }
+    public readonly Symbol StartSymbol = new (SpecialNonTerminal.Start, SymbolType.NonTerminal);
 
     private void AddTerminal(T terminal) {
         _terminals.Add(new Symbol(terminal, SymbolType.Terminal));
@@ -47,34 +43,35 @@ public class ContextFreeGrammar<T, N>  where T : Enum where N : Enum {
         return rule;
     }
 
-    private Symbol EnumToSym(Enum p) {
-        if (GetType(p) == SymbolType.Terminal) {
-            return new Symbol((T)p, SymbolType.Terminal);
-        }
-
-        if (GetType(p) == SymbolType.NonTerminal) {
-            return new Symbol((N)p, SymbolType.NonTerminal);
-        }
-
-        throw new Exception($"type {GetType(p)} not found");
-    }
-
-    private SymbolType GetType(Enum symbol) {
+    private Symbol EnumToSym(Enum symbol) {
         if (symbol.GetType() == typeof(T)) {
-            return SymbolType.Terminal;
+            return new Symbol((T)symbol, SymbolType.Terminal);
         }
 
         if (symbol.GetType() == typeof(N)) {
-            return SymbolType.NonTerminal;
+            return new Symbol((N)symbol, SymbolType.NonTerminal);
+        }
+        
+        if (symbol.GetType() == typeof(SpecialTerminal)) {
+            return new Symbol((SpecialTerminal)symbol, SymbolType.Terminal);
+        }
+        
+        if (symbol.GetType() == typeof(SpecialNonTerminal)) {
+            return new Symbol((SpecialNonTerminal)symbol, SymbolType.NonTerminal);
         }
 
-        throw new Exception("type not found");
+        throw new Exception($"enum type {symbol.GetType()} not found");
     }
 
     public List<Production> GetAllProdForNonTerminal(Symbol nonTerminal) {
         return Productions.Where(rule => rule.Premise.Equals(nonTerminal)).ToList();
     }
 
+    public bool HasStartSymbol() {
+        return Productions.Any(rule => rule.Premise.IsStartSymbol);
+    }
+    
+    
     public override string ToString() {
         var n = _nonTerminals.Aggregate("", (current, next) => $"{current} {next},");
         var sigma = _terminals.Aggregate("", (current, next) => $"{current} {next},");

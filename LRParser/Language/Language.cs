@@ -6,7 +6,7 @@ namespace LRParser.Language;
 
 public interface ILanguageObject { }
 
-public class LexValue : ILanguageObject {
+public struct LexValue : ILanguageObject {
     public readonly string Value;
 
     public LexValue(string value) {
@@ -23,7 +23,7 @@ public class LexValue : ILanguageObject {
     }
 }
 
-public class ArrayValue : ILanguageObject {
+public struct ArrayValue : ILanguageObject {
     public ILanguageObject[] Value { get;
         set;
     }
@@ -61,12 +61,20 @@ public class ArrayValue : ILanguageObject {
 public abstract class Language<T,N>: ContextFreeGrammar<T,N> where T : Enum where N : Enum{
     private readonly Lexer<T> Lexer;
     private readonly Parser<T, N> Parser;
+    
+    protected abstract TokenDefinition<T>[] SetUpTokenDefinitions();
     protected abstract void SetUpGrammar();
 
-    protected Language(params TokenDefinition<T>[] tokenDef) {
-        Lexer = new Lexer<T>(tokenDef);
+    protected Language() {
+        Lexer = new Lexer<T>(SetUpTokenDefinitions());
+        AddByEnumType(typeof(T));
+        AddByEnumType(typeof(N));
         SetUpGrammar();
         Parser = new Parser<T, N>(this);
+
+        if (!HasStartSymbol()) {
+            throw new Exception("No production with start symbol found!");
+        }
     }
 
     protected virtual ILanguageObject TryParse(string input) {

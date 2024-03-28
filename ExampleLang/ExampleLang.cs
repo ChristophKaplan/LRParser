@@ -1,3 +1,4 @@
+using LRParser.CFG;
 using LRParser.Language;
 using LRParser.Lexer;
 
@@ -12,7 +13,7 @@ public enum Terminal {
 }
 
 public enum NonTerminal {
-    StartSymbol,SecondStart, Declaration, Assigment,
+    LangObject, Declaration, Assigment,
 }
 
 public class IntValue : ILanguageObject {
@@ -24,24 +25,24 @@ public class IntValue : ILanguageObject {
 
 public class ExampleLang: Language<Terminal, NonTerminal>
 {
-    public ExampleLang(): base(
-        new TokenDefinition<Terminal>(Terminal.SemiColon, ";"),
-        new TokenDefinition<Terminal>(Terminal.Equals, "="),
-        new TokenDefinition<Terminal>(Terminal.Num, "\\d+"),
-        new TokenDefinition<Terminal>(Terminal.Type, "Int|Float"),
-        new TokenDefinition<Terminal>(Terminal.Variable, "[A-Z][a-z]*")) {
-    }
+    public ExampleLang(){ }
 
     private Dictionary<string, string> TypeTable = new ();
+    protected override TokenDefinition<Terminal>[] SetUpTokenDefinitions() {
+        return new[] {
+            new TokenDefinition<Terminal>(Terminal.SemiColon, ";"),
+            new TokenDefinition<Terminal>(Terminal.Equals, "="),
+            new TokenDefinition<Terminal>(Terminal.Num, "\\d+"),
+            new TokenDefinition<Terminal>(Terminal.Type, "Int|Float"),
+            new TokenDefinition<Terminal>(Terminal.Variable, "[A-Z][a-z]*")
+        };
+    }
+
     protected override void SetUpGrammar()
     {
-        AddByEnumType(typeof(Terminal));
-        AddByEnumType(typeof(NonTerminal));
-        AddStartSymbol(NonTerminal.StartSymbol);
-        
-        var rule01 = AddProductionRule(NonTerminal.StartSymbol, NonTerminal.SecondStart);
-        var rule02 = AddProductionRule(NonTerminal.SecondStart, NonTerminal.Declaration);
-        var rule03 = AddProductionRule(NonTerminal.SecondStart, NonTerminal.Declaration, NonTerminal.Assigment);
+        var rule01 = AddProductionRule(SpecialNonTerminal.Start, NonTerminal.LangObject);
+        var rule02 = AddProductionRule(NonTerminal.LangObject, NonTerminal.Declaration);
+        var rule03 = AddProductionRule(NonTerminal.LangObject, NonTerminal.Declaration, NonTerminal.Assigment);
         
         var rule04 = AddProductionRule(NonTerminal.Declaration, Terminal.Type, Terminal.Variable, Terminal.SemiColon);
         var rule05 = AddProductionRule(NonTerminal.Assigment, Terminal.Variable, Terminal.Equals, Terminal.Num, Terminal.SemiColon);

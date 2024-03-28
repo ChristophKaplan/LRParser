@@ -9,7 +9,11 @@ public enum SymbolType {
 
 public enum SpecialTerminal {
     Epsilon,
-    Dollar
+    Dollar,
+}
+
+public enum SpecialNonTerminal {
+    Start
 }
 
 public class Symbol {
@@ -40,7 +44,8 @@ public class Symbol {
     public static Symbol Dollar => new(SpecialTerminal.Dollar, SymbolType.Terminal);
     public bool IsEpsilon => Type == SymbolType.Terminal && _enum.Equals(SpecialTerminal.Epsilon);
     public bool IsDollar => Type == SymbolType.Terminal && _enum.Equals(SpecialTerminal.Dollar);
-
+    public bool IsStartSymbol => Type == SymbolType.NonTerminal && _enum.Equals(SpecialNonTerminal.Start);
+    
     public override int GetHashCode() {
         return _enum.GetHashCode();
     }
