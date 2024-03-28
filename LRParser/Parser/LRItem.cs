@@ -10,7 +10,7 @@ public class LRItem {
         _dotPosition = dotPosition;
         LookAheadSymbols = lookAheadSymbols;
 
-        if (CurrentSymbol != null && CurrentSymbol.IsEpsilon) {
+        if (!IsComplete && CurrentSymbol.IsEpsilon) {
             _dotPosition++;
         }
     }
@@ -24,8 +24,14 @@ public class LRItem {
     }
 
     public bool IsComplete => _dotPosition == Production.Conclusion.Length;
-    public Symbol CurrentSymbol => IsComplete ? null : Production.Conclusion[_dotPosition];
-    public LRItem NextItem => IsComplete ? null : new LRItem(Production, _dotPosition + 1, LookAheadSymbols);
+    public Symbol CurrentSymbol => Production.Conclusion[_dotPosition];
+    public LRItem NextItem {
+        get {
+            var nPos = _dotPosition;
+            if (!IsComplete) nPos++;
+            return new LRItem(Production, nPos , LookAheadSymbols);
+        }
+    }
 
     public List<Symbol> GetSymbolsAfterDot() {
         List<Symbol> symbols = new();

@@ -19,7 +19,8 @@ public enum SpecialNonTerminal {
 public class Symbol {
     private readonly Enum _enum;
     public ILanguageObject SyntheticAttribute;
-    public object InheritetAttribute;
+    public object InheritedAttribute;
+    
     public Symbol(Enum @enum, SymbolType type) {
         _enum = @enum;
         Type = type;
@@ -35,7 +36,7 @@ public class Symbol {
         _enum = symbol._enum;
         Type = symbol.Type;
         SyntheticAttribute = symbol.SyntheticAttribute;
-        InheritetAttribute = symbol.InheritetAttribute;
+        InheritedAttribute = symbol.InheritedAttribute;
     }
 
     public SymbolType Type { get; }

@@ -57,11 +57,11 @@ public class ExampleLang: Language<Terminal, NonTerminal>
             var typeDeclaration = (LexValue)rhs[0].SyntheticAttribute;
             var variable = (LexValue)rhs[1].SyntheticAttribute;
             
-            rhs[1].InheritetAttribute = typeDeclaration;
+            rhs[1].InheritedAttribute = typeDeclaration;
             TypeTable.Add(variable.Value, typeDeclaration.Value);
             
             Console.WriteLine(typeDeclaration.Value + " " + variable.Value);
-            lhs.InheritetAttribute = typeDeclaration;
+            lhs.InheritedAttribute = typeDeclaration;
             lhs.SyntheticAttribute = variable;
         });
         
@@ -74,13 +74,13 @@ public class ExampleLang: Language<Terminal, NonTerminal>
                 throw new Exception($"Variable: {variable} not declared ");
             }
             
-            rhs[0].InheritetAttribute = type;
+            rhs[0].InheritedAttribute = type;
             
-            lhs.InheritetAttribute = type;
+            lhs.InheritedAttribute = type;
             lhs.SyntheticAttribute = num;
             
             if (type.Equals("Int")) {
-                lhs.InheritetAttribute = typeof(int);
+                lhs.InheritedAttribute = typeof(int);
                 lhs.SyntheticAttribute = new IntValue(int.Parse(num.Value));
             }
         });

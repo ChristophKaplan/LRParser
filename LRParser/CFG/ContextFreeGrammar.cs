@@ -28,17 +28,7 @@ public class ContextFreeGrammar<T, N>  where T : Enum where N : Enum {
     }
 
     protected Production AddProductionRule(Enum premise, params Enum[] conclusions) {
-        var prem = EnumToSym(premise);
-        if (prem == null) {
-            Console.WriteLine("Premise is null");
-        }
-
-        var rule = new Production(prem, conclusions.Select(conclusion => EnumToSym(conclusion)).ToArray());
-
-        if (rule.Premise == null) {
-            Console.WriteLine("Premise is null");
-        }
-
+        var rule = new Production(EnumToSym(premise), conclusions.Select(conclusion => EnumToSym(conclusion)).ToArray());
         Productions.Add(rule);
         return rule;
     }
@@ -66,11 +56,6 @@ public class ContextFreeGrammar<T, N>  where T : Enum where N : Enum {
     public List<Production> GetAllProdForNonTerminal(Symbol nonTerminal) {
         return Productions.Where(rule => rule.Premise.Equals(nonTerminal)).ToList();
     }
-
-    public bool HasStartSymbol() {
-        return Productions.Any(rule => rule.Premise.IsStartSymbol);
-    }
-    
     
     public override string ToString() {
         var n = _nonTerminals.Aggregate("", (current, next) => $"{current} {next},");
