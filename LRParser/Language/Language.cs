@@ -91,7 +91,7 @@ public abstract class Language<T,N>: ContextFreeGrammar<T,N> where T : Enum wher
         return Productions.Any(rule => rule.Premise.IsStartSymbol);
     }
     
-    protected virtual ILanguageObject TryParse(string input) {
+    public virtual ILanguageObject TryParse(string input) {
         var tokens = Lexer.Tokenize(input);
         var tree = Parser.Parse(tokens);
         tree.EvaluateTree();
