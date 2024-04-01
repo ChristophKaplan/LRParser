@@ -21,6 +21,10 @@ public class IntValue : ILanguageObject {
     public IntValue(int value) {
         Value = value;
     }
+    
+    public string ToHTML() {
+        throw new NotImplementedException();
+    }
 }
 
 public class ExampleLang: Language<Terminal, NonTerminal>

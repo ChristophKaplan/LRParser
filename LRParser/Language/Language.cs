@@ -4,7 +4,9 @@ using LRParser.Parser;
 
 namespace LRParser.Language;
 
-public interface ILanguageObject { }
+public interface ILanguageObject {
+    string ToHTML();
+}
 
 public struct LexValue : ILanguageObject {
     public readonly string Value;
@@ -16,7 +18,11 @@ public struct LexValue : ILanguageObject {
     public override string ToString() {
         return Value;
     }
-    
+
+    public string ToHTML() {
+        throw new NotImplementedException();
+    }
+
     public static implicit operator string(LexValue value)
     {
         return value.Value;
@@ -55,6 +61,10 @@ public struct ArrayValue : ILanguageObject {
         }
 
         Value = temp;
+    }
+    
+    public string ToHTML() {
+        throw new NotImplementedException();
     }
 }
 
