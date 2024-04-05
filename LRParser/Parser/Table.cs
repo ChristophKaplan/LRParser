@@ -23,6 +23,10 @@ public class Table <T, N> where T : Enum where N : Enum{
         }
     }
 
+    public List<Symbol> ExpectedSymbols(int state) {
+        return ActionTable.Where(x => x.Key.Item1 == state).Select(x => x.Key.Item2).ToList();
+    }
+    
     private void CreateEntry(State state, LRItem item) {
         if (item.IsComplete) {
             if (item.Production.Premise.Equals(_cfg.StartSymbol)) {
@@ -36,7 +40,10 @@ public class Table <T, N> where T : Enum where N : Enum{
                     }
 
                     if (ActionTable.ContainsKey((state.Id, symbol)) && ActionTable[(state.Id, symbol)].Item1 == ParserAction.Reduce) {
-                        _tableOutput += $"Reduce/reduce conflict: {symbol}\n";
+                        int r1 = ActionTable[(state.Id, symbol)].Item2;
+                        int r2 = _cfg.Productions.IndexOf(item.Production);
+                        
+                        _tableOutput += $"Reduce/Reduce conflict: {symbol}\n {_cfg.Productions[r1]} vs. {_cfg.Productions[r2]} \n {state}";
                         throw new Exception(_tableOutput);
                     }
 

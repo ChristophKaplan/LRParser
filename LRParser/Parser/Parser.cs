@@ -31,6 +31,9 @@ public class Parser<T, N> where T : Enum where N : Enum {
         var treeStack = new Stack<ConcreteSyntaxTree>();
 
         while (true) {
+            //DEBUG
+            //Console.WriteLine(treeStack.Aggregate("", (current, tree) => tree.Symbol + " " +current ));
+            
             if (!_table.ActionTable.TryGetValue((stateStack.Peek(), input[0]), out var action)) {
                 Error(input, stateStack);
             }
@@ -60,7 +63,14 @@ public class Parser<T, N> where T : Enum where N : Enum {
     }
 
     private void Error(List<Symbol> input, Stack<int> stateStack) {
-        _parsingOutput += $"ERROR: cant parse \"{input[0]}\". {stateStack.Peek()}\n";
+        var expected = _table.ExpectedSymbols(stateStack.Peek());
+        _parsingOutput += $"ERROR: cant parse \"{input[0]}\". {stateStack.Peek()}\n Expected Symbols: {expected.Aggregate("", (current, symbol) => current + symbol + " ")}\n";
+        
+        //DEBUG
+        /*foreach (var ex in expected) {
+            _table.ActionTable.TryGetValue((stateStack.Peek(), ex), out var action);
+            Console.WriteLine($"Expected: {ex}, Action: {action.Item1} {_cfg.Productions[action.Item2]} ");
+        }*/
         throw new Exception($"Error:\n{_parsingOutput}");
     }
 

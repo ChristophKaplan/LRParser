@@ -77,7 +77,7 @@ public class LRItem {
             s += " .";
         }
 
-        s += $", {string.Join(" ", LookAheadSymbols)}";
+        s += $" ({string.Join(" ", LookAheadSymbols)})";
         return $"[{s}]";
     }
 }

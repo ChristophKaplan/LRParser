@@ -24,6 +24,8 @@ public class States<T, N> where T : Enum where N : Enum {
         MergeStates(StateList);
         _statesOutput += $"LALR, States reduced from: {stateCountBefore} to: {StateList.Count}\n";
 
+        var valid = ValidateStates(StateList);
+        
         if (showOutput) Console.WriteLine(_statesOutput);
         
         //Console.WriteLine(this);
@@ -34,7 +36,6 @@ public class States<T, N> where T : Enum where N : Enum {
         var states = new List<State> { firstState };
         var count = 0;
         GenerateStates(firstState, states, ref count);
-        var valid = ValidateStates(states);
         return states;
     }
 
