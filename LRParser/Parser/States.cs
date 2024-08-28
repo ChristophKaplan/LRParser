@@ -28,6 +28,7 @@ public class States<T, N> where T : Enum where N : Enum {
         
         if (showOutput) Console.WriteLine(_statesOutput);
         
+        //DEBUG
         //Console.WriteLine(this);
     }
 

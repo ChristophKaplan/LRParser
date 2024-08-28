@@ -31,26 +31,26 @@ public static class ContextFreeGrammarExtensions {
             }
             else {
                 var length = allProdForNonTerminal[i].Conclusion.Length;
-
+                var j = 0;
+                
                 //first symbol no eps
-                var first = First(cfg, allProdForNonTerminal[i].Conclusion[0], alreadyChecked);
+                var first = First(cfg, allProdForNonTerminal[i].Conclusion[j], alreadyChecked);
                 AddRangeLikeSet(first, directorSet[i]);
                 directorSet[i].Remove(Symbol.Epsilon);
 
-                if (length == 1) {
+                /*if (length == 1) {
                     AddRangeLikeSet(directorSet[i], result);
-                    continue; //first entry already checked
-                }
+                    continue; //i=0 j=0 entry already checked??
+                }*/
 
-                //mid symbols,if has eps check next
-                int j;
-                for (j = 1; First(cfg, allProdForNonTerminal[i].Conclusion[j], alreadyChecked).Contains(Symbol.Epsilon) && j < length; j++) {
+                //mid symbols, if has eps check next
+                for (j = 1; j < length && First(cfg, allProdForNonTerminal[i].Conclusion[j], alreadyChecked).Contains(Symbol.Epsilon); j++) {
                     AddRangeLikeSet(First(cfg, allProdForNonTerminal[i].Conclusion[j], alreadyChecked), directorSet[i]);
                     directorSet[i].Remove(Symbol.Epsilon);
                 }
 
                 //last symbol if mid had no epsilon
-                if (j == length && First(cfg, allProdForNonTerminal[i].Conclusion[length], alreadyChecked).Contains(Symbol.Epsilon)) {
+                if (j == length-1 && First(cfg, allProdForNonTerminal[i].Conclusion[j], alreadyChecked).Contains(Symbol.Epsilon)) {
                     directorSet[i].Add(Symbol.Epsilon);
                 }
             }

@@ -29,7 +29,7 @@ public struct ArrayValue : ILanguageObject {
         set;
     }
 
-    public ArrayValue(ILanguageObject[] value) {
+    public ArrayValue(params ILanguageObject[] value) {
         Value = value;
     }
     
@@ -71,7 +71,7 @@ public abstract class Language<T,N>: ContextFreeGrammar<T,N> where T : Enum wher
         AddByEnumType(typeof(T));
         AddByEnumType(typeof(N));
         SetUpGrammar();
-        Parser = new Parser<T, N>(this);
+        Parser = new Parser<T, N>(this, false);
 
         if (!HasStartSymbol()) {
             throw new Exception("No production with start symbol found!");

@@ -5,7 +5,8 @@ namespace LRParser.Parser;
 public enum ParserAction {
     Shift,
     Reduce,
-    Accept
+    Accept,
+    Error
 }
 
 public class Parser<T, N> where T : Enum where N : Enum {
@@ -20,6 +21,9 @@ public class Parser<T, N> where T : Enum where N : Enum {
         var startItem = new LRItem(cfg.Productions[0], 0, new List<Symbol> { Symbol.Dollar });
         var states = new States<T, N>(startItem, _cfg, showOutput);
         _table = new Table<T, N>(states, _cfg, showOutput);
+        
+        //DEBUG
+        //Console.WriteLine(_table);
     }
 
     public ConcreteSyntaxTree Parse(List<Symbol> input) {
@@ -32,10 +36,14 @@ public class Parser<T, N> where T : Enum where N : Enum {
 
         while (true) {
             //DEBUG
-            //Console.WriteLine(treeStack.Aggregate("", (current, tree) => tree.Symbol + " " +current ));
-            
-            if (!_table.ActionTable.TryGetValue((stateStack.Peek(), input[0]), out var action)) {
+            //Console.WriteLine(treeStack.Aggregate("\nDEBUG: ", (current, tree) => tree.Symbol + " " +current ));
+
+            var action = GetAction(stateStack, input, out var pullEps);
+
+            if (action.Item1 == ParserAction.Error)
+            {
                 Error(input, stateStack);
+                break;
             }
 
             if (action.Item1 == ParserAction.Accept) {
@@ -43,7 +51,7 @@ public class Parser<T, N> where T : Enum where N : Enum {
                 break;
             }
             else if (action.Item1 == ParserAction.Shift) {
-                Shift(input, stateStack, treeStack, action.Item2);
+                Shift(input, stateStack, treeStack, action.Item2, pullEps);
             }
             else if (action.Item1 == ParserAction.Reduce) {
                 Reduce(stateStack, treeStack, action.Item2);
@@ -57,6 +65,20 @@ public class Parser<T, N> where T : Enum where N : Enum {
         return treeStack.Pop();
     }
 
+    private (ParserAction, int) GetAction(Stack<int> stateStack, List<Symbol> input, out bool pullEps)
+    {
+        pullEps = false;
+        if (_table.ActionTable.TryGetValue((stateStack.Peek(), input[0]), out var action))
+        {
+            return action;
+        }
+        else if (_table.ActionTable.TryGetValue((stateStack.Peek(), Symbol.Epsilon), out var epsAction)) {
+            pullEps = true;
+            return epsAction;
+        }
+        return (ParserAction.Error, -1);
+    }
+    
     private void Accept() {
         _parsingOutput += "ACCEPT\n";
         if (_showOutput) Console.WriteLine(_parsingOutput);
@@ -67,14 +89,21 @@ public class Parser<T, N> where T : Enum where N : Enum {
         _parsingOutput += $"ERROR: cant parse \"{input[0]}\". {stateStack.Peek()}\n Expected Symbols: {expected.Aggregate("", (current, symbol) => current + symbol + " ")}\n";
         
         //DEBUG
-        /*foreach (var ex in expected) {
+        foreach (var ex in expected) {
             _table.ActionTable.TryGetValue((stateStack.Peek(), ex), out var action);
             Console.WriteLine($"Expected: {ex}, Action: {action.Item1} {_cfg.Productions[action.Item2]} ");
-        }*/
+        }
         throw new Exception($"Error:\n{_parsingOutput}");
     }
 
-    private void Shift(List<Symbol> input, Stack<int> stateStack, Stack<ConcreteSyntaxTree> treeStack, int shiftState) {
+    private void Shift(List<Symbol> input, Stack<int> stateStack, Stack<ConcreteSyntaxTree> treeStack, int shiftState, bool pullEps) {
+        if (pullEps)
+        {
+            //then what?
+            //do nothing?
+            return;
+        }
+
         _parsingOutput += $"SHIFT: {input[0]}, next state:{shiftState}\n";
         stateStack.Push(shiftState);
         treeStack.Push(new ConcreteSyntaxTree(new Symbol(input[0])));
