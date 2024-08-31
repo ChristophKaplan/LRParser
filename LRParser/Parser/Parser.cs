@@ -1,12 +1,10 @@
+using FirstOrderLogic;
 using LRParser.CFG;
 
 namespace LRParser.Parser;
 
 public enum ParserAction {
-    Shift,
-    Reduce,
-    Accept,
-    Error
+    Shift, Reduce, Accept, Error
 }
 
 public class Parser<T, N> where T : Enum where N : Enum {
@@ -15,15 +13,14 @@ public class Parser<T, N> where T : Enum where N : Enum {
     private string _parsingOutput = string.Empty;
     private readonly bool _showOutput;
 
-    public Parser(ContextFreeGrammar<T, N> cfg, bool showOutput = false) {
+    public Parser(ContextFreeGrammar<T, N> cfg, bool showOutput = false, bool debug = false) {
         _cfg = cfg;
         _showOutput = showOutput;
         var startItem = new LRItem(cfg.Productions[0], 0, new List<Symbol> { Symbol.Dollar });
-        var states = new States<T, N>(startItem, _cfg, showOutput);
+        var states = new States<T, N>(startItem, _cfg, showOutput, debug);
         _table = new Table<T, N>(states, _cfg, showOutput);
         
-        //DEBUG
-        //Console.WriteLine(_table);
+        if(debug) Console.WriteLine(_table);
     }
 
     public ConcreteSyntaxTree Parse(List<Symbol> input) {
@@ -86,13 +83,13 @@ public class Parser<T, N> where T : Enum where N : Enum {
 
     private void Error(List<Symbol> input, Stack<int> stateStack) {
         var expected = _table.ExpectedSymbols(stateStack.Peek());
-        _parsingOutput += $"ERROR: cant parse \"{input[0]}\". {stateStack.Peek()}\n Expected Symbols: {expected.Aggregate("", (current, symbol) => current + symbol + " ")}\n";
+        _parsingOutput += $"ERROR: cant parse \"{input[0]}\". current: {stateStack.Peek()}\n Expected Symbols: {expected.Aggregate("", (current, symbol) => current + symbol + " ")}\n";
         
         //DEBUG
-        foreach (var ex in expected) {
+        /*foreach (var ex in expected) {
             _table.ActionTable.TryGetValue((stateStack.Peek(), ex), out var action);
             Console.WriteLine($"Expected: {ex}, Action: {action.Item1} {_cfg.Productions[action.Item2]} ");
-        }
+        }*/
         throw new Exception($"Error:\n{_parsingOutput}");
     }
 
@@ -104,7 +101,7 @@ public class Parser<T, N> where T : Enum where N : Enum {
             return;
         }
 
-        _parsingOutput += $"SHIFT: {input[0]}, next state:{shiftState}\n";
+        _parsingOutput += $"SHIFT: {input[0]}, current:{stateStack.Peek()}, next state:{shiftState}\n";
         stateStack.Push(shiftState);
         treeStack.Push(new ConcreteSyntaxTree(new Symbol(input[0])));
         input.RemoveAt(0);
@@ -120,7 +117,7 @@ public class Parser<T, N> where T : Enum where N : Enum {
             stateStack.Pop();
             reduced.AddChild(treeStack.Pop());
         }
-
+        
         treeStack.Push(reduced);
 
         if (_table.GotoTable.TryGetValue((stateStack.Peek(), rule.Premise), out var gotoId)) {

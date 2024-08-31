@@ -4,14 +4,11 @@ namespace LRParser.Parser;
 
 public class States<T, N> where T : Enum where N : Enum {
     private readonly ContextFreeGrammar<T, N> _cfg;
-
-    public List<State> StateList {
-        get;
-    }
+    public List<State> StateList { get; }
 
     private string _statesOutput = string.Empty;
 
-    public States(LRItem startItem, ContextFreeGrammar<T, N> cfg, bool showOutput = false, bool lalr = true) {
+    public States(LRItem startItem, ContextFreeGrammar<T, N> cfg, bool showOutput = false, bool debug = false, bool lalr = true) {
         _cfg = cfg;
         StateList = GenerateStates(startItem);
 
@@ -27,9 +24,7 @@ public class States<T, N> where T : Enum where N : Enum {
         var valid = ValidateStates(StateList);
         
         if (showOutput) Console.WriteLine(_statesOutput);
-        
-        //DEBUG
-        //Console.WriteLine(this);
+        if(debug) Console.WriteLine(this);
     }
 
     private List<State> GenerateStates(LRItem startItem) {
@@ -127,7 +122,7 @@ public class States<T, N> where T : Enum where N : Enum {
 
         while (stack.Count > 0) {
             var currentItem = stack.Pop();
-            if (!FormUnionIfClosed(result, currentItem)) {
+            if (!IfContainedAddOnlyLookahead(currentItem, result)) {
                 result.Add(currentItem);
             }
 
@@ -135,15 +130,18 @@ public class States<T, N> where T : Enum where N : Enum {
                 continue;
             }
 
-            var afterDot = currentItem.GetSymbolsAfterDot();
+            var allAfterDotSymbol = currentItem.GetSymbolsAfterDotSymbol();
             var oldLookahead = currentItem.LookAheadSymbols;
 
-            foreach (var symbol in oldLookahead) {
-                var curLookahead = _cfg.First(afterDot.Count == 0 ? symbol : afterDot[0]); //k = 1, only LL(1) or LR(1)
+            foreach (var symbol in oldLookahead)
+            {
+                //var input = afterDot.Count == 0 ? new List<Symbol>() { symbol } : new List<Symbol>() { afterDot[0], symbol };
+                var input = allAfterDotSymbol.Count == 0 ? symbol : allAfterDotSymbol[0];
+                var curLookahead = _cfg.First(input, new List<Symbol>()); //k = 1, only LL(1) or LR(1)
                 var prods = _cfg.GetAllProdForNonTerminal(currentItem.CurrentSymbol);
                 foreach (var prod in prods) {
                     var deeperItem = new LRItem(prod, 0, curLookahead);
-                    if (!FormUnionIfClosed(stack, deeperItem)) {
+                    if (!IfContainedAddOnlyLookahead(deeperItem, stack)) {
                         stack.Push(deeperItem);
                     }
                 }
@@ -153,7 +151,7 @@ public class States<T, N> where T : Enum where N : Enum {
         return result;
     }
 
-    private static bool FormUnionIfClosed(IEnumerable<LRItem> closedSet, LRItem newItem) {
+    private static bool IfContainedAddOnlyLookahead(LRItem newItem, IEnumerable<LRItem> closedSet) {
         var closedAlready = false;
         foreach (var closedItem in closedSet) {
             if (!closedItem.CoreEquals(newItem)) {
@@ -161,12 +159,10 @@ public class States<T, N> where T : Enum where N : Enum {
             }
 
             closedAlready = true;
-            foreach (var s in newItem.LookAheadSymbols) {
-                if (closedItem.LookAheadSymbols.Contains(s)) {
-                    continue;
+            foreach (var lookAheadSymbol in newItem.LookAheadSymbols) {
+                if (!closedItem.LookAheadSymbols.Contains(lookAheadSymbol)) {
+                    closedItem.LookAheadSymbols.Add(lookAheadSymbol);
                 }
-
-                closedItem.LookAheadSymbols.Add(s);
             }
         }
 

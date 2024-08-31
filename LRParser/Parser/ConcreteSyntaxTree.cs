@@ -31,7 +31,7 @@ public class ConcreteSyntaxTree {
         if (_children.Count == 0) {
             return;
         }
-
+        
         foreach (var child in _children) {
             child.EvaluateTree();
         }

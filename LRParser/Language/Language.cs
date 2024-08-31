@@ -25,9 +25,7 @@ public struct LexValue : ILanguageObject {
 }
 
 public struct ArrayValue : ILanguageObject {
-    public ILanguageObject[] Value { get;
-        set;
-    }
+    public ILanguageObject[] Value { get; private set; }
 
     public ArrayValue(params ILanguageObject[] value) {
         Value = value;
@@ -71,7 +69,7 @@ public abstract class Language<T,N>: ContextFreeGrammar<T,N> where T : Enum wher
         AddByEnumType(typeof(T));
         AddByEnumType(typeof(N));
         SetUpGrammar();
-        Parser = new Parser<T, N>(this, false);
+        Parser = new Parser<T, N>(this, true);
 
         if (!HasStartSymbol()) {
             throw new Exception("No production with start symbol found!");

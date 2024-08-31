@@ -35,7 +35,7 @@ public class Table <T, N> where T : Enum where N : Enum{
             else {
                 foreach (var symbol in item.LookAheadSymbols) {
                     if (ActionTable.ContainsKey((state.Id, symbol)) && ActionTable[(state.Id, symbol)].Item1 == ParserAction.Shift) {
-                        _tableOutput += $"Shift reduce conflict, default to shift: {symbol}\n";
+                        _tableOutput += $"Shift reduce conflict, default to shift: {symbol}, State:{state.Id}\n";
                         continue;
                     }
 
@@ -56,7 +56,7 @@ public class Table <T, N> where T : Enum where N : Enum{
             switch (symbol.Type) {
                 case SymbolType.Terminal: {
                     if (ActionTable.ContainsKey((state.Id, symbol)) && ActionTable[(state.Id, symbol)].Item1 == ParserAction.Reduce) {
-                        _tableOutput += $"Shift reduce conflict, default to shift : {symbol}\n";
+                        _tableOutput += $"Shift reduce conflict, default to shift : {symbol} , State:{state.Id}\n";
                     }
 
                     if (!state.Transitions.TryGetValue(symbol, out var nextState)) {

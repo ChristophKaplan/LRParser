@@ -33,9 +33,9 @@ public class LRItem {
         }
     }
 
-    public List<Symbol> GetSymbolsAfterDot() {
+    public List<Symbol> GetSymbolsAfterDotSymbol() {
         List<Symbol> symbols = new();
-        for (var i = _dotPosition + 1; i < Production.Conclusion.Length; i++) {
+        for (var i = _dotPosition+1; i < Production.Conclusion.Length; i++) {
             symbols.Add(Production.Conclusion[i]);
         }
 

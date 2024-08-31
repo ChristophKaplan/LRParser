@@ -2,8 +2,7 @@ namespace LRParser.CFG;
 
 public static class ContextFreeGrammarExtensions {
     
-    public static List<Symbol> First<T, N>(this ContextFreeGrammar<T, N> cfg, Symbol symbol, List<Symbol> alreadyChecked = null)
-        where T : Enum where N : Enum {
+    public static List<Symbol> First<T, N>(this ContextFreeGrammar<T, N> cfg, Symbol symbol, List<Symbol> alreadyChecked) where T : Enum where N : Enum {
         var result = new List<Symbol>();
 
         if (symbol.Type == SymbolType.Terminal) {
@@ -11,14 +10,12 @@ public static class ContextFreeGrammarExtensions {
             return result;
         }
 
-        alreadyChecked ??= new List<Symbol>();
         if (alreadyChecked.Contains(symbol)) {
-            //Console.WriteLine("recursion: " + nonTerminal);
+            //Console.WriteLine("recursion: " + symbol);
             return result;
         }
 
         alreadyChecked.Add(symbol);
-
 
         var allProdForNonTerminal = cfg.GetAllProdForNonTerminal(symbol);
         var directorSet = new List<Symbol>[allProdForNonTerminal.Count];
@@ -33,45 +30,37 @@ public static class ContextFreeGrammarExtensions {
                 var length = allProdForNonTerminal[i].Conclusion.Length;
                 var j = 0;
                 
-                //first symbol no eps
-                var first = First(cfg, allProdForNonTerminal[i].Conclusion[j], alreadyChecked);
-                AddRangeLikeSet(first, directorSet[i]);
+                //add first set of forst symbol, remove eps
+                var firstSet = First(cfg, allProdForNonTerminal[i].Conclusion[j], new List<Symbol>(alreadyChecked));
+                AddRangeNoDuplicates(firstSet, directorSet[i]);
                 directorSet[i].Remove(Symbol.Epsilon);
 
-                /*if (length == 1) {
-                    AddRangeLikeSet(directorSet[i], result);
-                    continue; //i=0 j=0 entry already checked??
-                }*/
-
-                //mid symbols, if has eps check next
-                for (j = 1; j < length && First(cfg, allProdForNonTerminal[i].Conclusion[j], alreadyChecked).Contains(Symbol.Epsilon); j++) {
-                    AddRangeLikeSet(First(cfg, allProdForNonTerminal[i].Conclusion[j], alreadyChecked), directorSet[i]);
+                //add first set of following symbols IFF eps is contained
+                for (j = 1; j < length; j++)
+                {
+                    var nextFirstSet = First(cfg, allProdForNonTerminal[i].Conclusion[j], new List<Symbol>(alreadyChecked));
+                    if (!nextFirstSet.Contains(Symbol.Epsilon)) continue;
+                    AddRangeNoDuplicates(nextFirstSet, directorSet[i]);
                     directorSet[i].Remove(Symbol.Epsilon);
                 }
 
-                //last symbol if mid had no epsilon
-                if (j == length-1 && First(cfg, allProdForNonTerminal[i].Conclusion[j], alreadyChecked).Contains(Symbol.Epsilon)) {
+                //if first set of last symbol containes epsilon, add only epsilon
+                if (j == length-1 && First(cfg, allProdForNonTerminal[i].Conclusion[j], new List<Symbol>(alreadyChecked)).Contains(Symbol.Epsilon)) {
                     directorSet[i].Add(Symbol.Epsilon);
                 }
             }
 
-            AddRangeLikeSet(directorSet[i], result);
+            AddRangeNoDuplicates(directorSet[i], result);
         }
 
         return result;
     }
 
-    private static bool AddRangeLikeSet(List<Symbol> from, List<Symbol> to) {
-        var changed = false;
-        foreach (var s in from) {
-            if (to.Contains(s)) {
-                continue;
-            }
-
-            to.Add(s);
-            changed = true;
+    private static void AddRangeNoDuplicates(List<Symbol> from, List<Symbol> to)
+    {
+        foreach (var notContained in from.Where(fromSymbol => !to.Contains(fromSymbol)))
+        {
+            to.Add(notContained);
         }
-
-        return changed;
     }
 }
