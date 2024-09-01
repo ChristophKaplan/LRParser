@@ -96,8 +96,7 @@ public class Parser<T, N> where T : Enum where N : Enum {
     private void Shift(List<Symbol> input, Stack<int> stateStack, Stack<ConcreteSyntaxTree> treeStack, int shiftState, bool pullEps) {
         if (pullEps)
         {
-            //then what?
-            //do nothing?
+            //TODO: Implement what to do here?
             return;
         }
 
@@ -111,7 +110,7 @@ public class Parser<T, N> where T : Enum where N : Enum {
         var rule = _cfg.Productions[ruleId];
         _parsingOutput += $"REDUCE ({ruleId}), Rule: {rule}\n";
 
-        var reduced = new ConcreteSyntaxTree(new Symbol(rule.Premise), rule.SemanticAction); //new parent
+        var reduced = new ConcreteSyntaxTree(new Symbol(rule.Premise), rule.SemanticAction);
 
         for (var i = 0; i < rule.Conclusion.Count(s => !s.IsEpsilon); i++) {
             stateStack.Pop();
