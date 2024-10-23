@@ -1,3 +1,4 @@
+using Helpers;
 using LRParser.CFG;
 
 namespace LRParser.Parser;
@@ -12,7 +13,7 @@ public class Table <T, N> where T : Enum where N : Enum{
     public Table(States<T, N> states, ContextFreeGrammar<T, N> cfg, bool showOutput = false) {
         _cfg = cfg;
         CreateTable(states);
-        if(showOutput) Console.WriteLine($"Table:\n{_tableOutput}");
+        if(showOutput) Logger.Log($"Table:\n{_tableOutput}");
     }
 
     private void CreateTable(States<T, N> states) {

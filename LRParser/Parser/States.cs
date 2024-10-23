@@ -1,3 +1,4 @@
+using Helpers;
 using LRParser.CFG;
 
 namespace LRParser.Parser;
@@ -23,8 +24,8 @@ public class States<T, N> where T : Enum where N : Enum {
 
         var valid = ValidateStates(StateList);
         
-        if (showOutput) Console.WriteLine(_statesOutput);
-        if(debug) Console.WriteLine(this);
+        if (showOutput) Logger.Log(_statesOutput);
+        if(debug) Logger.Log(this.ToString());
     }
 
     private List<State> GenerateStates(LRItem startItem) {
@@ -97,7 +98,7 @@ public class States<T, N> where T : Enum where N : Enum {
             foreach (var (symbol, toState) in state.Transitions) {
                 if (toState.Id == mergeMe.Id) {
                     state.Transitions[symbol] = state1;
-                    //Console.WriteLine($"reroute {state.Id} to {state1.Id}");
+                    //Logging.Log($"reroute {state.Id} to {state1.Id}");
                 }
             }
         }

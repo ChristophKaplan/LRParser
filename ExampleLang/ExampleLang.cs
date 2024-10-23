@@ -1,3 +1,4 @@
+using Helpers;
 using LRParser.CFG;
 using LRParser.Language;
 using LRParser.Lexer;
@@ -64,7 +65,7 @@ public class ExampleLang: Language<Terminal, NonTerminal>
             rhs[1].InheritedAttribute = typeDeclaration;
             TypeTable.Add(variable.Value, typeDeclaration.Value);
             
-            Console.WriteLine(typeDeclaration.Value + " " + variable.Value);
+            Logger.Log(typeDeclaration.Value + " " + variable.Value);
             lhs.InheritedAttribute = typeDeclaration;
             lhs.SyntheticAttribute = variable;
         });

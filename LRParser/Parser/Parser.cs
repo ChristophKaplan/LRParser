@@ -1,4 +1,4 @@
-using FirstOrderLogic;
+using Helpers;
 using LRParser.CFG;
 
 namespace LRParser.Parser;
@@ -20,7 +20,7 @@ public class Parser<T, N> where T : Enum where N : Enum {
         var states = new States<T, N>(startItem, _cfg, showOutput, debug);
         _table = new Table<T, N>(states, _cfg, showOutput);
         
-        if(debug) Console.WriteLine(_table);
+        if(debug) Logger.Log(_table.ToString());
     }
 
     public ConcreteSyntaxTree Parse(List<Symbol> input) {
@@ -33,7 +33,7 @@ public class Parser<T, N> where T : Enum where N : Enum {
 
         while (true) {
             //DEBUG
-            //Console.WriteLine(treeStack.Aggregate("\nDEBUG: ", (current, tree) => tree.Symbol + " " +current ));
+            //Logging.Log(treeStack.Aggregate("\nDEBUG: ", (current, tree) => tree.Symbol + " " +current ));
 
             var action = GetAction(stateStack, input, out var pullEps);
 
@@ -78,7 +78,7 @@ public class Parser<T, N> where T : Enum where N : Enum {
     
     private void Accept() {
         _parsingOutput += "ACCEPT\n";
-        if (_showOutput) Console.WriteLine(_parsingOutput);
+        if (_showOutput) Logger.Log(_parsingOutput);
     }
 
     private void Error(List<Symbol> input, Stack<int> stateStack) {
@@ -88,7 +88,7 @@ public class Parser<T, N> where T : Enum where N : Enum {
         //DEBUG
         /*foreach (var ex in expected) {
             _table.ActionTable.TryGetValue((stateStack.Peek(), ex), out var action);
-            Console.WriteLine($"Expected: {ex}, Action: {action.Item1} {_cfg.Productions[action.Item2]} ");
+            Logging.Log($"Expected: {ex}, Action: {action.Item1} {_cfg.Productions[action.Item2]} ");
         }*/
         throw new Exception($"Error:\n{_parsingOutput}");
     }

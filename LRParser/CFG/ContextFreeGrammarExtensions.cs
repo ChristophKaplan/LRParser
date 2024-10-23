@@ -11,7 +11,7 @@ public static class ContextFreeGrammarExtensions {
         }
 
         if (alreadyChecked.Contains(symbol)) {
-            //Console.WriteLine("recursion: " + symbol);
+            //Logging.Log("recursion: " + symbol);
             return result;
         }
 
