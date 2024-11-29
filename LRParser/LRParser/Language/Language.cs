@@ -69,7 +69,7 @@ public abstract class Language<T,N>: ContextFreeGrammar<T,N> where T : Enum wher
         AddByEnumType(typeof(T));
         AddByEnumType(typeof(N));
         SetUpGrammar();
-        Parser = new Parser<T, N>(this, true);
+        Parser = new Parser<T, N>(this, false);
 
         if (!HasStartSymbol()) {
             throw new Exception("No production with start symbol found!");
