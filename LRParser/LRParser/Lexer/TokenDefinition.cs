@@ -4,20 +4,15 @@ using LRParser.CFG;
 namespace LRParser.Lexer;
 
 public class TokenDefinition<T> where T : Enum {
+    private readonly T _symbol;    
+    public Regex Regex { get; }
+    
     public TokenDefinition(T symbol, string regex) {
-        Symbol = symbol;
+        _symbol = symbol;
         Regex = new Regex(regex);
     }
-
-    private T Symbol {
-        get;
-    }
-
-    public Regex Regex {
-        get;
-    }
-
+    
     public Symbol CreateTerminal(string value) {
-        return new Symbol(Symbol, value, SymbolType.Terminal);
+        return new Symbol(_symbol, value, SymbolType.Terminal);
     }
 }

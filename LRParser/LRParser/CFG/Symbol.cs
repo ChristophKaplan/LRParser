@@ -16,24 +16,28 @@ public enum SpecialNonTerminal {
     Start
 }
 
-public class Symbol {
+public class Symbol : IEquatable<Symbol> {
+    private readonly int _hashcode;
     private readonly Enum _enum;
     public ILanguageObject SyntheticAttribute;
     public object InheritedAttribute;
     
     public Symbol(Enum @enum, SymbolType type) {
         _enum = @enum;
+        _hashcode = _enum.GetHashCode();
         Type = type;
     }
 
     public Symbol(Enum @enum, string lexValue, SymbolType type) {
         _enum = @enum;
+        _hashcode = _enum.GetHashCode();
         Type = type;
         SyntheticAttribute = new LexValue(lexValue);
     }
     
     public Symbol(Symbol symbol) {
         _enum = symbol._enum;
+        _hashcode = symbol._hashcode;
         Type = symbol.Type;
         SyntheticAttribute = symbol.SyntheticAttribute;
         InheritedAttribute = symbol.InheritedAttribute;
@@ -48,15 +52,21 @@ public class Symbol {
     public bool IsStartSymbol => Type == SymbolType.NonTerminal && _enum.Equals(SpecialNonTerminal.Start);
     
     public override int GetHashCode() {
-        return _enum.GetHashCode();
+        return _hashcode;
     }
 
-    public override bool Equals(object? obj) {
-        if (obj is Symbol other) {
-            return _enum.Equals(other._enum);
+    public bool Equals(Symbol other)
+    {
+        if(_hashcode != other._hashcode) {
+            return false;
         }
+        
+        return _enum.Equals(other._enum);
+    }
 
-        return false;
+    public override bool Equals(object? obj)
+    {
+        return obj is Symbol other && Equals(other);
     }
 
     public override string ToString() {

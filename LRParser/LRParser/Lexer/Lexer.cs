@@ -1,4 +1,4 @@
-﻿using LRParser.CFG;
+using LRParser.CFG;
 
 namespace LRParser.Lexer;
 
