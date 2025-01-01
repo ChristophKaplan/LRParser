@@ -77,13 +77,15 @@ public class Parser<T, N> where T : Enum where N : Enum {
     }
     
     private void Accept() {
-        _parsingOutput += "ACCEPT\n";
-        if (_showOutput) Logger.Log(_parsingOutput);
+        if (_showOutput) {
+            _parsingOutput += "ACCEPT\n";
+            Logger.Log(_parsingOutput);
+        }
     }
 
     private void Error(List<Symbol> input, Stack<int> stateStack) {
         var expected = _table.ExpectedSymbols(stateStack.Peek());
-        _parsingOutput += $"ERROR: cant parse \"{input[0]}\". current: {stateStack.Peek()}\n Expected Symbols: {expected.Aggregate("", (current, symbol) => current + symbol + " ")}\n";
+        if (_showOutput) _parsingOutput += $"ERROR: cant parse \"{input[0]}\". current: {stateStack.Peek()}\n Expected Symbols: {expected.Aggregate("", (current, symbol) => current + symbol + " ")}\n";
         
         //DEBUG
         /*foreach (var ex in expected) {
@@ -100,7 +102,7 @@ public class Parser<T, N> where T : Enum where N : Enum {
             return;
         }
 
-        _parsingOutput += $"SHIFT: {input[0]}, current:{stateStack.Peek()}, next state:{shiftState}\n";
+        if (_showOutput) _parsingOutput += $"SHIFT: {input[0]}, current:{stateStack.Peek()}, next state:{shiftState}\n";
         stateStack.Push(shiftState);
         treeStack.Push(new ConcreteSyntaxTree(new Symbol(input[0])));
         input.RemoveAt(0);
@@ -108,7 +110,7 @@ public class Parser<T, N> where T : Enum where N : Enum {
 
     private void Reduce(Stack<int> stateStack, Stack<ConcreteSyntaxTree> treeStack, int ruleId) {
         var rule = _cfg.Productions[ruleId];
-        _parsingOutput += $"REDUCE ({ruleId}), Rule: {rule}\n";
+        if (_showOutput) _parsingOutput += $"REDUCE ({ruleId}), Rule: {rule}\n";
 
         var reduced = new ConcreteSyntaxTree(new Symbol(rule.Premise), rule.SemanticAction);
 
