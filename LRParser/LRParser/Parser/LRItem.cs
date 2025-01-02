@@ -15,13 +15,9 @@ public class LRItem {
         }
     }
 
-    public Production Production {
-        get;
-    }
+    public Production Production { get; }
 
-    public List<Symbol> LookAheadSymbols {
-        get;
-    }
+    public List<Symbol> LookAheadSymbols { get; } 
 
     public bool IsComplete => _dotPosition == Production.Conclusion.Length;
     public Symbol CurrentSymbol => Production.Conclusion[_dotPosition];

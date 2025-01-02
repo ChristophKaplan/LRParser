@@ -84,9 +84,10 @@ public class States<T, N> where T : Enum where N : Enum {
         foreach (var item1 in state1.Items) {
             foreach (var mergeItem in mergeMe.Items) {
                 if (item1.CoreEquals(mergeItem)) {
-                    foreach (var s in mergeItem.LookAheadSymbols) {
-                        if (!item1.LookAheadSymbols.Contains(s)) {
-                            item1.LookAheadSymbols.Add(s);
+                    for (var i = mergeItem.LookAheadSymbols.Count-1; i >= 0; i--) {
+                        var sym = mergeItem.LookAheadSymbols[i];
+                        if (!item1.LookAheadSymbols.Contains(sym)) {
+                            item1.LookAheadSymbols.Add(sym);
                         }
                     }
                 }
@@ -94,13 +95,19 @@ public class States<T, N> where T : Enum where N : Enum {
         }
 
         //reroute
+        var transitionsToModify = new List<(State state, Symbol symbol)>();
+
         foreach (var state in states) {
             foreach (var (symbol, toState) in state.Transitions) {
                 if (toState.Id == mergeMe.Id) {
-                    state.Transitions[symbol] = state1;
-                    //Logging.Log($"reroute {state.Id} to {state1.Id}");
+                    transitionsToModify.Add((state, symbol));
                 }
             }
+        }
+
+        foreach (var (state, symbol) in transitionsToModify) {
+            state.Transitions[symbol] = state1;
+            //Logging.Log($"reroute {state.Id} to {state1.Id}");
         }
 
         //remove state2
