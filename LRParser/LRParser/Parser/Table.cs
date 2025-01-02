@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LogHelper;
 using LRParser.CFG;
 
 namespace LRParser.Parser {
@@ -15,7 +16,7 @@ namespace LRParser.Parser {
             _cfg = cfg;
             CreateTable(states);
             if (showOutput) {
-                Logger.Logger.Log($"Table:\n{_tableOutput}");
+                Logger.Log($"Table:\n{_tableOutput}");
             }
         }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LogHelper;
 using LRParser.CFG;
 
 namespace LRParser.Parser {
@@ -21,7 +22,7 @@ namespace LRParser.Parser {
             var states = new States<T, N>(startItem, _cfg, showOutput, debug);
             _table = new Table<T, N>(states, _cfg, showOutput);
             if (debug) {
-                Logger.Logger.Log(_table.ToString());
+                Logger.Log(_table.ToString());
             }
         }
 
@@ -79,7 +80,7 @@ namespace LRParser.Parser {
         private void Accept() {
             if (_showOutput) {
                 _parsingOutput += "ACCEPT\n";
-                Logger.Logger.Log(_parsingOutput);
+                Logger.Log(_parsingOutput);
             }
         }
 

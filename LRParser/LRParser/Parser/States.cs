@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LogHelper;
 using LRParser.CFG;
 
 namespace LRParser.Parser {
@@ -26,11 +27,11 @@ namespace LRParser.Parser {
             var valid = ValidateStates(StateList);
 
             if (showOutput) {
-                Logger.Logger.Log(_statesOutput);
+                Logger.Log(_statesOutput);
             }
 
             if (debug) {
-                Logger.Logger.Log(ToString());
+                Logger.Log(ToString());
             }
         }
 
