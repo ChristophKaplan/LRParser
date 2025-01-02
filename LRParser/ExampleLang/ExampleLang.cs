@@ -1,9 +1,10 @@
-using Helpers;
+using System;
+using System.Collections.Generic;
 using LRParser.CFG;
 using LRParser.Language;
 using LRParser.Lexer;
 
-namespace ExampleLang;
+namespace ExampleLang{
 
 public enum Terminal {
     Type,
@@ -21,10 +22,6 @@ public class IntValue : ILanguageObject {
     public int Value { get; set; }
     public IntValue(int value) {
         Value = value;
-    }
-    
-    public string ToHTML() {
-        throw new NotImplementedException();
     }
 }
 
@@ -65,7 +62,7 @@ public class ExampleLang: Language<Terminal, NonTerminal>
             rhs[1].InheritedAttribute = typeDeclaration;
             TypeTable.Add(variable.Value, typeDeclaration.Value);
             
-            Logger.Log(typeDeclaration.Value + " " + variable.Value);
+            Logger.Logger.Log(typeDeclaration.Value + " " + variable.Value);
             lhs.InheritedAttribute = typeDeclaration;
             lhs.SyntheticAttribute = variable;
         });
@@ -95,4 +92,5 @@ public class ExampleLang: Language<Terminal, NonTerminal>
     {
         return base.TryParse(input);
     }
+}
 }
