@@ -6,10 +6,5 @@
     </PropertyGroup>    
     <ItemGroup>
       <ProjectReference Include="..\LRParser\LRParser.csproj" />
-    </ItemGroup>    
-    <ItemGroup>
-      <Reference Include="Logger">
-        <HintPath>..\..\Logger\Logger\bin\Release\netstandard2.1\Logger.dll</HintPath>
-      </Reference>
-    </ItemGroup>    
+    </ItemGroup>
 </Project>

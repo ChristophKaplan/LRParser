@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LRParser", "LRParser.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LRParserExample", "..\LRParserExample\LRParserExample.csproj", "{E6BC3867-7280-4494-8C0C-0933C7948042}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logger", "..\..\Logger\Logger\Logger.csproj", "{F5EEFD88-BA2D-4775-8CF0-2E4DAF008D7B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{E6BC3867-7280-4494-8C0C-0933C7948042}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6BC3867-7280-4494-8C0C-0933C7948042}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6BC3867-7280-4494-8C0C-0933C7948042}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5EEFD88-BA2D-4775-8CF0-2E4DAF008D7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5EEFD88-BA2D-4775-8CF0-2E4DAF008D7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5EEFD88-BA2D-4775-8CF0-2E4DAF008D7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5EEFD88-BA2D-4775-8CF0-2E4DAF008D7B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
