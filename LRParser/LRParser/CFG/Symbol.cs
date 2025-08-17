@@ -19,9 +19,12 @@ namespace LRParser.CFG {
     public class Symbol : IEquatable<Symbol> {
         private readonly int _hashcode;
         private readonly Enum _enum;
+        
         public ILanguageObject SyntheticAttribute;
         public object InheritedAttribute;
 
+        public SymbolType Type { get; }
+        
         public Symbol(Enum @enum, SymbolType type) {
             _enum = @enum;
             _hashcode = _enum.GetHashCode();
@@ -42,25 +45,18 @@ namespace LRParser.CFG {
             SyntheticAttribute = symbol.SyntheticAttribute;
             InheritedAttribute = symbol.InheritedAttribute;
         }
-
-        public SymbolType Type { get; }
-
+        
         public static Symbol Epsilon => new(SpecialTerminal.Epsilon, SymbolType.Terminal);
         public static Symbol Dollar => new(SpecialTerminal.Dollar, SymbolType.Terminal);
         public bool IsEpsilon => Type == SymbolType.Terminal && _enum.Equals(SpecialTerminal.Epsilon);
         public bool IsDollar => Type == SymbolType.Terminal && _enum.Equals(SpecialTerminal.Dollar);
         public bool IsStartSymbol => Type == SymbolType.NonTerminal && _enum.Equals(SpecialNonTerminal.Start);
 
-        public override int GetHashCode() {
-            return _hashcode;
-        }
-
-        public bool Equals(Symbol other) {
-            if (_hashcode != other._hashcode) {
-                return false;
-            }
-
-            return _enum.Equals(other._enum);
+        public override int GetHashCode() => _hashcode;
+        
+        public bool Equals(Symbol other)
+        {
+            return _hashcode == other._hashcode && _enum.Equals(other._enum);
         }
 
         public override bool Equals(object? obj) {

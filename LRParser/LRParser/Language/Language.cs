@@ -69,7 +69,7 @@ namespace LRParser.Language {
             AddByEnumType(typeof(T));
             AddByEnumType(typeof(N));
             SetUpGrammar();
-            Parser = new Parser<T, N>(this, false);
+            Parser = new Parser<T, N>(this, true, true);
 
             if (!HasStartSymbol()) {
                 throw new Exception("No production with start symbol found!");
