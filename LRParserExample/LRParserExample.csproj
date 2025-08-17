@@ -3,8 +3,8 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
         <LangVersion>9</LangVersion>
-    </PropertyGroup>    
+    </PropertyGroup>
     <ItemGroup>
-      <ProjectReference Include="..\LRParser\LRParser.csproj" />
+        <ProjectReference Include="..\LRParser\LRParser.csproj"/>
     </ItemGroup>
 </Project>

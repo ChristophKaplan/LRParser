@@ -20,7 +20,7 @@ namespace LRParser.CFG
         Start
     }
 
-    public class Symbol : IEquatable<Symbol>
+    public struct Symbol : IEquatable<Symbol>
     {
         private readonly int _hashcode;
         private readonly Enum _enum;
@@ -35,31 +35,27 @@ namespace LRParser.CFG
             _enum = @enum;
             _hashcode = _enum.GetHashCode();
             Type = type;
+            SyntheticAttribute = default;
+            InheritedAttribute = default;
         }
 
-        public Symbol(Enum @enum, string lexValue, SymbolType type)
+        public Symbol Clone()
         {
-            _enum = @enum;
-            _hashcode = _enum.GetHashCode();
-            Type = type;
-            SyntheticAttribute = new LexValue(lexValue);
-        }
-
-        public Symbol(Symbol symbol)
-        {
-            _enum = symbol._enum;
-            _hashcode = symbol._hashcode;
-            Type = symbol.Type;
-            SyntheticAttribute = symbol.SyntheticAttribute;
-            InheritedAttribute = symbol.InheritedAttribute;
+            return (Symbol)MemberwiseClone();
         }
 
         public static Symbol Epsilon => new(SpecialTerminal.Epsilon, SymbolType.Terminal);
         public static Symbol Dollar => new(SpecialTerminal.Dollar, SymbolType.Terminal);
         public static Symbol Start => new(SpecialNonTerminal.Start, SymbolType.NonTerminal);
+
         public bool IsEpsilon => Type == SymbolType.Terminal && _enum.Equals(SpecialTerminal.Epsilon);
         public bool IsDollar => Type == SymbolType.Terminal && _enum.Equals(SpecialTerminal.Dollar);
         public bool IsStartSymbol => Type == SymbolType.NonTerminal && _enum.Equals(SpecialNonTerminal.Start);
+
+        public void SetValue(string value)
+        {
+            SyntheticAttribute = new LexValue(value);
+        }
 
         public override int GetHashCode() => _hashcode;
 
