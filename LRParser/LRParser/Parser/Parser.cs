@@ -6,20 +6,15 @@ using LRParser.CFG;
 
 namespace LRParser.Parser
 {
-    public enum ParserAction
-    {
-        Shift,
-        Reduce,
-        Accept,
-        Error
-    }
-
     public class Parser<T, N> where T : Enum where N : Enum
     {
         private readonly ContextFreeGrammar<T, N> _cfg;
         private readonly Table<T, N> _table;
         private string _parsingOutput = string.Empty;
         private readonly bool _showOutput;
+
+        private Stack<int> stateStack = new Stack<int>();
+        private Stack<ConcreteSyntaxTreeNode> treeStack = new Stack<ConcreteSyntaxTreeNode>();
 
         public Parser(ContextFreeGrammar<T, N> cfg, bool showOutput = false, bool debug = false)
         {
@@ -34,65 +29,72 @@ namespace LRParser.Parser
             }
         }
 
-        public ConcreteSyntaxTree Parse(List<Symbol> input)
+        private void ResetStack()
+        {
+            stateStack.Clear();
+            stateStack.Push(0);
+            treeStack.Clear();
+        }
+
+        public ConcreteSyntaxTreeNode Parse(List<Symbol> input)
         {
             input.Add(Symbol.Dollar);
+            ResetStack();
 
-            var stateStack = new Stack<int>();
-            stateStack.Push(0);
-
-            var treeStack = new Stack<ConcreteSyntaxTree>();
-
-            while (true)
+            var shouldContinue = true;
+            while (shouldContinue)
             {
                 //DEBUG
                 //Logging.Log(treeStack.Aggregate("\nDEBUG: ", (current, tree) => tree.Symbol + " " +current ));
-
-                var action = GetAction(stateStack, input, out var pullEps);
-
-                if (action.Item1 == ParserAction.Error)
-                {
-                    Error(input, stateStack);
-                    break;
-                }
-
-                if (action.Item1 == ParserAction.Accept)
-                {
-                    Accept();
-                    break;
-                }
-                else if (action.Item1 == ParserAction.Shift)
-                {
-                    Shift(input, stateStack, treeStack, action.Item2, pullEps);
-                }
-                else if (action.Item1 == ParserAction.Reduce)
-                {
-                    Reduce(stateStack, treeStack, action.Item2);
-                }
-                else
-                {
-                    Error(input, stateStack);
-                    break;
-                }
+                var action = GetAction(input, out var pullEps);
+                shouldContinue = ProcessAction(input, action, pullEps);
             }
 
             return treeStack.Pop();
         }
 
-        private (ParserAction, int) GetAction(Stack<int> stateStack, List<Symbol> input, out bool pullEps)
+        private bool ProcessAction(List<Symbol> input, ParserAction action, bool pullEps)
+        {
+            var parserAction = action.Action;
+
+            switch (parserAction)
+            {
+                case ParserAction.Type.Error:
+                    Error(input);
+                    return false;
+                case ParserAction.Type.Accept:
+                    Accept();
+                    return false;
+                case ParserAction.Type.Shift:
+                    Shift(input, action.StateOrProdId, pullEps);
+                    break;
+                case ParserAction.Type.Reduce:
+                    Reduce(action.StateOrProdId);
+                    break;
+                default:
+                    Error(input);
+                    return false;
+            }
+
+            return true;
+        }
+
+        private ParserAction GetAction(List<Symbol> input, out bool pullEps)
         {
             pullEps = false;
-            if (_table.ActionTable.TryGetValue((stateStack.Peek(), input[0]), out var action))
+            if (_table.ActionTable.TryGetValue(new StateSymbolTuple(stateStack.Peek(), input[0]), out var action))
             {
                 return action;
             }
-            else if (_table.ActionTable.TryGetValue((stateStack.Peek(), Symbol.Epsilon), out var epsAction))
+
+            if (_table.ActionTable.TryGetValue(new StateSymbolTuple(stateStack.Peek(), Symbol.Epsilon),
+                    out var epsAction))
             {
                 pullEps = true;
                 return epsAction;
             }
 
-            return (ParserAction.Error, -1);
+            return ParserAction.Default;
         }
 
         private void Accept()
@@ -104,7 +106,7 @@ namespace LRParser.Parser
             }
         }
 
-        private void Error(List<Symbol> input, Stack<int> stateStack)
+        private void Error(List<Symbol> input)
         {
             var expected = _table.ExpectedSymbols(stateStack.Peek());
             if (_showOutput)
@@ -121,8 +123,7 @@ namespace LRParser.Parser
             throw new Exception($"Error:\n{_parsingOutput}");
         }
 
-        private void Shift(List<Symbol> input, Stack<int> stateStack, Stack<ConcreteSyntaxTree> treeStack,
-            int shiftState, bool pullEps)
+        private void Shift(List<Symbol> input, int shiftState, bool pullEps)
         {
             if (pullEps)
             {
@@ -136,11 +137,11 @@ namespace LRParser.Parser
             }
 
             stateStack.Push(shiftState);
-            treeStack.Push(new ConcreteSyntaxTree(input[0].Clone()));
+            treeStack.Push(new ConcreteSyntaxTreeNode(input[0].Clone()));
             input.RemoveAt(0);
         }
 
-        private void Reduce(Stack<int> stateStack, Stack<ConcreteSyntaxTree> treeStack, int ruleId)
+        private void Reduce(int ruleId)
         {
             var rule = _cfg.Productions[ruleId];
             if (_showOutput)
@@ -148,7 +149,7 @@ namespace LRParser.Parser
                 _parsingOutput += $"REDUCE ({ruleId}), Rule: {rule}\n";
             }
 
-            var reduced = new ConcreteSyntaxTree(rule.Premise.Clone(), rule.SemanticAction);
+            var reduced = new ConcreteSyntaxTreeNode(rule.Premise.Clone(), rule.SemanticAction);
 
             for (var i = 0; i < rule.Conclusion.Count(s => !s.IsEpsilon); i++)
             {
@@ -158,7 +159,7 @@ namespace LRParser.Parser
 
             treeStack.Push(reduced);
 
-            if (_table.GotoTable.TryGetValue((stateStack.Peek(), rule.Premise), out var gotoId))
+            if (_table.GotoTable.TryGetValue(new StateSymbolTuple(stateStack.Peek(), rule.Premise), out var gotoId))
             {
                 stateStack.Push(gotoId);
             }

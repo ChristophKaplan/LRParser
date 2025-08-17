@@ -39,7 +39,7 @@ namespace LRParser.CFG
             InheritedAttribute = default;
         }
 
-        public Symbol Clone()
+        public readonly Symbol Clone()
         {
             return (Symbol)MemberwiseClone();
         }

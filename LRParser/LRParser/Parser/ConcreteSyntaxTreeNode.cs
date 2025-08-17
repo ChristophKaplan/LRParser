@@ -5,27 +5,27 @@ using LRParser.CFG;
 
 namespace LRParser.Parser
 {
-    public class ConcreteSyntaxTree
+    public class ConcreteSyntaxTreeNode
     {
         private readonly Production.SemanticActionDelegate _semanticAction;
         public Symbol Symbol;
-        private readonly List<ConcreteSyntaxTree> _children;
+        private readonly List<ConcreteSyntaxTreeNode> _children;
 
-        public ConcreteSyntaxTree(Symbol symbol)
+        public ConcreteSyntaxTreeNode(Symbol symbol)
         {
             Symbol = symbol;
             _semanticAction = null;
-            _children = new List<ConcreteSyntaxTree>();
+            _children = new List<ConcreteSyntaxTreeNode>();
         }
 
-        public ConcreteSyntaxTree(Symbol symbol, Production.SemanticActionDelegate semanticAction)
+        public ConcreteSyntaxTreeNode(Symbol symbol, Production.SemanticActionDelegate semanticAction)
         {
             Symbol = symbol;
             _semanticAction = semanticAction;
-            _children = new List<ConcreteSyntaxTree>();
+            _children = new List<ConcreteSyntaxTreeNode>();
         }
 
-        public void AddChild(ConcreteSyntaxTree child)
+        public void AddChild(ConcreteSyntaxTreeNode child)
         {
             _children.Insert(0, child);
         }
