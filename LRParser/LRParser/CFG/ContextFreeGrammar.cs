@@ -7,7 +7,7 @@ namespace LRParser.CFG {
         private readonly List<Symbol> _nonTerminals = new();
         public readonly List<Production> Productions = new();
         private readonly List<Symbol> _terminals = new();
-        public readonly Symbol StartSymbol = new(SpecialNonTerminal.Start, SymbolType.NonTerminal);
+        public readonly Symbol StartSymbol = Symbol.Start;
 
         private void AddTerminal(T terminal) {
             _terminals.Add(new Symbol(terminal, SymbolType.Terminal));
