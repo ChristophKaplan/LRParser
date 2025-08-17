@@ -12,9 +12,8 @@ namespace LRParser.Parser
         private readonly Table<T, N> _table;
         private string _parsingOutput = string.Empty;
         private readonly bool _showOutput;
-
-        private Stack<int> stateStack = new Stack<int>();
-        private Stack<ConcreteSyntaxTreeNode> treeStack = new Stack<ConcreteSyntaxTreeNode>();
+        private readonly Stack<int> _stateStack = new();
+        private readonly Stack<ConcreteSyntaxTreeNode> _treeStack = new();
 
         public Parser(ContextFreeGrammar<T, N> cfg, bool showOutput = false, bool debug = false)
         {
@@ -31,9 +30,9 @@ namespace LRParser.Parser
 
         private void ResetStack()
         {
-            stateStack.Clear();
-            stateStack.Push(0);
-            treeStack.Clear();
+            _stateStack.Clear();
+            _stateStack.Push(0);
+            _treeStack.Clear();
         }
 
         public ConcreteSyntaxTreeNode Parse(List<Symbol> input)
@@ -46,11 +45,11 @@ namespace LRParser.Parser
             {
                 //DEBUG
                 //Logging.Log(treeStack.Aggregate("\nDEBUG: ", (current, tree) => tree.Symbol + " " +current ));
-                var action = GetAction(input, out var pullEps);
+                var action = GetParserAction(input, out var pullEps);
                 shouldContinue = ProcessAction(input, action, pullEps);
             }
 
-            return treeStack.Pop();
+            return _treeStack.Pop();
         }
 
         private bool ProcessAction(List<Symbol> input, ParserAction action, bool pullEps)
@@ -79,18 +78,18 @@ namespace LRParser.Parser
             return true;
         }
 
-        private ParserAction GetAction(List<Symbol> input, out bool pullEps)
+        private ParserAction GetParserAction(List<Symbol> input, out bool pulledEps)
         {
-            pullEps = false;
-            if (_table.ActionTable.TryGetValue(new StateSymbolTuple(stateStack.Peek(), input[0]), out var action))
+            pulledEps = false;
+            if (_table.ActionTable.TryGetValue(new StateSymbolTuple(_stateStack.Peek(), input[0]), out var action))
             {
                 return action;
             }
 
-            if (_table.ActionTable.TryGetValue(new StateSymbolTuple(stateStack.Peek(), Symbol.Epsilon),
+            if (_table.ActionTable.TryGetValue(new StateSymbolTuple(_stateStack.Peek(), Symbol.Epsilon),
                     out var epsAction))
             {
-                pullEps = true;
+                pulledEps = true;
                 return epsAction;
             }
 
@@ -99,20 +98,22 @@ namespace LRParser.Parser
 
         private void Accept()
         {
-            if (_showOutput)
+            if (!_showOutput)
             {
-                _parsingOutput += "ACCEPT\n";
-                Logger.Log(_parsingOutput);
+                return;
             }
+
+            _parsingOutput += "ACCEPT\n";
+            Logger.Log(_parsingOutput);
         }
 
         private void Error(List<Symbol> input)
         {
-            var expected = _table.ExpectedSymbols(stateStack.Peek());
+            var expected = _table.ExpectedSymbols(_stateStack.Peek());
             if (_showOutput)
             {
                 _parsingOutput +=
-                    $"ERROR: cant parse \"{input[0]}\". current: {stateStack.Peek()}\n Expected Symbols: {expected.Aggregate("", (current, symbol) => current + symbol + " ")}\n";
+                    $"ERROR: cant parse \"{input[0]}\". current: {_stateStack.Peek()}\n Expected Symbols: {expected.Aggregate("", (current, symbol) => current + symbol + " ")}\n";
             }
 
             //DEBUG
@@ -133,11 +134,11 @@ namespace LRParser.Parser
 
             if (_showOutput)
             {
-                _parsingOutput += $"SHIFT: {input[0]}, current:{stateStack.Peek()}, next state:{shiftState}\n";
+                _parsingOutput += $"SHIFT: {input[0]}, current:{_stateStack.Peek()}, next state:{shiftState}\n";
             }
 
-            stateStack.Push(shiftState);
-            treeStack.Push(new ConcreteSyntaxTreeNode(input[0].Clone()));
+            _stateStack.Push(shiftState);
+            _treeStack.Push(new ConcreteSyntaxTreeNode(input[0].Clone()));
             input.RemoveAt(0);
         }
 
@@ -153,19 +154,19 @@ namespace LRParser.Parser
 
             for (var i = 0; i < rule.Conclusion.Count(s => !s.IsEpsilon); i++)
             {
-                stateStack.Pop();
-                reduced.AddChild(treeStack.Pop());
+                _stateStack.Pop();
+                reduced.AddChild(_treeStack.Pop());
             }
 
-            treeStack.Push(reduced);
+            _treeStack.Push(reduced);
 
-            if (_table.GotoTable.TryGetValue(new StateSymbolTuple(stateStack.Peek(), rule.Premise), out var gotoId))
+            if (_table.GotoTable.TryGetValue(new StateSymbolTuple(_stateStack.Peek(), rule.Premise), out var gotoId))
             {
-                stateStack.Push(gotoId);
+                _stateStack.Push(gotoId);
             }
             else
             {
-                throw new Exception("Goto not found:" + (stateStack.Peek(), rule.Premise));
+                throw new Exception("Goto not found:" + (_stateStack.Peek(), rule.Premise));
             }
         }
     }

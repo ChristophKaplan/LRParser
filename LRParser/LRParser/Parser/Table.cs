@@ -47,67 +47,79 @@ namespace LRParser.Parser
         {
             if (item.IsComplete)
             {
-                if (item.Production.Premise.Equals(_cfg.StartSymbol))
-                {
-                    ActionTable[new StateSymbolTuple(state.Id, Symbol.Dollar)] =
-                        new ParserAction(ParserAction.Type.Accept, -1);
-                }
-                else
-                {
-                    foreach (var symbol in item.LookAheadSymbols)
-                    {
-                        if (ActionTable.ContainsKey(new StateSymbolTuple(state.Id, symbol)) &&
-                            ActionTable[new StateSymbolTuple(state.Id, symbol)].Action == ParserAction.Type.Shift)
-                        {
-                            _tableOutput += $"Shift reduce conflict, default to shift: {symbol}, State:{state.Id}\n";
-                            continue;
-                        }
-
-                        if (ActionTable.ContainsKey(new StateSymbolTuple(state.Id, symbol)) &&
-                            ActionTable[new StateSymbolTuple(state.Id, symbol)].Action == ParserAction.Type.Reduce)
-                        {
-                            var r1 = ActionTable[new StateSymbolTuple(state.Id, symbol)].StateOrProdId;
-                            var r2 = _cfg.Productions.IndexOf(item.Production);
-
-                            _tableOutput +=
-                                $"Reduce/Reduce conflict: {symbol}\n {_cfg.Productions[r1]} vs. {_cfg.Productions[r2]} \n {state}";
-                            throw new Exception(_tableOutput);
-                        }
-
-                        ActionTable[new StateSymbolTuple(state.Id, symbol)] = new ParserAction(ParserAction.Type.Reduce,
-                            _cfg.Productions.IndexOf(item.Production));
-                    }
-                }
+                CreateEntryComplete(state, item);
             }
             else
             {
-                var symbol = item.CurrentSymbol;
-                switch (symbol.Type)
+                CreateEntryNonComplete(state, item);
+            }
+        }
+
+        private void CreateEntryComplete(State state, LRItem item)
+        {
+            if (item.Production.Premise.Equals(_cfg.StartSymbol))
+            {
+                var symbolTuple = new StateSymbolTuple(state.Id, Symbol.Dollar);
+                ActionTable[symbolTuple] = new ParserAction(ParserAction.Type.Accept, -1);
+            }
+            else
+            {
+                foreach (var symbol in item.LookAheadSymbols)
                 {
-                    case SymbolType.Terminal:
-                    {
-                        if (ActionTable.ContainsKey(new StateSymbolTuple(state.Id, symbol)) &&
-                            ActionTable[new StateSymbolTuple(state.Id, symbol)].Action == ParserAction.Type.Reduce)
-                        {
-                            _tableOutput += $"Shift reduce conflict, default to shift : {symbol} , State:{state.Id}\n";
-                        }
+                    var tuple = new StateSymbolTuple(state.Id, symbol);
+                    var contained = ActionTable.ContainsKey(tuple);
 
-                        if (!state.Transitions.TryGetValue(symbol, out var nextState))
-                        {
-                            _tableOutput += $"Cant find shift symbol {symbol} at state {state}!\n";
-                            throw new Exception(_tableOutput);
-                        }
-
-                        ActionTable[new StateSymbolTuple(state.Id, symbol)] =
-                            new ParserAction(ParserAction.Type.Shift, nextState.Id);
-                        break;
-                    }
-                    case SymbolType.NonTerminal:
+                    if (contained && ActionTable[tuple].Action == ParserAction.Type.Shift)
                     {
-                        var nextState = state.Transitions[symbol];
-                        GotoTable[new StateSymbolTuple(state.Id, symbol)] = nextState.Id;
-                        break;
+                        _tableOutput += $"Shift reduce conflict, default to shift: {symbol}, State:{state.Id}\n";
+                        continue;
                     }
+
+                    if (contained && ActionTable[tuple].Action == ParserAction.Type.Reduce)
+                    {
+                        var r1 = ActionTable[tuple].StateOrProdId;
+                        var r2 = _cfg.Productions.IndexOf(item.Production);
+
+                        _tableOutput +=
+                            $"Reduce/Reduce conflict: {symbol}\n {_cfg.Productions[r1]} vs. {_cfg.Productions[r2]} \n {state}";
+                        throw new Exception(_tableOutput);
+                    }
+
+                    ActionTable[tuple] = new ParserAction(ParserAction.Type.Reduce,
+                        _cfg.Productions.IndexOf(item.Production));
+                }
+            }
+        }
+
+        private void CreateEntryNonComplete(State state, LRItem item)
+        {
+            var symbol = item.CurrentSymbol;
+            var symbolTuple = new StateSymbolTuple(state.Id, symbol);
+
+            switch (symbol.Type)
+            {
+                case SymbolType.Terminal:
+                {
+                    if (ActionTable.ContainsKey(symbolTuple) &&
+                        ActionTable[symbolTuple].Action == ParserAction.Type.Reduce)
+                    {
+                        _tableOutput += $"Shift reduce conflict, default to shift : {symbol} , State:{state.Id}\n";
+                    }
+
+                    if (!state.Transitions.TryGetValue(symbol, out var nextState))
+                    {
+                        _tableOutput += $"Cant find shift symbol {symbol} at state {state}!\n";
+                        throw new Exception(_tableOutput);
+                    }
+
+                    ActionTable[symbolTuple] = new ParserAction(ParserAction.Type.Shift, nextState.Id);
+                    break;
+                }
+                case SymbolType.NonTerminal:
+                {
+                    var nextState = state.Transitions[symbol];
+                    GotoTable[symbolTuple] = nextState.Id;
+                    break;
                 }
             }
         }
