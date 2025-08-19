@@ -13,8 +13,9 @@ namespace LRParser.Parser
         private string _parsingOutput = string.Empty;
         private readonly bool _showOutput;
         private readonly Stack<int> _stateStack = new();
-        private readonly Stack<ConcreteSyntaxTreeNode> _treeStack = new();
-
+        private readonly Stack<int> _treeNodeStack = new();
+        private readonly ConcreteSyntaxTree _syntaxTree = new();
+        
         public Parser(ContextFreeGrammar<T, N> cfg, bool showOutput = false, bool debug = false)
         {
             _cfg = cfg;
@@ -32,10 +33,10 @@ namespace LRParser.Parser
         {
             _stateStack.Clear();
             _stateStack.Push(0);
-            _treeStack.Clear();
+            _treeNodeStack.Clear();
         }
 
-        public ConcreteSyntaxTreeNode Parse(List<Symbol> input)
+        public int Parse(List<Symbol> input,out ConcreteSyntaxTree tree)
         {
             input.Add(Symbol.Dollar);
             ResetStack();
@@ -48,8 +49,8 @@ namespace LRParser.Parser
                 var action = GetParserAction(input, out var pullEps);
                 shouldContinue = ProcessAction(input, action, pullEps);
             }
-
-            return _treeStack.Pop();
+            tree = this._syntaxTree;
+            return _treeNodeStack.Pop();
         }
 
         private bool ProcessAction(List<Symbol> input, ParserAction action, bool pullEps)
@@ -138,7 +139,9 @@ namespace LRParser.Parser
             }
 
             _stateStack.Push(shiftState);
-            _treeStack.Push(new ConcreteSyntaxTreeNode(input[0].Clone()));
+            var clone = input[0].Clone();
+            var nodeIndex = _syntaxTree.AddNode(clone, null); //wurde nur auf stack gelegt eigentlich. jetzt im tree
+            _treeNodeStack.Push(nodeIndex);
             input.RemoveAt(0);
         }
 
@@ -149,16 +152,16 @@ namespace LRParser.Parser
             {
                 _parsingOutput += $"REDUCE ({ruleId}), Rule: {rule}\n";
             }
-
-            var reduced = new ConcreteSyntaxTreeNode(rule.Premise.Clone(), rule.SemanticAction);
+            
+            var reducedIndex = _syntaxTree.AddNode(rule.Premise.Clone(), rule.SemanticAction);
 
             for (var i = 0; i < rule.Conclusion.Count(s => !s.IsEpsilon); i++)
             {
                 _stateStack.Pop();
-                reduced.AddChild(_treeStack.Pop());
+                _syntaxTree.AddChildToParent(_treeNodeStack.Pop(),reducedIndex);
             }
 
-            _treeStack.Push(reduced);
+            _treeNodeStack.Push(reducedIndex);
 
             if (_table.GotoTable.TryGetValue(new StateSymbolTuple(_stateStack.Peek(), rule.Premise), out var gotoId))
             {

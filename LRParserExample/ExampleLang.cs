@@ -55,19 +55,11 @@ namespace ExampleLang
 
         protected override void SetUpGrammar()
         {
-            var rule01 = AddProductionRule(SpecialNonTerminal.Start, NonTerminal.LangObject);
-            var rule02 = AddProductionRule(NonTerminal.LangObject, NonTerminal.Declaration);
-            var rule03 = AddProductionRule(NonTerminal.LangObject, NonTerminal.Declaration, NonTerminal.Assigment);
-            var rule04 = AddProductionRule(NonTerminal.Declaration, Terminal.Type, Terminal.Variable,
-                Terminal.SemiColon);
-            var rule05 = AddProductionRule(NonTerminal.Assigment, Terminal.Variable, Terminal.Equals, Terminal.Num,
-                Terminal.SemiColon);
-
-            rule01.SetSemanticAction(Rule01);
-            rule02.SetSemanticAction(Rule02);
-            rule03.SetSemanticAction(Rule03);
-            rule04.SetSemanticAction(Rule04);
-            rule05.SetSemanticAction(Rule05);
+            AddProductionRule(Rule01, SpecialNonTerminal.Start, NonTerminal.LangObject);
+            AddProductionRule(Rule02, NonTerminal.LangObject, NonTerminal.Declaration);
+            AddProductionRule(Rule03, NonTerminal.LangObject, NonTerminal.Declaration, NonTerminal.Assigment);
+            AddProductionRule(Rule04, NonTerminal.Declaration, Terminal.Type, Terminal.Variable, Terminal.SemiColon);
+            AddProductionRule(Rule05, NonTerminal.Assigment, Terminal.Variable, Terminal.Equals, Terminal.Num, Terminal.SemiColon);
         }
 
         private void Rule01(ref Symbol lhs, Symbol[] rhs)

@@ -3,21 +3,18 @@ using System.Linq;
 
 namespace LRParser.CFG
 {
-    public class Production
+    public struct Production
     {
-        internal readonly Symbol[] Conclusion;
-        internal readonly Symbol Premise;
         public delegate void SemanticActionDelegate(ref Symbol symbol, Symbol[] parameters);
         public SemanticActionDelegate SemanticAction;
+        
+        public readonly Symbol[] Conclusion;
+        public readonly Symbol Premise;
 
-        public Production(Symbol premise, params Symbol[] conclusion)
+        public Production(SemanticActionDelegate action, Symbol premise, params Symbol[] conclusion)
         {
             Premise = premise;
             Conclusion = conclusion;
-        }
-
-        public void SetSemanticAction(SemanticActionDelegate action)
-        {
             SemanticAction = action;
         }
 

@@ -1,31 +1,79 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using LRParser.CFG;
 
 namespace LRParser.Parser
 {
-    public class ConcreteSyntaxTreeNode
+    public class ConcreteSyntaxTree
     {
-        private readonly Production.SemanticActionDelegate _semanticAction;
-        public Symbol Symbol;
-        private readonly List<ConcreteSyntaxTreeNode> _children;
-
-        public ConcreteSyntaxTreeNode(Symbol symbol)
+        private Dictionary<int, ConcreteSyntaxTreeNode> _nodes = new();
+        
+        public int AddNode(Symbol symbol, Production.SemanticActionDelegate semanticAction)
         {
-            Symbol = symbol;
-            _semanticAction = null;
-            _children = new List<ConcreteSyntaxTreeNode>();
+            var index = _nodes.Count;
+            _nodes.Add(index, new ConcreteSyntaxTreeNode (index, symbol, semanticAction));
+            return index;
+        }
+        
+        public ConcreteSyntaxTreeNode GetNode(int index)
+        {
+            return _nodes.TryGetValue(index, out var node) ? node : throw new KeyNotFoundException($"Node with index {index} not found.");
         }
 
-        public ConcreteSyntaxTreeNode(Symbol symbol, Production.SemanticActionDelegate semanticAction)
+        public void EvaluateTree(int child)
         {
+            if (_nodes[child]._children.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var childId in _nodes[child]._children)
+            {
+                EvaluateTree(childId);
+            }
+
+            Semantic(child);
+        }
+
+        private void Semantic(int child)
+        {
+            var node = _nodes[child];
+            //if (node._semanticAction == null) return;
+            
+            var parameters = node._children.Select(childId => _nodes[childId].Symbol).ToArray();
+            node._semanticAction.Invoke(ref node.Symbol, parameters);
+            _nodes[child] = node; // Update the node after semantic action
+        }
+
+        public void AddChildToParent(int child, int parent)
+        {
+            if (!_nodes.ContainsKey(child) || !_nodes.ContainsKey(parent))
+            {
+                throw new KeyNotFoundException($"Child {child} or parent {parent} not found in the tree.");
+            }
+            
+            ConcreteSyntaxTreeNode p = _nodes[parent];
+            p.AddChild(child);
+            _nodes[parent] = p;
+        }
+    }
+
+    public struct ConcreteSyntaxTreeNode
+    {
+        private int Id;
+        public readonly Production.SemanticActionDelegate _semanticAction;
+        public Symbol Symbol;
+        public readonly List<int> _children;
+
+        public ConcreteSyntaxTreeNode(int id, Symbol symbol, Production.SemanticActionDelegate semanticAction)
+        {
+            Id = id;
             Symbol = symbol;
             _semanticAction = semanticAction;
-            _children = new List<ConcreteSyntaxTreeNode>();
+            _children = new List<int>();
         }
 
-        public void AddChild(ConcreteSyntaxTreeNode child)
+        public void AddChild(int child)
         {
             _children.Insert(0, child);
         }
@@ -33,27 +81,6 @@ namespace LRParser.Parser
         public override string ToString()
         {
             return $"\t{Symbol} {_children.Aggregate("\n\t", (current, next) => $"{current} {next}")}";
-        }
-
-        public void EvaluateTree()
-        {
-            if (_children.Count == 0)
-            {
-                return;
-            }
-
-            foreach (var child in _children)
-            {
-                child.EvaluateTree();
-            }
-
-            Semantic();
-        }
-
-        private void Semantic()
-        {
-            var parameters = _children.Select(child => child.Symbol).ToArray();
-            _semanticAction.Invoke(ref Symbol, parameters);
         }
     }
 }

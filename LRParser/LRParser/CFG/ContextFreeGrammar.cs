@@ -30,11 +30,11 @@ namespace LRParser.CFG {
             }
         }
 
-        protected Production AddProductionRule(Enum premise, params Enum[] conclusions) {
-            var rule = new Production(EnumToSym(premise), conclusions.Select(conclusion => EnumToSym(conclusion)).ToArray());
+        protected void AddProductionRule(Production.SemanticActionDelegate semanticAction, Enum premise, params Enum[] conclusions) {
+            var rule = new Production(semanticAction, EnumToSym(premise), conclusions.Select(conclusion => EnumToSym(conclusion)).ToArray());
             Productions.Add(rule);
-            return rule;
         }
+        
 
         private Symbol EnumToSym(Enum symbol) {
             if (symbol.GetType() == typeof(T)) {

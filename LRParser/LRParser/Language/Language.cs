@@ -82,9 +82,10 @@ namespace LRParser.Language {
 
         public virtual ILanguageObject TryParse(string input) {
             var tokens = Lexer.Tokenize(input);
-            var tree = Parser.Parse(tokens);
-            tree.EvaluateTree();
-            return tree.Symbol.SyntheticAttribute;
+            var index = Parser.Parse(tokens, out var tree);
+            tree.EvaluateTree(index);
+            var a = tree.GetNode(index);
+            return a.Symbol.SyntheticAttribute;
         }
     }
 }
