@@ -3,7 +3,7 @@ using System.Linq;
 using LRParser.CFG;
 
 namespace LRParser.Parser {
-    public class State {
+    public struct State {
         public State(List<LRItem> items, int id) {
             Id = id;
             Items = items;

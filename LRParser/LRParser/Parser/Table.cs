@@ -26,7 +26,7 @@ namespace LRParser.Parser
 
         private void CreateTable(States<T, N> states)
         {
-            foreach (var state in states.StateList)
+            foreach (var state in states.StateList.Values)
             {
                 foreach (var item in state.Items)
                 {
