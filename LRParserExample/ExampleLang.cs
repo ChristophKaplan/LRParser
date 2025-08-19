@@ -23,7 +23,7 @@ namespace ExampleLang
         Assigment,
     }
 
-    public class IntValue : ILanguageObject
+    public struct IntValue : ILanguageObject
     {
         public int Value { get; set; }
 
