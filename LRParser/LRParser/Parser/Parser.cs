@@ -139,7 +139,7 @@ namespace LRParser.Parser
             }
 
             _stateStack.Push(shiftState);
-            var clone = input[0].Clone();
+            var clone = input[0];
             var nodeIndex = _syntaxTree.AddNode(clone, null); //wurde nur auf stack gelegt eigentlich. jetzt im tree
             _treeNodeStack.Push(nodeIndex);
             input.RemoveAt(0);
@@ -153,7 +153,7 @@ namespace LRParser.Parser
                 _parsingOutput += $"REDUCE ({ruleId}), Rule: {rule}\n";
             }
             
-            var reducedIndex = _syntaxTree.AddNode(rule.Premise.Clone(), rule.SemanticAction);
+            var reducedIndex = _syntaxTree.AddNode(rule.Premise, rule.SemanticAction);
 
             for (var i = 0; i < rule.Conclusion.Count(s => !s.IsEpsilon); i++)
             {

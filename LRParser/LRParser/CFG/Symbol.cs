@@ -9,15 +9,11 @@ namespace LRParser.CFG
         NonTerminal
     }
 
-    public enum SpecialTerminal
+    public enum InternalSymbol
     {
         Epsilon,
-        Dollar
-    }
-
-    public enum SpecialNonTerminal
-    {
-        Start
+        Dollar,
+        Start //NonTerminal
     }
 
     public struct Symbol : IEquatable<Symbol>
@@ -39,18 +35,13 @@ namespace LRParser.CFG
             InheritedAttribute = default;
         }
 
-        public readonly Symbol Clone()
-        {
-            return (Symbol)MemberwiseClone();
-        }
+        public static Symbol Epsilon => new(InternalSymbol.Epsilon, SymbolType.Terminal);
+        public static Symbol Dollar => new(InternalSymbol.Dollar, SymbolType.Terminal);
+        public static Symbol Start => new(InternalSymbol.Start, SymbolType.NonTerminal);
 
-        public static Symbol Epsilon => new(SpecialTerminal.Epsilon, SymbolType.Terminal);
-        public static Symbol Dollar => new(SpecialTerminal.Dollar, SymbolType.Terminal);
-        public static Symbol Start => new(SpecialNonTerminal.Start, SymbolType.NonTerminal);
-
-        public bool IsEpsilon => Type == SymbolType.Terminal && _enum.Equals(SpecialTerminal.Epsilon);
-        public bool IsDollar => Type == SymbolType.Terminal && _enum.Equals(SpecialTerminal.Dollar);
-        public bool IsStartSymbol => Type == SymbolType.NonTerminal && _enum.Equals(SpecialNonTerminal.Start);
+        public bool IsEpsilon => _enum.Equals(InternalSymbol.Epsilon);
+        public bool IsDollar => _enum.Equals(InternalSymbol.Dollar);
+        public bool IsStartSymbol => _enum.Equals(InternalSymbol.Start);
 
         public void SetValue(string value)
         {

@@ -69,6 +69,8 @@ namespace LRParser.Language {
             AddByEnumType(typeof(T));
             AddByEnumType(typeof(N));
             SetUpGrammar();
+            InsertStartProductionRule();
+            
             Parser = new Parser<T, N>(this, true, true);
 
             if (!HasStartSymbol()) {
