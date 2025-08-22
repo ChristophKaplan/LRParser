@@ -45,13 +45,13 @@ namespace LRParser.Parser {
         }
 
         public bool CoreEquals(LRItem other) {
+            if(GetCoreHash() != other.GetCoreHash()) {
+                return false;
+            }
+            
             return Production.Equals(other.Production) && _dotPosition == other._dotPosition;
         }
-
-        private bool LookAheadEquals(List<Symbol> other) {
-            return LookAheadSymbols.Count == other.Count && LookAheadSymbols.All(symbol => other.Contains(symbol));
-        }
-
+        
         public override bool Equals(object? obj) {
             if (obj == null || obj.GetType() != GetType()) {
                 return false;
@@ -60,9 +60,18 @@ namespace LRParser.Parser {
             var other = (LRItem)obj;
             return Production.Equals(other.Production) && _dotPosition == other._dotPosition && LookAheadEquals(other.LookAheadSymbols);
         }
+        
+        private bool LookAheadEquals(List<Symbol> other) {
+            return LookAheadSymbols.Count == other.Count && LookAheadSymbols.All(other.Contains);
+        }
 
         public override int GetHashCode() {
             return HashCode.Combine(Production, _dotPosition, LookAheadSymbols);
+        }
+        
+        public int GetCoreHash()
+        {
+            return HashCode.Combine(Production, _dotPosition);
         }
 
         public override string ToString() {

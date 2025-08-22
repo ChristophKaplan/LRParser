@@ -16,19 +16,19 @@ namespace LRParser.LRParser.Parser
         private readonly ContextFreeGrammar<T, N> _cfg;
         private StringBuilder _tableOutput = new();
 
-        public Table(States<T, N> states, ContextFreeGrammar<T, N> cfg, bool showOutput = false)
+        public Table(StateManager<T, N> stateManager, ContextFreeGrammar<T, N> cfg, bool showOutput = false)
         {
             _cfg = cfg;
-            CreateTable(states);
+            CreateTable(stateManager);
             if (showOutput)
             {
                 Logger.Log($"Table:\n{_tableOutput.ToString()}");
             }
         }
 
-        private void CreateTable(States<T, N> states)
+        private void CreateTable(StateManager<T, N> stateManager)
         {
-            foreach (var state in states.StateList.Values)
+            foreach (var state in stateManager.States)
             {
                 foreach (var item in state.Items)
                 {

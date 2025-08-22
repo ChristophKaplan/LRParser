@@ -66,12 +66,12 @@ namespace LRParser.Language {
 
         protected Language() {
             Lexer = new Lexer<T>(SetUpTokenDefinitions());
-            AddByEnumType(typeof(T));
-            AddByEnumType(typeof(N));
+            AddByEnumType<T>();
+            AddByEnumType<N>();
             SetUpGrammar();
             InsertStartProductionRule();
 
-            var showOutput = false;
+            var showOutput = true;
             var debug = false;
             Parser = new Parser<T, N>(this, showOutput , debug);
         }

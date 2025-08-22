@@ -22,7 +22,7 @@ namespace LRParser.Parser
             _cfg = cfg;
             _showOutput = showOutput;
             var startItem = new LRItem(cfg.Productions[0], 0, new List<Symbol> { Symbol.Dollar });
-            var states = new States<T, N>(startItem, _cfg, showOutput, debug);
+            var states = new StateManager<T, N>(startItem, _cfg, showOutput, debug);
             _table = new Table<T, N>(states, _cfg, showOutput);
             if (debug)
             {

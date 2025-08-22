@@ -21,20 +21,24 @@ namespace LRParser.CFG
             _nonTerminals.Add(new Symbol(nonTerminal, SymbolType.NonTerminal));
         }
 
-        protected void AddByEnumType(Type enumType)
+        private static readonly Dictionary<Type, Array> _enumValuesCache = new();
+        protected void AddByEnumType<E>() where E : Enum
         {
-            foreach (int i in Enum.GetValues(enumType))
+            if (!_enumValuesCache.TryGetValue(typeof(E), out var values))
             {
-                if (Enum.IsDefined(enumType, i))
+                values = Enum.GetValues(typeof(E));
+                _enumValuesCache[typeof(E)] = values;
+            }
+            
+            foreach (int i in Enum.GetValues(typeof(E)))
+            {
+                if (typeof(T).IsAssignableFrom(typeof(E)))
                 {
-                    if (typeof(T).IsAssignableFrom(enumType))
-                    {
-                        AddTerminal((T)Enum.ToObject(enumType, i));
-                    }
-                    else if (typeof(N).IsAssignableFrom(enumType))
-                    {
-                        AddNonTerminal((N)Enum.ToObject(enumType, i));
-                    }
+                    AddTerminal((T)Enum.ToObject(typeof(E), i));
+                }
+                else if (typeof(N).IsAssignableFrom(typeof(E)))
+                {
+                    AddNonTerminal((N)Enum.ToObject(typeof(E), i));
                 }
             }
         }

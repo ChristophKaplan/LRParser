@@ -1,35 +1,37 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using LogHelper;
 using LRParser.CFG;
+using LRParser.LRParser.Parser;
 
 namespace LRParser.Parser
 {
-    public class States<T, N> where T : Enum where N : Enum
+    public class StateManager<T, N> where T : Enum where N : Enum
     {
         private readonly ContextFreeGrammar<T, N> _cfg;
-        public Dictionary<int, State> StateList { get; }
+        public List<State> States { get; private set; }
 
         private string _statesOutput = string.Empty;
 
-        public States(LRItem startItem, ContextFreeGrammar<T, N> cfg, bool showOutput = false, bool debug = false,
+        public StateManager(LRItem startItem, ContextFreeGrammar<T, N> cfg, bool showOutput = false, bool debug = false,
             bool lalr = true)
         {
             _cfg = cfg;
-            StateList = GenerateStates(startItem);
+            GenerateStates(startItem);
 
             if (!lalr)
             {
-                _statesOutput += $"Cannonical LR, States: {StateList.Count}\n";
+                _statesOutput += $"Cannonical LR, States: {States.Count}\n";
                 return;
             }
 
-            var stateCountBefore = StateList.Count;
-            MergeStates(StateList);
-            _statesOutput += $"LALR, States reduced from: {stateCountBefore} to: {StateList.Count}\n";
+            var stateCountBefore = States.Count;
+            MergeStates();
+            _statesOutput += $"LALR, States reduced from: {stateCountBefore} to: {States.Count}\n";
 
-            var valid = ValidateStates(StateList);
+            var valid = ValidateStates();
 
             if (showOutput)
             {
@@ -42,16 +44,15 @@ namespace LRParser.Parser
             }
         }
 
-        private Dictionary<int, State> GenerateStates(LRItem startItem)
+        private void GenerateStates(LRItem startItem)
         {
             var firstState = new State(Closure(new List<LRItem> { startItem }), 0);
-            var states = new Dictionary<int, State> { { firstState.Id, firstState } };
+            States = new List<State> { firstState };
             var count = 0;
-            GenerateStates(firstState, states, ref count);
-            return states;
+            GenerateStates(firstState, ref count);
         }
 
-        private void GenerateStates(State currentState, Dictionary<int, State> states, ref int stateId)
+        private void GenerateStates(State currentState, ref int stateId)
         {
             var possibleTransitionGroups = currentState.GetIncompleteItems().GroupBy(i => i.CurrentSymbol);
 
@@ -67,11 +68,11 @@ namespace LRParser.Parser
 
                 var nextState = new State(nextClosureSet, ++stateId);
 
-                if (!TryGetEqualState(states, nextState, out var equalState))
+                if (!TryGetEqualState(nextState, out var equalState))
                 {
                     currentState.Transitions.Add(possibleTransitions.Key, nextState);
-                    states.Add(nextState.Id, nextState);
-                    GenerateStates(nextState, states, ref stateId);
+                    States.Add(nextState);
+                    GenerateStates(nextState, ref stateId);
                 }
                 else
                 {
@@ -80,10 +81,10 @@ namespace LRParser.Parser
             }
         }
 
-        private bool ValidateStates(Dictionary<int, State> states)
+        private bool ValidateStates()
         {
             var conflict = false;
-            foreach (var state in states.Values)
+            foreach (var state in States)
             {
                 conflict = state.HasConflict(ref _statesOutput);
             }
@@ -91,45 +92,31 @@ namespace LRParser.Parser
             return conflict;
         }
 
-        private void MergeStates(Dictionary<int, State> states)
+        private void MergeStates()
         {
-            for (var i = 0; i < states.Count; i++)
+            for (var i = 0; i < States.Count; i++)
             {
-                for (var j = i + 1; j < states.Count; j++)
+                for (var j = i + 1; j < States.Count; j++)
                 {
-                    if (states.ElementAt(i).Value.HasEqualCore(states.ElementAt(j).Value))
+                    var a = States[i];
+                    var b = States[j];
+                    
+                    if (a.HasEqualCore(b))
                     {
-                        MergeStates(states[i], states[j], states);
+                        MergeStates(a, b);
                     }
                 }
             }
         }
 
-        private void MergeStates(State state1, State mergeMe, Dictionary<int, State> states)
+        private void MergeStates(State myState, State mergeMe)
         {
-            //merge lookaheads
-            foreach (var item1 in state1.Items)
-            {
-                foreach (var mergeItem in mergeMe.Items)
-                {
-                    if (item1.CoreEquals(mergeItem))
-                    {
-                        for (var i = mergeItem.LookAheadSymbols.Count - 1; i >= 0; i--)
-                        {
-                            var sym = mergeItem.LookAheadSymbols[i];
-                            if (!item1.LookAheadSymbols.Contains(sym))
-                            {
-                                item1.LookAheadSymbols.Add(sym);
-                            }
-                        }
-                    }
-                }
-            }
+            myState.MergeLookaheads(mergeMe);
 
             //reroute
             var transitionsToModify = new List<(State state, Symbol symbol)>();
 
-            foreach (var state in states.Values)
+            foreach (var state in States)
             {
                 foreach (var (symbol, toState) in state.Transitions)
                 {
@@ -142,18 +129,17 @@ namespace LRParser.Parser
 
             foreach (var (state, symbol) in transitionsToModify)
             {
-                state.Transitions[symbol] = state1;
+                state.Transitions[symbol] = myState;
                 //Logging.Log($"reroute {state.Id} to {state1.Id}");
-                states[state.Id] = state; //need to update!?! when state is a struct
             }
 
             //remove state2
-            states.Remove(mergeMe.Id);
+            States.Remove(mergeMe);
         }
 
-        private bool TryGetEqualState(Dictionary<int, State> states, State state, out State foundState)
+        private bool TryGetEqualState(State state, out State foundState)
         {
-            foreach (var curState in states.Values.Where(curState => curState.HasEqualItems(state)))
+            foreach (var curState in States.Where(curState => curState.HasEqualItems(state)))
             {
                 foundState = curState;
                 return true;
@@ -186,7 +172,6 @@ namespace LRParser.Parser
 
                 foreach (var symbol in oldLookahead)
                 {
-                    //var input = afterDot.Count == 0 ? new List<Symbol>() { symbol } : new List<Symbol>() { afterDot[0], symbol };
                     var input = allAfterDotSymbol.Count == 0 ? symbol : allAfterDotSymbol[0];
                     var curLookahead = _cfg.First(input, new List<Symbol>()); //k = 1, only LL(1) or LR(1)
                     var prods = _cfg.GetAllProdForNonTerminal(currentItem.CurrentSymbol);
@@ -207,6 +192,7 @@ namespace LRParser.Parser
         private static bool IfContainedAddOnlyLookahead(LRItem newItem, IEnumerable<LRItem> closedSet)
         {
             var closedAlready = false;
+
             foreach (var closedItem in closedSet)
             {
                 if (!closedItem.CoreEquals(newItem))
@@ -229,13 +215,14 @@ namespace LRParser.Parser
 
         public override string ToString()
         {
-            var a = "ALL STATES:\n";
-            foreach (var state in StateList)
+            var sb = new StringBuilder();
+            sb.AppendLine($"States: {States.Count}");
+            foreach (var state in States)
             {
-                a += $"{state}\n";
+                sb.Append($"{state}\n");
             }
 
-            return a;
+            return sb.ToString();
         }
     }
 }
