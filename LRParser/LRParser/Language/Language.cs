@@ -70,16 +70,10 @@ namespace LRParser.Language {
             AddByEnumType(typeof(N));
             SetUpGrammar();
             InsertStartProductionRule();
-            
-            Parser = new Parser<T, N>(this, true, true);
 
-            if (!HasStartSymbol()) {
-                throw new Exception("No production with start symbol found!");
-            }
-        }
-
-        private bool HasStartSymbol() {
-            return Productions.Any(rule => rule.Premise.IsStartSymbol);
+            var showOutput = false;
+            var debug = false;
+            Parser = new Parser<T, N>(this, showOutput , debug);
         }
 
         public virtual ILanguageObject TryParse(string input) {

@@ -19,8 +19,9 @@ namespace LRParser.CFG
     public struct Symbol : IEquatable<Symbol>
     {
         private readonly int _hashcode;
-        private readonly Enum _enum;
 
+        //these ore not performant
+        private readonly Enum _enum;
         public ILanguageObject SyntheticAttribute;
         public object InheritedAttribute;
 
@@ -29,23 +30,30 @@ namespace LRParser.CFG
         public Symbol(Enum @enum, SymbolType type)
         {
             _enum = @enum;
-            _hashcode = _enum.GetHashCode();
             Type = type;
             SyntheticAttribute = default;
             InheritedAttribute = default;
+            _hashcode = 0;
+            _hashcode = CreateHashCode();
         }
 
         public static Symbol Epsilon => new(InternalSymbol.Epsilon, SymbolType.Terminal);
         public static Symbol Dollar => new(InternalSymbol.Dollar, SymbolType.Terminal);
         public static Symbol Start => new(InternalSymbol.Start, SymbolType.NonTerminal);
-
         public bool IsEpsilon => _enum.Equals(InternalSymbol.Epsilon);
         public bool IsDollar => _enum.Equals(InternalSymbol.Dollar);
-        public bool IsStartSymbol => _enum.Equals(InternalSymbol.Start);
 
         public void SetValue(string value)
         {
             SyntheticAttribute = new LexValue(value);
+        }
+
+        private int CreateHashCode()
+        {
+            const int internalSymbolMarker = 23;
+            return _enum is InternalSymbol ? 
+                HashCode.Combine(_enum, Type, internalSymbolMarker) : 
+                HashCode.Combine(_enum, Type);
         }
 
         public override int GetHashCode() => _hashcode;

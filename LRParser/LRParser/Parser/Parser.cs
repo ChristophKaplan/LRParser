@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using LogHelper;
 using LRParser.CFG;
+using LRParser.LRParser.Parser;
 
 namespace LRParser.Parser
 {

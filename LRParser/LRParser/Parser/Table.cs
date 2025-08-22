@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using LogHelper;
 using LRParser.CFG;
+using LRParser.Parser;
 
-namespace LRParser.Parser
+namespace LRParser.LRParser.Parser
 {
     public class Table<T, N> where T : Enum where N : Enum
     {
@@ -12,7 +14,7 @@ namespace LRParser.Parser
         public Dictionary<StateSymbolTuple, int> GotoTable { get; } = new();
 
         private readonly ContextFreeGrammar<T, N> _cfg;
-        private string _tableOutput = string.Empty;
+        private StringBuilder _tableOutput = new();
 
         public Table(States<T, N> states, ContextFreeGrammar<T, N> cfg, bool showOutput = false)
         {
@@ -20,7 +22,7 @@ namespace LRParser.Parser
             CreateTable(states);
             if (showOutput)
             {
-                Logger.Log($"Table:\n{_tableOutput}");
+                Logger.Log($"Table:\n{_tableOutput.ToString()}");
             }
         }
 
@@ -37,10 +39,15 @@ namespace LRParser.Parser
 
         public List<Symbol> ExpectedSymbols(int state)
         {
-            return ActionTable
-                .Where(x => x.Key.State == state)
-                .Select(x => x.Key.Symbol)
-                .ToList();
+            var result = new List<Symbol>();
+            foreach (var entry in ActionTable)
+            {
+                if (entry.Key.StateId == state)
+                {
+                    result.Add(entry.Key.Symbol);
+                }
+            }
+            return result;
         }
 
         private void CreateEntry(State state, LRItem item)
@@ -67,22 +74,22 @@ namespace LRParser.Parser
                 foreach (var symbol in item.LookAheadSymbols)
                 {
                     var tuple = new StateSymbolTuple(state.Id, symbol);
-                    var contained = ActionTable.ContainsKey(tuple);
+                    var contained = ActionTable.TryGetValue(tuple, out var parserAction);
 
-                    if (contained && ActionTable[tuple].Action == ParserAction.Type.Shift)
+                    if (contained && parserAction.Action == ParserAction.Type.Shift)
                     {
-                        _tableOutput += $"Shift reduce conflict, default to shift: {symbol}, State:{state.Id}\n";
+                        _tableOutput.Append($"Shift reduce conflict, default to shift: {symbol}, State:{state.Id}\n");
                         continue;
                     }
 
-                    if (contained && ActionTable[tuple].Action == ParserAction.Type.Reduce)
+                    if (contained && parserAction.Action == ParserAction.Type.Reduce)
                     {
-                        var r1 = ActionTable[tuple].StateOrProdId;
+                        var r1 = parserAction.StateOrProdId; //contained already
                         var r2 = _cfg.Productions.IndexOf(item.Production);
 
-                        _tableOutput +=
-                            $"Reduce/Reduce conflict: {symbol}\n {_cfg.Productions[r1]} vs. {_cfg.Productions[r2]} \n {state}";
-                        throw new Exception(_tableOutput);
+                        _tableOutput.Append(
+                            $"Reduce/Reduce conflict: {symbol}\n {_cfg.Productions[r1]} vs. {_cfg.Productions[r2]} \n {state}");
+                        throw new Exception(_tableOutput.ToString());
                     }
 
                     ActionTable[tuple] = new ParserAction(ParserAction.Type.Reduce,
@@ -100,16 +107,16 @@ namespace LRParser.Parser
             {
                 case SymbolType.Terminal:
                 {
-                    if (ActionTable.ContainsKey(symbolTuple) &&
-                        ActionTable[symbolTuple].Action == ParserAction.Type.Reduce)
+                    if (ActionTable.TryGetValue(symbolTuple, out var parserAction) &&
+                        parserAction.Action == ParserAction.Type.Reduce)
                     {
-                        _tableOutput += $"Shift reduce conflict, default to shift : {symbol} , State:{state.Id}\n";
+                        _tableOutput.Append( $"Shift reduce conflict, default to shift : {symbol} , State:{state.Id}\n");
                     }
 
                     if (!state.Transitions.TryGetValue(symbol, out var nextState))
                     {
-                        _tableOutput += $"Cant find shift symbol {symbol} at state {state}!\n";
-                        throw new Exception(_tableOutput);
+                        _tableOutput.Append($"Cant find shift symbol {symbol} at state {state}!\n");
+                        throw new Exception(_tableOutput.ToString());
                     }
 
                     ActionTable[symbolTuple] = new ParserAction(ParserAction.Type.Shift, nextState.Id);
@@ -129,7 +136,7 @@ namespace LRParser.Parser
             var s = "ACTION\n";
             foreach (var entry in ActionTable)
             {
-                s += $"({entry.Key.State}, {entry.Key.Symbol}) -> {entry.Value}\n";
+                s += $"({entry.Key.StateId}, {entry.Key.Symbol}) -> {entry.Value}\n";
             }
 
             s += "\nGOTO\n";
