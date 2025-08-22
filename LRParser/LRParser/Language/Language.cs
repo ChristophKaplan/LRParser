@@ -55,6 +55,10 @@ namespace LRParser.Language {
 
             Value = temp;
         }
+        
+        public override string ToString() {
+            return string.Join(" ", Value.Select(v => v.ToString()));
+        }
     }
 
     public abstract class Language<T, N> : ContextFreeGrammar<T, N> where T : Enum where N : Enum {
