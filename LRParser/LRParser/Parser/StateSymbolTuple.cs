@@ -12,5 +12,10 @@ namespace LRParser.Parser
             State = state;
             Symbol = symbol;
         }
+        
+        public override string ToString() 
+        {
+            return $"({State}, {Symbol})";
+        }
     }
 }

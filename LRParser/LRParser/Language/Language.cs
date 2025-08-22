@@ -84,8 +84,8 @@ namespace LRParser.Language {
             var tokens = Lexer.Tokenize(input);
             var index = Parser.Parse(tokens, out var tree);
             tree.EvaluateTree(index);
-            var a = tree.GetNode(index);
-            return a.Symbol.SyntheticAttribute;
+            var symbol = tree.GetSymbol(index);
+            return symbol.SyntheticAttribute;
         }
     }
 }

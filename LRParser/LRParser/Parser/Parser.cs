@@ -158,7 +158,7 @@ namespace LRParser.Parser
             for (var i = 0; i < rule.Conclusion.Count(s => !s.IsEpsilon); i++)
             {
                 _stateStack.Pop();
-                _syntaxTree.AddChildToParent(_treeNodeStack.Pop(),reducedIndex);
+                _syntaxTree.AddChild(reducedIndex, _treeNodeStack.Pop());
             }
 
             _treeNodeStack.Push(reducedIndex);

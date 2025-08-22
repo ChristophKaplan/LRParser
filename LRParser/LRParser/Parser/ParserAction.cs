@@ -20,5 +20,17 @@ namespace LRParser.Parser
             StateOrProdId = stateOrProdId;
             Action = action;
         }
+
+        public override string ToString()
+        {
+            return Action switch
+            {
+                Type.Shift => $"Shift, Next state: {StateOrProdId}",
+                Type.Reduce => $"Reduce to production {StateOrProdId}",
+                Type.Accept => "Accept",
+                Type.Error => "Error",
+                _ => "Unknown action"
+            };
+        }
     }
 }
