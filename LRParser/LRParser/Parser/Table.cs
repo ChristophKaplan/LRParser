@@ -85,10 +85,9 @@ namespace LRParser.LRParser.Parser
                     if (contained && parserAction.Action == ParserAction.Type.Reduce)
                     {
                         var r1 = parserAction.StateOrProdId; //contained already
-                        var r2 = _cfg.Productions.IndexOf(item.Production);
+                        var r2 = _cfg.Productions.IndexOf(item.Production); //want to add but already contained
 
-                        _tableOutput.Append(
-                            $"Reduce/Reduce conflict: {symbol}\n {_cfg.Productions[r1]} vs. {_cfg.Productions[r2]} \n {state}");
+                        _tableOutput.Append($"Reduce/Reduce conflict: {symbol}\n {_cfg.Productions[r1]} vs. {_cfg.Productions[r2]} \n {state}");
                         throw new Exception(_tableOutput.ToString());
                     }
 

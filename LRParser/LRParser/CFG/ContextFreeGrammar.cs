@@ -86,7 +86,7 @@ namespace LRParser.CFG
             throw new Exception($"enum type {type} not found");
         }
 
-        public List<Production> GetAllProdForNonTerminal(Symbol nonTerminal)
+        public List<Production> GetProductionsForNonTerminal(Symbol nonTerminal)
         {
             return Productions.Where(rule => rule.Premise.Equals(nonTerminal)).ToList();
         }

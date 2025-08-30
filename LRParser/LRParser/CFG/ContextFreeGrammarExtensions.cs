@@ -4,11 +4,11 @@ using System.Linq;
 
 namespace LRParser.CFG {
     public static class ContextFreeGrammarExtensions {
-        public static List<Symbol> First<T, N>(this ContextFreeGrammar<T, N> cfg, Symbol symbol, List<Symbol> alreadyChecked)
-            where T : Enum where N : Enum {
+        public static List<Symbol> First<T, N>(this ContextFreeGrammar<T, N> cfg, Symbol symbol, List<Symbol> alreadyChecked) where T : Enum where N : Enum {
+            
             var result = new List<Symbol>();
 
-            if (symbol.Type == SymbolType.Terminal) {
+            if (symbol.Type == SymbolType.Terminal) { //Trivial case
                 result.Add(symbol);
                 return result;
             }
@@ -20,27 +20,27 @@ namespace LRParser.CFG {
 
             alreadyChecked.Add(symbol);
 
-            var allProdForNonTerminal = cfg.GetAllProdForNonTerminal(symbol);
-            var directorSet = new List<Symbol>[allProdForNonTerminal.Count];
+            var productionsForNonTerminal = cfg.GetProductionsForNonTerminal(symbol);
+            List<Symbol>[] directorSet = new List<Symbol>[productionsForNonTerminal.Count];
 
-            for (var i = 0; i < allProdForNonTerminal.Count; i++) {
+            for (var i = 0; i < productionsForNonTerminal.Count; i++) {
                 directorSet[i] = new List<Symbol>();
 
-                if (allProdForNonTerminal[i].Conclusion[0].IsEpsilon) {
+                if (productionsForNonTerminal[i].Conclusion[0].IsEpsilon) {
                     directorSet[i].Add(Symbol.Epsilon);
                 }
                 else {
-                    var length = allProdForNonTerminal[i].Conclusion.Length;
+                    var length = productionsForNonTerminal[i].Conclusion.Length;
                     var j = 0;
 
-                    //add first set of forst symbol, remove eps
-                    var firstSet = First(cfg, allProdForNonTerminal[i].Conclusion[j], new List<Symbol>(alreadyChecked));
+                    //add first set of first symbol, remove eps
+                    var firstSet = First(cfg, productionsForNonTerminal[i].Conclusion[j], new List<Symbol>(alreadyChecked));
                     AddRangeNoDuplicates(firstSet, directorSet[i]);
                     directorSet[i].Remove(Symbol.Epsilon);
 
                     //add first set of following symbols IFF eps is contained
                     for (j = 1; j < length; j++) {
-                        var nextFirstSet = First(cfg, allProdForNonTerminal[i].Conclusion[j], new List<Symbol>(alreadyChecked));
+                        var nextFirstSet = First(cfg, productionsForNonTerminal[i].Conclusion[j], new List<Symbol>(alreadyChecked));
                         if (!nextFirstSet.Contains(Symbol.Epsilon)) {
                             continue;
                         }
@@ -51,7 +51,7 @@ namespace LRParser.CFG {
 
                     //if first set of last symbol containes epsilon, add only epsilon
                     if (j == length - 1 &&
-                        First(cfg, allProdForNonTerminal[i].Conclusion[j], new List<Symbol>(alreadyChecked)).Contains(Symbol.Epsilon)) {
+                        First(cfg, productionsForNonTerminal[i].Conclusion[j], new List<Symbol>(alreadyChecked)).Contains(Symbol.Epsilon)) {
                         directorSet[i].Add(Symbol.Epsilon);
                     }
                 }

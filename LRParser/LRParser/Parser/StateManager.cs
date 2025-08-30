@@ -100,7 +100,7 @@ namespace LRParser.Parser
                 {
                     var a = States[i];
                     var b = States[j];
-                    
+
                     if (a.HasEqualCore(b))
                     {
                         MergeStates(a, b);
@@ -157,9 +157,14 @@ namespace LRParser.Parser
             while (stack.Count > 0)
             {
                 var currentItem = stack.Pop();
-                if (!IfContainedAddOnlyLookahead(currentItem, result))
+
+                if (!TryGetEqualCore(currentItem, result, out var resultItem))
                 {
                     result.Add(currentItem);
+                }
+                else
+                {
+                    resultItem.AddLookahead(currentItem);
                 }
 
                 if (currentItem.IsComplete || currentItem.CurrentSymbol.Type == SymbolType.Terminal)
@@ -170,17 +175,34 @@ namespace LRParser.Parser
                 var allAfterDotSymbol = currentItem.GetSymbolsAfterDotSymbol();
                 var oldLookahead = currentItem.LookAheadSymbols;
 
-                foreach (var symbol in oldLookahead)
+                for (var i = 0; i < oldLookahead.Count; i++)
                 {
+                    var symbol = oldLookahead[i];
                     var input = allAfterDotSymbol.Count == 0 ? symbol : allAfterDotSymbol[0];
                     var curLookahead = _cfg.First(input, new List<Symbol>()); //k = 1, only LL(1) or LR(1)
-                    var prods = _cfg.GetAllProdForNonTerminal(currentItem.CurrentSymbol);
-                    foreach (var prod in prods)
+                    var productions = _cfg.GetProductionsForNonTerminal(currentItem.CurrentSymbol);
+
+                    foreach (var prod in productions)
                     {
                         var deeperItem = new LRItem(prod, 0, curLookahead);
-                        if (!IfContainedAddOnlyLookahead(deeperItem, stack))
+                        if (!TryGetEqualCore(deeperItem, stack, out var itemOnStack))
                         {
+                            //not sure about this
+                            bool canAddToStack = true;
+                            if (TryGetEqualCore(deeperItem, result, out var closedItem))
+                            {
+                                if (deeperItem.IsLookaheadContainedIn(closedItem))
+                                {
+                                    canAddToStack = false;
+                                }
+                            }
+                            
+                            if (!canAddToStack) continue;
                             stack.Push(deeperItem);
+                        }
+                        else
+                        {
+                            itemOnStack.AddLookahead(deeperItem);
                         }
                     }
                 }
@@ -189,29 +211,19 @@ namespace LRParser.Parser
             return result;
         }
 
-        private static bool IfContainedAddOnlyLookahead(LRItem newItem, IEnumerable<LRItem> closedSet)
+        private static bool TryGetEqualCore(LRItem newItem, IEnumerable<LRItem> closedSet, out LRItem closedItem)
         {
-            var closedAlready = false;
-
-            foreach (var closedItem in closedSet)
+            foreach (var item in closedSet)
             {
-                if (!closedItem.CoreEquals(newItem))
-                {
-                    continue;
-                }
-
-                closedAlready = true;
-                foreach (var lookAheadSymbol in newItem.LookAheadSymbols)
-                {
-                    if (!closedItem.LookAheadSymbols.Contains(lookAheadSymbol))
-                    {
-                        closedItem.LookAheadSymbols.Add(lookAheadSymbol);
-                    }
-                }
+                if (!item.CoreEquals(newItem)) continue;
+                closedItem = item;
+                return true;
             }
 
-            return closedAlready;
+            closedItem = default;
+            return false;
         }
+        
 
         public override string ToString()
         {

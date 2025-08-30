@@ -55,11 +55,14 @@ namespace ExampleLang
 
         protected override void SetUpGrammar()
         {
-            AddProductionRule(Rule01, SpecialNonTerminal.Start, NonTerminal.LangObject);
             AddProductionRule(Rule02, NonTerminal.LangObject, NonTerminal.Declaration);
-            AddProductionRule(Rule03, NonTerminal.LangObject, NonTerminal.Declaration, NonTerminal.Assigment);
+            AddProductionRule(Rule02, NonTerminal.LangObject, NonTerminal.LangObject,NonTerminal.LangObject);
+            //AddProductionRule(Rule03, NonTerminal.LangObject, NonTerminal.Declaration, NonTerminal.Assigment);
+            
+            //terminating
+            AddProductionRule(Rule02, NonTerminal.LangObject, InternalSymbol.Epsilon);
             AddProductionRule(Rule04, NonTerminal.Declaration, Terminal.Type, Terminal.Variable, Terminal.SemiColon);
-            AddProductionRule(Rule05, NonTerminal.Assigment, Terminal.Variable, Terminal.Equals, Terminal.Num, Terminal.SemiColon);
+            //AddProductionRule(Rule05, NonTerminal.Assigment, Terminal.Variable, Terminal.Equals, Terminal.Num, Terminal.SemiColon);
         }
 
         private void Rule01(ref Symbol lhs, Symbol[] rhs)

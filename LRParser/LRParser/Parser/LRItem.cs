@@ -19,7 +19,7 @@ namespace LRParser.Parser {
 
         public Production Production { get; }
 
-        public List<Symbol> LookAheadSymbols { get; }
+        public List<Symbol> LookAheadSymbols { get; private set; }
 
         public bool IsComplete => _dotPosition == Production.Conclusion.Length;
         public Symbol CurrentSymbol => Production.Conclusion[_dotPosition];
@@ -63,6 +63,30 @@ namespace LRParser.Parser {
         
         private bool LookAheadEquals(List<Symbol> other) {
             return LookAheadSymbols.Count == other.Count && LookAheadSymbols.All(other.Contains);
+        }
+        
+        public bool IsLookaheadContainedIn(LRItem otherItem)
+        {
+            foreach (var lookAheadSymbol in LookAheadSymbols)
+            {
+                if (!otherItem.LookAheadSymbols.Contains(lookAheadSymbol))
+                {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        public void AddLookahead(LRItem other)
+        {
+            foreach (var lookAheadSymbol in other.LookAheadSymbols)
+            {
+                if (!LookAheadSymbols.Contains(lookAheadSymbol))
+                {
+                    LookAheadSymbols.Add(lookAheadSymbol);
+                }
+            }
         }
 
         public override int GetHashCode() {
