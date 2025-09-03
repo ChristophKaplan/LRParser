@@ -76,8 +76,9 @@ namespace LRParser.Language {
             InsertStartProductionRule();
 
             var showOutput = true;
-            var debug = false;
-            Parser = new Parser<T, N>(this, showOutput , debug);
+            var debug = true;
+            var isLaLr = false;
+            Parser = new Parser<T, N>(this, showOutput , debug, isLaLr);
         }
 
         public virtual ILanguageObject TryParse(string input) {

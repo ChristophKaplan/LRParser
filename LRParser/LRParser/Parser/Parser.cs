@@ -17,12 +17,12 @@ namespace LRParser.Parser
         private readonly Stack<int> _treeNodeStack = new();
         private readonly ConcreteSyntaxTree _syntaxTree = new();
         
-        public Parser(ContextFreeGrammar<T, N> cfg, bool showOutput = false, bool debug = false)
+        public Parser(ContextFreeGrammar<T, N> cfg, bool showOutput = false, bool debug = false, bool isLaLr = true)
         {
             _cfg = cfg;
             _showOutput = showOutput;
             var startItem = new LRItem(cfg.Productions[0], 0, new List<Symbol> { Symbol.Dollar });
-            var states = new StateManager<T, N>(startItem, _cfg, showOutput, debug);
+            var states = new StateManager<T, N>(startItem, _cfg, showOutput, debug, isLaLr);
             _table = new Table<T, N>(states, _cfg, showOutput);
             if (debug)
             {

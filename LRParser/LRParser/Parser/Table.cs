@@ -16,9 +16,11 @@ namespace LRParser.LRParser.Parser
         private readonly ContextFreeGrammar<T, N> _cfg;
         private StringBuilder _tableOutput = new();
 
+        private StateManager<T, N> stateManager1;
         public Table(StateManager<T, N> stateManager, ContextFreeGrammar<T, N> cfg, bool showOutput = false)
         {
             _cfg = cfg;
+            stateManager1 = stateManager;
             CreateTable(stateManager);
             if (showOutput)
             {
@@ -88,7 +90,7 @@ namespace LRParser.LRParser.Parser
                         var r2 = _cfg.Productions.IndexOf(item.Production); //want to add but already contained
 
                         _tableOutput.Append($"Reduce/Reduce conflict: {symbol}\n {_cfg.Productions[r1]} vs. {_cfg.Productions[r2]} \n {state}");
-                        throw new Exception(_tableOutput.ToString());
+                        throw new Exception(_tableOutput.ToString() +"\n"+ stateManager1.ToString());
                     }
 
                     ActionTable[tuple] = new ParserAction(ParserAction.Type.Reduce,

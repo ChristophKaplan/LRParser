@@ -15,8 +15,7 @@ namespace LRParser.Parser
 
         private string _statesOutput = string.Empty;
 
-        public StateManager(LRItem startItem, ContextFreeGrammar<T, N> cfg, bool showOutput = false, bool debug = false,
-            bool lalr = true)
+        public StateManager(LRItem startItem, ContextFreeGrammar<T, N> cfg, bool showOutput = false, bool debug = false, bool lalr = true)
         {
             _cfg = cfg;
             GenerateStates(startItem);
@@ -24,12 +23,13 @@ namespace LRParser.Parser
             if (!lalr)
             {
                 _statesOutput += $"Cannonical LR, States: {States.Count}\n";
-                return;
             }
-
-            var stateCountBefore = States.Count;
-            MergeStates();
-            _statesOutput += $"LALR, States reduced from: {stateCountBefore} to: {States.Count}\n";
+            else
+            {
+                var stateCountBefore = States.Count;
+                MergeStates();
+                _statesOutput += $"LALR, States reduced from: {stateCountBefore} to: {States.Count}\n";
+            }
 
             var valid = ValidateStates();
 
@@ -167,19 +167,27 @@ namespace LRParser.Parser
                     resultItem.AddLookahead(currentItem);
                 }
 
-                if (currentItem.IsComplete || currentItem.CurrentSymbol.Type == SymbolType.Terminal)
+                if (currentItem.IsComplete || 
+                    currentItem.CurrentSymbol.Type == SymbolType.Terminal || 
+                    currentItem.CurrentSymbol.IsEpsilon || 
+                    currentItem.CurrentSymbol.IsDollar)
                 {
                     continue;
                 }
 
-                var allAfterDotSymbol = currentItem.GetSymbolsAfterDotSymbol();
-                var oldLookahead = currentItem.LookAheadSymbols;
+                var allAfterDotSymbol = currentItem.GetSymbolsAfterDotSymbol(); // das ist beta
+                var oldLookahead = currentItem.LookAheadSymbols; // das ist s
 
                 for (var i = 0; i < oldLookahead.Count; i++)
                 {
-                    var symbol = oldLookahead[i];
-                    var input = allAfterDotSymbol.Count == 0 ? symbol : allAfterDotSymbol[0];
-                    var curLookahead = _cfg.First(input, new List<Symbol>()); //k = 1, only LL(1) or LR(1)
+                    var symbol = oldLookahead[i]; //jedes a in s
+                    var input = new List<Symbol>(allAfterDotSymbol).Append(symbol).ToArray();
+                    
+                    var curLookahead = _cfg.First(input, new List<Symbol>()); //k = 1, only LL(1) or LR(1)   FIRST(beta a)
+                    
+                    // im not sure if eps is supposed to be in the lookaheads and the table 
+                    curLookahead.RemoveAll(symbol => symbol.IsEpsilon);
+                    
                     var productions = _cfg.GetProductionsForNonTerminal(currentItem.CurrentSymbol);
 
                     foreach (var prod in productions)
