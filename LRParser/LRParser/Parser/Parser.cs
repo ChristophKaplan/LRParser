@@ -115,7 +115,7 @@ namespace LRParser.Parser
             if (_showOutput)
             {
                 _parsingOutput +=
-                    $"ERROR: cant parse \"{input[0]}\". current: {_stateStack.Peek()}\n Expected Symbols: {expected.Aggregate("", (current, symbol) => current + symbol + " ")}\n";
+                    $"ERROR: cant parse \"{input[0]}\" in {input[0].Position}. current: {_stateStack.Peek()}\n Expected Symbols: {expected.Aggregate("", (current, symbol) => current + symbol + " ")}\n";
             }
 
             //DEBUG
@@ -123,7 +123,7 @@ namespace LRParser.Parser
                 _table.ActionTable.TryGetValue((stateStack.Peek(), ex), out var action);
                 Logging.Log($"Expected: {ex}, Action: {action.Item1} {_cfg.Productions[action.Item2]} ");
             }*/
-            throw new Exception($"Error:\n{_parsingOutput}");
+            throw new Exception($"Error in {input[0].Position}: \n{_parsingOutput}");
         }
 
         private void Shift(List<Symbol> input, int shiftState, bool pullEps)

@@ -26,7 +26,7 @@ namespace LRParser.Language {
 
     public struct ArrayValue : ILanguageObject {
         public ILanguageObject[] Value { get; private set; }
-
+        
         public ArrayValue(params ILanguageObject[] value) {
             Value = value;
         }

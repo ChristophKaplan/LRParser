@@ -9,16 +9,21 @@ namespace LRParser.Lexer
         private readonly T _symbol;
         public Regex Regex { get; }
 
+        private (int lineNumber, int linePosition) position;
+
         public TokenDefinition(T symbol, string regex)
         {
             _symbol = symbol;
             Regex = new Regex(regex);
         }
 
-        public Symbol CreateTerminal(string value)
+        public Symbol CreateTerminal(string value, (int lineNumber, int linePosition) position)
         {
+            this.position = position;
+            
             var terminal = new Symbol(_symbol, SymbolType.Terminal);
             terminal.SetValue(value);
+            terminal.SetPosition(position);
             return terminal;
         }
     }
