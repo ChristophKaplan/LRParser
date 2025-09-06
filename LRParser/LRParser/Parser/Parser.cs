@@ -115,7 +115,7 @@ namespace LRParser.Parser
             if (_showOutput)
             {
                 _parsingOutput +=
-                    $"ERROR: cant parse \"{input[0]}\" in {input[0].Position}. current: {_stateStack.Peek()}\n Expected Symbols: {expected.Aggregate("", (current, symbol) => current + symbol + " ")}\n";
+                    $"ERROR: cant parse \"{input[0]} - {input[0].SyntheticAttribute.ToString()}\" in {input[0].Position}. current: {_stateStack.Peek()}\n Expected Symbols: {expected.Aggregate("", (current, symbol) => current + symbol + " ")}\n";
             }
 
             //DEBUG
