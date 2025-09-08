@@ -43,7 +43,7 @@ namespace LRParser.CFG
             }
         }
 
-        protected void AddProductionRule(Production.SemanticActionDelegate semanticAction, Enum premise,
+        protected void AddRule(Production.SemanticActionDelegate semanticAction, Enum premise,
             params Enum[] conclusions)
         {
             var rule = new Production(semanticAction, EnumToSym(premise),
@@ -60,7 +60,7 @@ namespace LRParser.CFG
 
             void StartRule(ref Symbol lhs, Symbol[] rhs)
             {
-                lhs.SyntheticAttribute = rhs[0].SyntheticAttribute;
+                lhs.Attribute = rhs[0].Attribute;
             }
         }
 

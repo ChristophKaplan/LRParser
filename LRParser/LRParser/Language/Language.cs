@@ -86,7 +86,7 @@ namespace LRParser.Language {
             var rootNodeId = Parser.Parse(tokens, out var tree);
             tree.EvaluateTree(rootNodeId);
             var symbol = tree.GetSymbol(rootNodeId);
-            return symbol.SyntheticAttribute;
+            return symbol.Attribute;
         }
     }
 }

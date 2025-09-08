@@ -46,7 +46,8 @@ namespace LRParser.Parser
             while (shouldContinue)
             {
                 //DEBUG
-                //Logging.Log(treeStack.Aggregate("\nDEBUG: ", (current, tree) => tree.Symbol + " " +current ));
+                //Logger.Log(treeStack.Aggregate("\nDEBUG: ", (current, tree) => tree.Symbol + " " +current ));
+                Logger.Log(input.Aggregate("Input: ", (current, symbol) => current + symbol + " "));
                 var action = GetParserAction(input, out var pullEps);
                 shouldContinue = ProcessAction(input, action, pullEps);
             }
@@ -115,7 +116,7 @@ namespace LRParser.Parser
             if (_showOutput)
             {
                 _parsingOutput +=
-                    $"ERROR: cant parse \"{input[0]} - {input[0].SyntheticAttribute.ToString()}\" in {input[0].Position}. current: {_stateStack.Peek()}\n Expected Symbols: {expected.Aggregate("", (current, symbol) => current + symbol + " ")}\n";
+                    $"ERROR: cant parse \"{input[0]} - {input[0].Attribute.ToString()}\" in {input[0].Position}. current: {_stateStack.Peek()}\n Expected Symbols: {expected.Aggregate("", (current, symbol) => current + symbol + " ")}\n";
             }
 
             //DEBUG

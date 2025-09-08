@@ -22,8 +22,7 @@ namespace LRParser.CFG
 
         //these ore not performant
         private readonly Enum _enum;
-        public ILanguageObject SyntheticAttribute;
-        public object InheritedAttribute;
+        public ILanguageObject Attribute;
         public (int lineNumber, int linePosition) Position;
         
         public SymbolType Type { get; }
@@ -32,8 +31,7 @@ namespace LRParser.CFG
         {
             _enum = @enum;
             Type = type;
-            SyntheticAttribute = default;
-            InheritedAttribute = default;
+            Attribute = default;
             Position = (-1, -1);
             _hashcode = 0;
             _hashcode = CreateHashCode();
@@ -47,7 +45,7 @@ namespace LRParser.CFG
 
         public void SetValue(string value)
         {
-            SyntheticAttribute = new LexValue(value);
+            Attribute = new LexValue(value);
         }
         
         public void SetPosition((int lineNumber, int linePosition) position)
