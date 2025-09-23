@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LRParser.Language;
 
 namespace LRParser.CFG
 {
@@ -48,9 +49,9 @@ namespace LRParser.CFG
             Productions.Insert(0, startRule);
             return;
 
-            void StartRule(ref Symbol lhs, Symbol[] rhs)
+            ILanguageObject StartRule(Symbol[] rhs)
             {
-                lhs.Attribute = rhs[0].Attribute;
+                return rhs[0].Attribute;
             }
         }
 

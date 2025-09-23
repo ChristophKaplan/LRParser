@@ -1,11 +1,12 @@
 using System;
 using System.Linq;
+using LRParser.Language;
 
 namespace LRParser.CFG
 {
     public struct Production
     {
-        public delegate void SemanticActionDelegate(ref Symbol symbol, Symbol[] parameters);
+        public delegate ILanguageObject SemanticActionDelegate(Symbol[] parameters);
         public SemanticActionDelegate SemanticAction;
         
         public readonly Symbol[] Conclusion;

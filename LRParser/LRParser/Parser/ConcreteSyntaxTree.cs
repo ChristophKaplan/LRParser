@@ -21,7 +21,7 @@ namespace LRParser.Parser {
             }
 
             var symbol = _data[nodeId];
-            _semanticActions[nodeId].Invoke(ref symbol, parameters);
+            symbol.Attribute = _semanticActions[nodeId].Invoke(parameters);
             _data[nodeId] = symbol;
         }
     }
