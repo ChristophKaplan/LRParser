@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace LRParser.CFG
 {
-    public class ContextFreeGrammar<T, N> where T : Enum where N : Enum
+    public class ContextFreeGrammar<T, N> where T : struct, Enum where N : struct, Enum
     {
         private readonly List<Symbol> _nonTerminals = new();
         public readonly List<Production> Productions = new();
@@ -21,30 +21,20 @@ namespace LRParser.CFG
             _nonTerminals.Add(new Symbol(nonTerminal, SymbolType.NonTerminal));
         }
 
-        private static readonly Dictionary<Type, Array> _enumValuesCache = new();
-        protected void AddByEnumType<E>() where E : Enum
+        protected void AddTerminalsAndNonTerminals()
         {
-            if (!_enumValuesCache.TryGetValue(typeof(E), out var values))
+            foreach (var terminal in Enum.GetValues<T>())
             {
-                values = Enum.GetValues(typeof(E));
-                _enumValuesCache[typeof(E)] = values;
+                AddTerminal(terminal);
             }
             
-            foreach (int i in Enum.GetValues(typeof(E)))
+            foreach (var nonTerminal in Enum.GetValues<N>())
             {
-                if (typeof(T).IsAssignableFrom(typeof(E)))
-                {
-                    AddTerminal((T)Enum.ToObject(typeof(E), i));
-                }
-                else if (typeof(N).IsAssignableFrom(typeof(E)))
-                {
-                    AddNonTerminal((N)Enum.ToObject(typeof(E), i));
-                }
+                AddNonTerminal(nonTerminal);
             }
         }
 
-        protected void AddRule(Production.SemanticActionDelegate semanticAction, Enum premise,
-            params Enum[] conclusions)
+        protected void AddRule(Production.SemanticActionDelegate semanticAction, Enum premise, params Enum[] conclusions)
         {
             var rule = new Production(semanticAction, EnumToSym(premise),
                 conclusions.Select(conclusion => EnumToSym(conclusion)).ToArray());

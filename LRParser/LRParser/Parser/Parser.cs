@@ -7,7 +7,7 @@ using LRParser.LRParser.Parser;
 
 namespace LRParser.Parser
 {
-    public class Parser<T, N> where T : Enum where N : Enum
+    public class Parser<T, N> where T : struct, Enum where N : struct, Enum
     {
         private readonly ContextFreeGrammar<T, N> _cfg;
         private readonly Table<T, N> _table;

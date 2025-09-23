@@ -8,7 +8,7 @@ using LRParser.Parser;
 
 namespace LRParser.LRParser.Parser
 {
-    public class Table<T, N> where T : Enum where N : Enum
+    public class Table<T, N> where T : struct, Enum where N : struct, Enum
     {
         public Dictionary<StateSymbolTuple, ParserAction> ActionTable { get; } = new();
         public Dictionary<StateSymbolTuple, int> GotoTable { get; } = new();

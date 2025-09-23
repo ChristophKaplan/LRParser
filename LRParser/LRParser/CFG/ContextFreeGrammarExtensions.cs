@@ -7,7 +7,7 @@ namespace LRParser.CFG
     public static class ContextFreeGrammarExtensions
     {
         public static List<Symbol> First<T, N>(this ContextFreeGrammar<T, N> cfg, Symbol[] symbols,
-            List<Symbol> alreadyChecked) where T : Enum where N : Enum
+            List<Symbol> alreadyChecked) where T : struct, Enum where N : struct, Enum
         {
             var result = new List<Symbol>();
 
@@ -47,7 +47,7 @@ namespace LRParser.CFG
         }
 
         private static List<Symbol> FirstRules<T, N>(this ContextFreeGrammar<T, N> cfg, Symbol[] symbols,
-            List<Symbol> alreadyChecked) where T : Enum where N : Enum
+            List<Symbol> alreadyChecked) where T : struct, Enum where N : struct, Enum
         {
             var directorSet = new List<Symbol>();
             

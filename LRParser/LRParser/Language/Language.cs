@@ -61,7 +61,7 @@ namespace LRParser.Language {
         }
     }
 
-    public abstract class Language<T, N> : ContextFreeGrammar<T, N> where T : Enum where N : Enum {
+    public abstract class Language<T, N> : ContextFreeGrammar<T, N> where T : struct, Enum where N : struct, Enum {
         private readonly Lexer<T> Lexer;
         private readonly Parser<T, N> Parser;
 
@@ -70,8 +70,7 @@ namespace LRParser.Language {
 
         protected Language() {
             Lexer = new Lexer<T>(SetUpTokenDefinitions());
-            AddByEnumType<T>();
-            AddByEnumType<N>();
+            AddTerminalsAndNonTerminals();
             SetUpGrammar();
             InsertStartProductionRule();
 

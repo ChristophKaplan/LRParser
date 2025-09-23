@@ -8,7 +8,7 @@ using LRParser.LRParser.Parser;
 
 namespace LRParser.Parser
 {
-    public class StateManager<T, N> where T : Enum where N : Enum
+    public class StateManager<T, N> where T : struct, Enum where N : struct, Enum
     {
         private readonly ContextFreeGrammar<T, N> _cfg;
         public List<State> States { get; private set; }
