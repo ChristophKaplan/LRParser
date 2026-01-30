@@ -55,64 +55,60 @@ namespace ExampleLang
 
         protected override void SetUpGrammar()
         {
-            AddProductionRule(Rule02, NonTerminal.LangObject, NonTerminal.Declaration);
-            AddProductionRule(Rule02, NonTerminal.LangObject, NonTerminal.LangObject,NonTerminal.LangObject);
-            //AddProductionRule(Rule03, NonTerminal.LangObject, NonTerminal.Declaration, NonTerminal.Assigment);
-            
+            AddRule(Rule02, NonTerminal.LangObject, NonTerminal.Declaration);
+            //AddRule(Rule02, NonTerminal.LangObject, NonTerminal.LangObject, NonTerminal.LangObject);
+            AddRule(Rule03, NonTerminal.LangObject, NonTerminal.Declaration, NonTerminal.Assigment);
+
             //terminating
-            AddProductionRule(Rule02, NonTerminal.LangObject, InternalSymbol.Epsilon);
-            AddProductionRule(Rule04, NonTerminal.Declaration, Terminal.Type, Terminal.Variable, Terminal.SemiColon);
-            //AddProductionRule(Rule05, NonTerminal.Assigment, Terminal.Variable, Terminal.Equals, Terminal.Num, Terminal.SemiColon);
+            AddRule(Rule02, NonTerminal.LangObject, InternalSymbol.Epsilon);
+            AddRule(Rule04, NonTerminal.Declaration, Terminal.Type, Terminal.Variable, Terminal.SemiColon);
+            AddRule(Rule05, NonTerminal.Assigment, Terminal.Variable, Terminal.Equals, Terminal.Num,
+                Terminal.SemiColon);
         }
 
-        private void Rule01(ref Symbol lhs, Symbol[] rhs)
+        private ILanguageObject Rule01(Symbol[] rhs)
         {
-            lhs.SyntheticAttribute = rhs[0].SyntheticAttribute;
+            return rhs[0].Attribute;
         }
 
-        private void Rule02(ref Symbol lhs, Symbol[] rhs)
+        private ILanguageObject Rule02(Symbol[] rhs)
         {
-            lhs.SyntheticAttribute = rhs[0].SyntheticAttribute;
+            return rhs[0].Attribute;
         }
 
-        private void Rule03(ref Symbol lhs, Symbol[] rhs)
+        private ILanguageObject Rule03(Symbol[] rhs)
         {
-            lhs.SyntheticAttribute = rhs[1].SyntheticAttribute;
+            return rhs[1].Attribute;
         }
 
-        private void Rule04(ref Symbol lhs, Symbol[] rhs)
+        private ILanguageObject Rule04(Symbol[] rhs)
         {
-            var typeDeclaration = (LexValue)rhs[0].SyntheticAttribute;
-            var variable = (LexValue)rhs[1].SyntheticAttribute;
+            var typeDeclaration = (LexValue)rhs[0].Attribute;
+            var variable = (LexValue)rhs[1].Attribute;
 
-            rhs[1].InheritedAttribute = typeDeclaration;
             TypeTable.Add(variable.Value, typeDeclaration.Value);
 
             //Logger.Log(typeDeclaration.Value + " " + variable.Value);
-            lhs.InheritedAttribute = typeDeclaration;
-            lhs.SyntheticAttribute = variable;
+
+            return variable;
         }
 
-        private void Rule05(ref Symbol lhs, Symbol[] rhs)
+        private ILanguageObject Rule05(Symbol[] rhs)
         {
-            var variable = (LexValue)rhs[0].SyntheticAttribute;
-            var num = (LexValue)rhs[2].SyntheticAttribute;
+            var variable = (LexValue)rhs[0].Attribute;
+            var num = (LexValue)rhs[2].Attribute;
 
             if (!TypeTable.TryGetValue(variable.Value, out var type))
             {
                 throw new Exception($"Variable: {variable} not declared ");
             }
 
-            rhs[0].InheritedAttribute = type;
-
-            lhs.InheritedAttribute = type;
-            lhs.SyntheticAttribute = num;
-
             if (type.Equals("Int"))
             {
-                lhs.InheritedAttribute = typeof(int);
-                lhs.SyntheticAttribute = new IntValue(int.Parse(num.Value));
+                return new IntValue(int.Parse(num.Value));
             }
+
+            return null;
         }
 
         public ILanguageObject TryParse(string input) => base.TryParse(input);

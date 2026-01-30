@@ -24,12 +24,12 @@ namespace LRParser.CFG
 
         protected void AddTerminalsAndNonTerminals()
         {
-            foreach (var terminal in Enum.GetValues<T>())
+            foreach (T terminal in Enum.GetValues(typeof(T)))
             {
                 AddTerminal(terminal);
             }
-            
-            foreach (var nonTerminal in Enum.GetValues<N>())
+    
+            foreach (N nonTerminal in Enum.GetValues(typeof(N)))
             {
                 AddNonTerminal(nonTerminal);
             }

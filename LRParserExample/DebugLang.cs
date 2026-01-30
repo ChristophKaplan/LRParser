@@ -31,17 +31,16 @@ namespace LRParserExample
 
         protected override void SetUpGrammar()
         {
-            AddProductionRule(Rule00, NonTerminal.List, NonTerminal.List, NonTerminal.LangObject);
-            AddProductionRule(Rule00, NonTerminal.List, NonTerminal.LangObject);
+            AddRule(Rule00, NonTerminal.List, NonTerminal.List, NonTerminal.LangObject);
+            AddRule(Rule00, NonTerminal.List, NonTerminal.LangObject);
             
-            AddProductionRule(Rule00, NonTerminal.LangObject, Terminal.Identifier);
-            AddProductionRule(Rule00, NonTerminal.LangObject, InternalSymbol.Epsilon);
+            AddRule(Rule00, NonTerminal.LangObject, Terminal.Identifier);
+            AddRule(Rule00, NonTerminal.LangObject, InternalSymbol.Epsilon);
         }
         
-        private void Rule00(ref Symbol lhs, Symbol[] rhs)
+        private ILanguageObject Rule00(Symbol[] rhs)
         {
-            lhs.SyntheticAttribute = rhs[0].SyntheticAttribute;
+           return rhs[0].Attribute;
         }
-
     }
 }
