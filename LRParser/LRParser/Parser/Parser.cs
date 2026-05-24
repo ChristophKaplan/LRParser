@@ -47,7 +47,7 @@ namespace LRParser.Parser
             {
                 //DEBUG
                 //Logger.Log(treeStack.Aggregate("\nDEBUG: ", (current, tree) => tree.Symbol + " " +current ));
-                Logger.Log(input.Aggregate("Input: ", (current, symbol) => current + symbol + " "));
+                //Logger.Log(input.Aggregate("Input: ", (current, symbol) => current + symbol + " "));
                 var action = GetParserAction(input, out var pullEps);
                 shouldContinue = ProcessAction(input, action, pullEps);
             }
