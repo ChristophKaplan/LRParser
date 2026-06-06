@@ -41,6 +41,11 @@ namespace ExampleLang
 
         private Dictionary<string, string> TypeTable = new();
 
+        protected override void ResetState()
+        {
+            TypeTable.Clear();
+        }
+
         protected override TokenDefinition<Terminal>[] SetUpTokenDefinitions()
         {
             return new[]
@@ -108,9 +113,7 @@ namespace ExampleLang
                 return new IntValue(int.Parse(num.Value));
             }
 
-            return null;
+            throw new Exception($"Unsupported type '{type}' for variable '{variable}'");
         }
-
-        public ILanguageObject TryParse(string input) => base.TryParse(input);
     }
 }

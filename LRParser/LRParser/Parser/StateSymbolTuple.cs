@@ -33,7 +33,7 @@ namespace LRParser.LRParser.Parser
 
         public bool Equals(StateSymbolTuple other)
         {
-            return GetHashCode() == other.GetHashCode();
+            return _hashCode == other._hashCode && StateId == other.StateId && Symbol.Equals(other.Symbol);
         }
     }
 }

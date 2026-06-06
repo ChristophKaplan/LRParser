@@ -68,6 +68,11 @@ namespace LRParser.Language {
         protected abstract TokenDefinition<T>[] SetUpTokenDefinitions();
         protected abstract void SetUpGrammar();
 
+        // Override to clear any per-parse semantic state (e.g. symbol tables) so
+        // the same language instance can be reused across multiple TryParse calls.
+        protected virtual void ResetState() {
+        }
+
         protected Language() {
             Lexer = new Lexer<T>(SetUpTokenDefinitions());
             AddTerminalsAndNonTerminals();
@@ -81,6 +86,7 @@ namespace LRParser.Language {
         }
 
         public virtual ILanguageObject TryParse(string input) {
+            ResetState();
             var tokens = Lexer.Tokenize(input);
             var rootNodeId = Parser.Parse(tokens, out var tree);
             tree.EvaluateTree(rootNodeId);

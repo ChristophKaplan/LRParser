@@ -31,7 +31,11 @@ namespace LRParser.Parser
                 _statesOutput += $"LALR, States reduced from: {stateCountBefore} to: {States.Count}\n";
             }
 
-            var valid = ValidateStates();
+            var hasConflict = ValidateStates();
+            if (hasConflict)
+            {
+                _statesOutput += "Grammar contains one or more conflicts (see above).\n";
+            }
 
             if (showOutput)
             {
@@ -86,7 +90,7 @@ namespace LRParser.Parser
             var conflict = false;
             foreach (var state in States)
             {
-                conflict = state.HasConflict(ref _statesOutput);
+                conflict |= state.HasConflict(ref _statesOutput);
             }
 
             return conflict;
@@ -104,6 +108,10 @@ namespace LRParser.Parser
                     if (a.HasEqualCore(b))
                     {
                         MergeStates(a, b);
+                        // MergeStates removes b from the list, shifting the
+                        // remaining states down. Step back so the state that
+                        // slid into slot j is examined and not skipped.
+                        j--;
                     }
                 }
             }

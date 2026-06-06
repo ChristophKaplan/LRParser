@@ -15,7 +15,7 @@ namespace LRParser.Parser
         private readonly bool _showOutput;
         private readonly Stack<int> _stateStack = new();
         private readonly Stack<int> _treeNodeStack = new();
-        private readonly ConcreteSyntaxTree _syntaxTree = new();
+        private ConcreteSyntaxTree _syntaxTree = new();
         
         public Parser(ContextFreeGrammar<T, N> cfg, bool showOutput = false, bool debug = false, bool isLaLr = true)
         {
@@ -35,11 +35,13 @@ namespace LRParser.Parser
             _stateStack.Clear();
             _stateStack.Push(0);
             _treeNodeStack.Clear();
+            _syntaxTree = new ConcreteSyntaxTree();
         }
 
         public int Parse(List<Symbol> input,out ConcreteSyntaxTree tree)
         {
-            input.Add(Symbol.Dollar);
+            // Work on a private copy so the caller's list is not mutated.
+            var workingInput = new List<Symbol>(input) { Symbol.Dollar };
             ResetStack();
 
             var shouldContinue = true;
@@ -48,14 +50,14 @@ namespace LRParser.Parser
                 //DEBUG
                 //Logger.Log(treeStack.Aggregate("\nDEBUG: ", (current, tree) => tree.Symbol + " " +current ));
                 //Logger.Log(input.Aggregate("Input: ", (current, symbol) => current + symbol + " "));
-                var action = GetParserAction(input, out var pullEps);
-                shouldContinue = ProcessAction(input, action, pullEps);
+                var action = GetParserAction(workingInput);
+                shouldContinue = ProcessAction(workingInput, action);
             }
             tree = this._syntaxTree;
             return _treeNodeStack.Pop();
         }
 
-        private bool ProcessAction(List<Symbol> input, ParserAction action, bool pullEps)
+        private bool ProcessAction(List<Symbol> input, ParserAction action)
         {
             var parserAction = action.Action;
 
@@ -68,7 +70,7 @@ namespace LRParser.Parser
                     Accept();
                     return false;
                 case ParserAction.Type.Shift:
-                    Shift(input, action.StateOrProdId, pullEps);
+                    Shift(input, action.StateOrProdId);
                     break;
                 case ParserAction.Type.Reduce:
                     Reduce(action.StateOrProdId);
@@ -81,22 +83,11 @@ namespace LRParser.Parser
             return true;
         }
 
-        private ParserAction GetParserAction(List<Symbol> input, out bool pulledEps)
+        private ParserAction GetParserAction(List<Symbol> input)
         {
-            pulledEps = false;
-            if (_table.ActionTable.TryGetValue(new StateSymbolTuple(_stateStack.Peek(), input[0]), out var action))
-            {
-                return action;
-            }
-
-            if (_table.ActionTable.TryGetValue(new StateSymbolTuple(_stateStack.Peek(), Symbol.Epsilon),
-                    out var epsAction))
-            {
-                pulledEps = true;
-                return epsAction;
-            }
-
-            return ParserAction.Default;
+            return _table.ActionTable.TryGetValue(new StateSymbolTuple(_stateStack.Peek(), input[0]), out var action)
+                ? action
+                : ParserAction.Default;
         }
 
         private void Accept()
@@ -127,14 +118,8 @@ namespace LRParser.Parser
             throw new Exception($"Error in {input[0].Position}: \n{_parsingOutput}");
         }
 
-        private void Shift(List<Symbol> input, int shiftState, bool pullEps)
+        private void Shift(List<Symbol> input, int shiftState)
         {
-            if (pullEps)
-            {
-                //TODO: Implement what to do here?
-                return;
-            }
-
             if (_showOutput)
             {
                 _parsingOutput += $"SHIFT: {input[0]}, current:{_stateStack.Peek()}, next state:{shiftState}\n";

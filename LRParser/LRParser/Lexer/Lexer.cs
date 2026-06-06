@@ -48,9 +48,15 @@ namespace LRParser.Lexer
 
                 if (matchLength == 0)
                 {
-                    columnNumber++;
-                    currentIndex++;
-                    continue;
+                    if (char.IsWhiteSpace(source[currentIndex]))
+                    {
+                        columnNumber++;
+                        currentIndex++;
+                        continue;
+                    }
+
+                    throw new Exception(
+                        $"Lexer error: unrecognized character '{source[currentIndex]}' at line {lineNumber}, column {columnNumber}");
                 }
 
                 var value = source.Substring(currentIndex, matchLength);
