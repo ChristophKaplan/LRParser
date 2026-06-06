@@ -11,7 +11,12 @@ namespace LRParser.LRParser.Parser {
         public Dictionary<Symbol, State> Transitions { get; }
 
         private readonly int _coreHash;
-        
+
+        // Order-independent hash of the item cores. Two states can only be
+        // HasEqualItems-equal if their CoreHash matches, so it is a safe bucket
+        // key for fast state de-duplication.
+        public int CoreHash => _coreHash;
+
         public State(List<LRItem> items, int id) {
             Id = id;
             Items = items;

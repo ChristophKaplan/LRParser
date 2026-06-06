@@ -1,61 +1,52 @@
 # LRParser
 
-A C# library for building LR / LALR(1) parsers from a programmatically declared grammar. Define terminals and non-terminals as `enum`s, attach regex-based token rules and C# semantic actions, and parse strings into a typed syntax tree.
+A C# library for building LR(1) / LALR(1) parsers from a grammar declared in plain C#. Define terminals and non-terminals as `enum`s, attach regex token rules and semantic actions, and parse strings into a typed result.
 
 ## Features
 
 - LR(1) and LALR(1) table construction (toggle via constructor flag)
-- Regex-based lexer driven by a `TokenDefinition<T>` list
-- Grammars expressed in plain C# using `enum`s for terminals/non-terminals
-- Support for ε (epsilon) productions via `InternalSymbol.Epsilon`
-- Per-rule semantic actions that build typed `ILanguageObject` results
-- Concrete syntax tree available after parsing
-- Optional verbose output and table dumping for debugging grammars
+- Regex-based lexer with line/column tracking
+- Grammars written in C# using `enum`s for terminals/non-terminals
+- ε (epsilon) productions via `InternalSymbol.Epsilon`
+- Per-rule semantic actions producing typed `ILanguageObject` results
+- Optional verbose/table dumping for debugging grammars
 
-## Project layout
+## Layout
 
 ```
 LRParser/
-├── LRParser/              # The parser library (netstandard2.1 + net8.0)
-│   ├── CFG/               # ContextFreeGrammar, Production, Symbol
-│   ├── Lexer/             # Regex-based Lexer + TokenDefinition
-│   ├── Parser/            # LR table construction, parser, syntax tree
-│   └── Language/          # Language<T,N> base class + ILanguageObject
-└── LRParserExample/       # Example console app using the library
-    ├── ExampleLang.cs     # Tiny typed declaration/assignment language
-    ├── DebugLang.cs       # Minimal grammar used for debugging
-    └── Program.cs
+├── LRParser/          # The library (netstandard2.1 + net8.0)
+│   ├── CFG/           # ContextFreeGrammar, Production, Symbol
+│   ├── Lexer/         # Regex lexer + TokenDefinition
+│   ├── Parser/        # LR table construction, parser, syntax tree
+│   └── Language/      # Language<T,N> base class + ILanguageObject
+├── LRParserExample/   # Example console app (ExampleLang, DebugLang)
+└── LRParser.Tests/    # xUnit test suite
 ```
 
 ## Requirements
 
 - .NET 8.0 SDK (the library also targets `netstandard2.1`)
-- The solution references an external `Logger` project at `..\..\Logger\Logger\Logger.csproj` (sibling to this repo's parent directory). Clone or adjust the reference before building.
+- An external `Logger` project referenced at `..\..\Logger\Logger\Logger.csproj`. Clone or adjust the reference before building.
 
-## Building
+## Build, run, test
 
 ```powershell
 dotnet build LRParser\LRParser.sln
-```
-
-Run the example:
-
-```powershell
-dotnet run --project LRParserExample\LRParserExample.csproj
+dotnet run  --project LRParserExample\LRParserExample.csproj
+dotnet test LRParser.Tests\LRParser.Tests.csproj
 ```
 
 ## Defining a language
 
-A language is a class that derives from `Language<TTerminal, TNonTerminal>` and implements two methods: `SetUpTokenDefinitions` and `SetUpGrammar`.
+Derive from `Language<TTerminal, TNonTerminal>` and implement `SetUpTokenDefinitions` and `SetUpGrammar`. Token rules are tried in order; the first match wins. Whitespace between tokens is skipped, and unrecognized characters raise a lexer error.
 
 ```csharp
 public enum Terminal { Type, Variable, Equals, Num, SemiColon }
-public enum NonTerminal { LangObject, Declaration, Assigment }
+public enum NonTerminal { LangObject, Declaration, Assignment }
 
 public class ExampleLang : Language<Terminal, NonTerminal>
 {
-    private readonly Dictionary<string, string> _typeTable = new();
-
     protected override TokenDefinition<Terminal>[] SetUpTokenDefinitions() => new[]
     {
         new TokenDefinition<Terminal>(Terminal.SemiColon, ";"),
@@ -68,53 +59,35 @@ public class ExampleLang : Language<Terminal, NonTerminal>
     protected override void SetUpGrammar()
     {
         AddRule(PassThrough, NonTerminal.LangObject,  NonTerminal.Declaration);
-        AddRule(PassSecond,  NonTerminal.LangObject,  NonTerminal.Declaration, NonTerminal.Assigment);
+        AddRule(PassSecond,  NonTerminal.LangObject,  NonTerminal.Declaration, NonTerminal.Assignment);
         AddRule(PassThrough, NonTerminal.LangObject,  InternalSymbol.Epsilon);
-
         AddRule(Declare,     NonTerminal.Declaration, Terminal.Type, Terminal.Variable, Terminal.SemiColon);
-        AddRule(Assign,      NonTerminal.Assigment,   Terminal.Variable, Terminal.Equals, Terminal.Num, Terminal.SemiColon);
+        AddRule(Assign,      NonTerminal.Assignment,  Terminal.Variable, Terminal.Equals, Terminal.Num, Terminal.SemiColon);
     }
 
     private ILanguageObject PassThrough(Symbol[] rhs) => rhs[0].Attribute;
     private ILanguageObject PassSecond(Symbol[] rhs)  => rhs[1].Attribute;
-
-    private ILanguageObject Declare(Symbol[] rhs)
-    {
-        var type = (LexValue)rhs[0].Attribute;
-        var name = (LexValue)rhs[1].Attribute;
-        _typeTable.Add(name.Value, type.Value);
-        return name;
-    }
-
-    private ILanguageObject Assign(Symbol[] rhs)
-    {
-        var name = (LexValue)rhs[0].Attribute;
-        var num  = (LexValue)rhs[2].Attribute;
-        if (!_typeTable.TryGetValue(name.Value, out var type))
-            throw new Exception($"Variable: {name} not declared");
-        return type == "Int" ? new IntValue(int.Parse(num.Value)) : null;
-    }
+    // ... Declare / Assign build the typed result ...
 }
 ```
 
-Parse a string:
-
 ```csharp
 var lang = new ExampleLang();
-var result = lang.TryParse("Int A; A = 50;");
-Console.WriteLine(result);
+Console.WriteLine(lang.TryParse("Int A; A = 50;"));
 ```
+
+A single language instance is safe to reuse across multiple `TryParse` calls; override `ResetState()` to clear any per-parse state (e.g. a symbol table).
 
 ## How it works
 
-1. `Lexer<T>` walks the input and, at each position, tries each `TokenDefinition` in order; the first regex that matches produces a `Symbol` carrying its raw value and source position.
-2. `ContextFreeGrammar<T, N>` collects productions; an implicit start production wrapping the first user rule is inserted automatically.
-3. `StateManager<T, N>` builds the LR(1) item sets (or merges them into LALR sets when `isLaLr = true`) and `Table<T, N>` produces the `ACTION` and `GOTO` tables.
-4. `Parser<T, N>.Parse` runs the standard shift/reduce loop against the tables, building a `ConcreteSyntaxTree` as it goes.
-5. After accepting, the tree is evaluated bottom-up; each reduction invokes its `SemanticActionDelegate`, returning a typed `ILanguageObject` for the root.
+1. `Lexer<T>` tokenizes the input (first matching `TokenDefinition` wins).
+2. `ContextFreeGrammar<T,N>` collects productions and wraps the first rule in an implicit start production.
+3. `StateManager<T,N>` builds the LR(1) item sets (merged into LALR sets when `isLaLr = true`); `Table<T,N>` produces the `ACTION`/`GOTO` tables.
+4. `Parser<T,N>.Parse` runs the shift/reduce loop, building a `ConcreteSyntaxTree`.
+5. The tree is evaluated bottom-up, invoking each rule's semantic action to produce the typed result.
 
-To inspect the generated tables or trace parsing, flip the flags in `Language<T,N>`'s constructor (`showOutput`, `debug`, `isLaLr`).
+Flip `showOutput` / `debug` / `isLaLr` in the `Language<T,N>` constructor to trace parsing or dump tables.
 
 ## License
 
-No license file is currently included in the repository.
+No license file is currently included.

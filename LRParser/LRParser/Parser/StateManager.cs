@@ -13,6 +13,10 @@ namespace LRParser.Parser
         private readonly ContextFreeGrammar<T, N> _cfg;
         public List<State> States { get; private set; }
 
+        // Index of states by core hash, used only during generation to make
+        // state de-duplication near O(1) instead of a linear scan of all states.
+        private readonly Dictionary<int, List<State>> _statesByCoreHash = new();
+
         private string _statesOutput = string.Empty;
 
         public StateManager(LRItem startItem, ContextFreeGrammar<T, N> cfg, bool showOutput = false, bool debug = false, bool lalr = true)
@@ -50,10 +54,24 @@ namespace LRParser.Parser
 
         private void GenerateStates(LRItem startItem)
         {
+            States = new List<State>();
+            _statesByCoreHash.Clear();
             var firstState = new State(Closure(new List<LRItem> { startItem }), 0);
-            States = new List<State> { firstState };
+            AddState(firstState);
             var count = 0;
             GenerateStates(firstState, ref count);
+        }
+
+        private void AddState(State state)
+        {
+            States.Add(state);
+            if (!_statesByCoreHash.TryGetValue(state.CoreHash, out var bucket))
+            {
+                bucket = new List<State>();
+                _statesByCoreHash[state.CoreHash] = bucket;
+            }
+
+            bucket.Add(state);
         }
 
         private void GenerateStates(State currentState, ref int stateId)
@@ -75,7 +93,7 @@ namespace LRParser.Parser
                 if (!TryGetEqualState(nextState, out var equalState))
                 {
                     currentState.Transitions.Add(possibleTransitions.Key, nextState);
-                    States.Add(nextState);
+                    AddState(nextState);
                     GenerateStates(nextState, ref stateId);
                 }
                 else
@@ -147,10 +165,16 @@ namespace LRParser.Parser
 
         private bool TryGetEqualState(State state, out State foundState)
         {
-            foreach (var curState in States.Where(curState => curState.HasEqualItems(state)))
+            if (_statesByCoreHash.TryGetValue(state.CoreHash, out var bucket))
             {
-                foundState = curState;
-                return true;
+                foreach (var curState in bucket)
+                {
+                    if (curState.HasEqualItems(state))
+                    {
+                        foundState = curState;
+                        return true;
+                    }
+                }
             }
 
             foundState = default;
