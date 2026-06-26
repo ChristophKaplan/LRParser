@@ -99,13 +99,14 @@ namespace LRParser.CFG
                 }
             }
 
-            foreach (var nonTerminal in reachable)
+            var undefined = reachable
+                .Where(nt => GetProductionsForNonTerminal(nt).Count == 0)
+                .ToList();
+            if (undefined.Count > 0)
             {
-                if (GetProductionsForNonTerminal(nonTerminal).Count == 0)
-                {
-                    throw new InvalidOperationException(
-                        $"Non-terminal {nonTerminal} is reachable from the start symbol but has no productions.");
-                }
+                throw new InvalidOperationException(
+                    $"Non-terminal(s) reachable from the start symbol but with no productions: " +
+                    $"{string.Join(", ", undefined)}.");
             }
 
             // Productive = can derive a string of terminals. Fixpoint: a premise
@@ -140,13 +141,14 @@ namespace LRParser.CFG
                 }
             }
 
-            foreach (var nonTerminal in reachable)
+            var unproductive = reachable
+                .Where(nt => !productive.Contains(nt))
+                .ToList();
+            if (unproductive.Count > 0)
             {
-                if (!productive.Contains(nonTerminal))
-                {
-                    throw new InvalidOperationException(
-                        $"Non-terminal {nonTerminal} is reachable but not productive (it cannot derive any terminal string).");
-                }
+                throw new InvalidOperationException(
+                    $"Non-terminal(s) reachable but not productive (cannot derive any terminal string): " +
+                    $"{string.Join(", ", unproductive)}.");
             }
         }
 
