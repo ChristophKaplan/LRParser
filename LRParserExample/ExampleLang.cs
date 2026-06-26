@@ -78,7 +78,8 @@ namespace ExampleLang
 
         private ILanguageObject Rule02(Symbol[] rhs)
         {
-            return rhs[0].Attribute;
+            // rhs is empty for the epsilon production (LangObject -> epsilon).
+            return rhs.Length > 0 ? rhs[0].Attribute : null!;
         }
 
         private ILanguageObject Rule03(Symbol[] rhs)

@@ -125,8 +125,8 @@ namespace LRParser.Parser
 
                     if (a.HasEqualCore(b))
                     {
-                        MergeStates(a, b);
-                        // MergeStates removes b from the list, shifting the
+                        MergeStatePair(a, b);
+                        // MergeStatePair removes b from the list, shifting the
                         // remaining states down. Step back so the state that
                         // slid into slot j is examined and not skipped.
                         j--;
@@ -135,11 +135,12 @@ namespace LRParser.Parser
             }
         }
 
-        private void MergeStates(State myState, State mergeMe)
+        private void MergeStatePair(State myState, State mergeMe)
         {
             myState.MergeLookaheads(mergeMe);
 
-            //reroute
+            // Reroute every transition that pointed at the merged-away state so it
+            // now targets the surviving state.
             var transitionsToModify = new List<(State state, Symbol symbol)>();
 
             foreach (var state in States)
@@ -156,10 +157,8 @@ namespace LRParser.Parser
             foreach (var (state, symbol) in transitionsToModify)
             {
                 state.Transitions[symbol] = myState;
-                //Logging.Log($"reroute {state.Id} to {state1.Id}");
             }
 
-            //remove state2
             States.Remove(mergeMe);
         }
 
@@ -207,17 +206,18 @@ namespace LRParser.Parser
                     continue;
                 }
 
-                var allAfterDotSymbol = currentItem.GetSymbolsAfterDotSymbol(); // das ist beta
-                var oldLookahead = currentItem.LookAheadSymbols; // das ist s
+                var allAfterDotSymbol = currentItem.GetSymbolsAfterDotSymbol(); // beta
+                var oldLookahead = currentItem.LookAheadSymbols;                // s
 
                 for (var i = 0; i < oldLookahead.Count; i++)
                 {
-                    var symbol = oldLookahead[i]; //jedes a in s
+                    var symbol = oldLookahead[i]; // each a in s
                     var input = new List<Symbol>(allAfterDotSymbol).Append(symbol).ToArray();
                     
-                    var curLookahead = _cfg.First(input, new List<Symbol>()); //k = 1, only LL(1) or LR(1)   FIRST(beta a)
-                    
-                    // im not sure if eps is supposed to be in the lookaheads and the table 
+                    // FIRST(beta a) — the lookahead set for items derived from this
+                    // non-terminal. k = 1 (LR(1)). Epsilon never belongs in a
+                    // lookahead/ACTION entry, so strip it.
+                    var curLookahead = _cfg.First(input);
                     curLookahead.RemoveAll(symbol => symbol.IsEpsilon);
                     
                     var productions = _cfg.GetProductionsForNonTerminal(currentItem.CurrentSymbol);

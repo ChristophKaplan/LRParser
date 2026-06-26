@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using LRParser.CFG;
 using LRParser.Lexer;
@@ -24,40 +25,28 @@ namespace LRParser.Language {
         }
     }
 
-    public struct ArrayValue : ILanguageObject {
-        public ILanguageObject[] Value { get; private set; }
-        
+    // A reference type (not a struct): it is handed around as ILanguageObject and
+    // mutated via Add/Insert, which only works reliably with reference semantics.
+    // Backed by a List so Add is amortized O(1) rather than reallocating each call.
+    public class ArrayValue : ILanguageObject {
+        private readonly List<ILanguageObject> _values;
+
         public ArrayValue(params ILanguageObject[] value) {
-            Value = value;
+            _values = new List<ILanguageObject>(value ?? Array.Empty<ILanguageObject>());
         }
 
-        public void Add(ILanguageObject value) {
-            var temp = new ILanguageObject[Value.Length + 1];
-            for (var i = 0; i < Value.Length; i++) {
-                temp[i] = Value[i];
-            }
+        public ILanguageObject[] Value => _values.ToArray();
 
-            temp[^1] = value;
-            Value = temp;
+        public void Add(ILanguageObject value) {
+            _values.Add(value);
         }
 
         public void Insert(ILanguageObject value, int index) {
-            var temp = new ILanguageObject[Value.Length + 1];
-            for (var i = 0; i < index; i++) {
-                temp[i] = Value[i];
-            }
-
-            temp[index] = value;
-
-            for (var i = index + 1; i < temp.Length; i++) {
-                temp[i] = Value[i - 1];
-            }
-
-            Value = temp;
+            _values.Insert(index, value);
         }
-        
+
         public override string ToString() {
-            return string.Join(" ", Value.Select(v => v.ToString()));
+            return string.Join(" ", _values.Select(v => v.ToString()));
         }
     }
 
@@ -85,13 +74,34 @@ namespace LRParser.Language {
             Parser = new Parser<T, N>(this, showOutput , debug, isLaLr);
         }
 
-        public virtual ILanguageObject TryParse(string input) {
+        // Parses the input and returns the typed result, throwing LexerException
+        // or ParseException on malformed input (and propagating any exception a
+        // semantic action raises).
+        public virtual ILanguageObject Parse(string input) {
             ResetState();
             var tokens = Lexer.Tokenize(input);
             var rootNodeId = Parser.Parse(tokens, out var tree);
             tree.EvaluateTree(rootNodeId);
             var symbol = tree.GetSymbol(rootNodeId);
             return symbol.Attribute;
+        }
+
+        // Non-throwing variant: returns false (instead of throwing) when the
+        // input cannot be lexed or parsed. Exceptions raised by semantic actions
+        // are intentionally not swallowed.
+        public bool TryParse(string input, out ILanguageObject result) {
+            try {
+                result = Parse(input);
+                return true;
+            }
+            catch (LexerException) {
+                result = null!;
+                return false;
+            }
+            catch (ParseException) {
+                result = null!;
+                return false;
+            }
         }
     }
 }

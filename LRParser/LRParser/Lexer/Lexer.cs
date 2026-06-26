@@ -33,16 +33,21 @@ namespace LRParser.Lexer
                 }
 
                 var matchLength = 0;
+                tokenDefinition = null;
 
+                // Maximal munch: pick the rule with the longest match at this
+                // position. Ties keep the earliest-declared rule (strict '>'),
+                // and zero-length matches are ignored so an empty-capable rule
+                // (e.g. "\d*") cannot shadow a real token. The \G anchor in the
+                // rule's regex guarantees any match starts exactly here.
                 foreach (var rule in _tokenDefinitions)
                 {
                     var match = rule.Regex.Match(source, currentIndex);
 
-                    if (match.Success && match.Index - currentIndex == 0)
+                    if (match.Success && match.Length > matchLength)
                     {
                         tokenDefinition = rule;
                         matchLength = match.Length;
-                        break;
                     }
                 }
 
@@ -55,15 +60,34 @@ namespace LRParser.Lexer
                         continue;
                     }
 
-                    throw new Exception(
-                        $"Lexer error: unrecognized character '{source[currentIndex]}' at line {lineNumber}, column {columnNumber}");
+                    throw new LexerException(source[currentIndex], lineNumber, columnNumber);
                 }
 
                 var value = source.Substring(currentIndex, matchLength);
-                var positon = (lineNumber, columnNumber);
-                result.Add(tokenDefinition.CreateTerminal(value, positon));
+                result.Add(tokenDefinition.CreateTerminal(value, (lineNumber, columnNumber)));
                 currentIndex += matchLength;
-                columnNumber += matchLength; // Erst NACH der Positionsbestimmung erhöhen
+
+                // Advance line/column. A token may itself span newlines (e.g. a
+                // multi-line string rule), so account for any '\n' inside it
+                // rather than blindly adding the length to the column.
+                var lastNewline = value.LastIndexOf('\n');
+                if (lastNewline < 0)
+                {
+                    columnNumber += matchLength;
+                }
+                else
+                {
+                    foreach (var ch in value)
+                    {
+                        if (ch == '\n')
+                        {
+                            lineNumber++;
+                        }
+                    }
+
+                    // Columns after the last newline, 1-based.
+                    columnNumber = matchLength - lastNewline;
+                }
             }
 
             return result;

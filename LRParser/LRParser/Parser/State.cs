@@ -21,7 +21,6 @@ namespace LRParser.LRParser.Parser {
             Id = id;
             Items = items;
             Transitions = new Dictionary<Symbol, State>();
-            _coreHash = -1;
             _coreHash = GetCoreHash();
         }
 
@@ -36,10 +35,11 @@ namespace LRParser.LRParser.Parser {
 
         private int GetCoreHash()
         {
-            // Sort LRItems by core hash for order-independence
+            // Order-independent: hash each item core once, then fold the sorted
+            // hashes so construction order does not affect the result.
             var sortedHashes = Items
-                .OrderBy(i => i.GetCoreHash())
-                .Select(i => i.GetCoreHash());
+                .Select(i => i.GetCoreHash())
+                .OrderBy(h => h);
 
             int hash = 17;
             foreach (var h in sortedHashes)
@@ -64,19 +64,9 @@ namespace LRParser.LRParser.Parser {
             {
                 foreach (var mergeItem in mergeMe.Items)
                 {
-                    if (!myItem.CoreEquals(mergeItem))
+                    if (myItem.CoreEquals(mergeItem))
                     {
-                        continue;
-                    }
-                    
-                    var count = mergeItem.LookAheadSymbols.Count;
-                    for (var i = count - 1; i >= 0; i--)
-                    {
-                        var sym = mergeItem.LookAheadSymbols[i];
-                        if (!myItem.LookAheadSymbols.Contains(sym))
-                        {
-                            myItem.LookAheadSymbols.Add(sym);
-                        }
+                        myItem.AddLookahead(mergeItem);
                     }
                 }
             }
@@ -94,10 +84,9 @@ namespace LRParser.LRParser.Parser {
                 }
 
                 foreach (var laSym in item.LookAheadSymbols) {
-                    if (laSym.IsDollar) {
-                        continue;
-                    }
-
+                    // $ (end-of-input) is a legitimate reduce lookahead; two
+                    // completed items that both reduce on $ are a genuine
+                    // reduce/reduce conflict and must not be skipped.
                     foreach (var item2 in Items) {
                         if (item2.IsComplete && !item.Equals(item2) && item2.LookAheadSymbols.Contains(laSym)) {
                             output += $"Reduce-Reduce conflict: {item} and {item2} contains reduce symbol:{laSym} on State:{Id}\n";

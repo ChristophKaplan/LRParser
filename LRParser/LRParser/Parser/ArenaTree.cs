@@ -40,16 +40,15 @@ namespace LRParser.Parser
             var start = _childStart[nodeId];
             var count = _childCount[nodeId];
 
-            if (count == 0)
-            {
-                return;
-            }
-
             for (var i = 0; i < count; i++)
             {
                 EvaluateTree(_children[start + i]);
             }
 
+            // Always invoke Semantic, even for childless nodes: an epsilon
+            // production reduces to a node with no children but still carries a
+            // semantic action that must run. Leaf nodes are filtered out by the
+            // concrete implementation (they have no action).
             Semantic(nodeId, start, count);
         }
         

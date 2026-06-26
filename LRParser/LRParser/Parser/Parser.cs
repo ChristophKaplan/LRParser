@@ -16,6 +16,9 @@ namespace LRParser.Parser
         private readonly Stack<int> _stateStack = new();
         private readonly Stack<int> _treeNodeStack = new();
         private ConcreteSyntaxTree _syntaxTree = new();
+        // Cursor into the working input. Advancing an index instead of removing
+        // the front element keeps parsing O(n) instead of O(n^2).
+        private int _position;
         
         public Parser(ContextFreeGrammar<T, N> cfg, bool showOutput = false, bool debug = false, bool isLaLr = true)
         {
@@ -36,6 +39,7 @@ namespace LRParser.Parser
             _stateStack.Push(0);
             _treeNodeStack.Clear();
             _syntaxTree = new ConcreteSyntaxTree();
+            _position = 0;
         }
 
         public int Parse(List<Symbol> input,out ConcreteSyntaxTree tree)
@@ -47,9 +51,6 @@ namespace LRParser.Parser
             var shouldContinue = true;
             while (shouldContinue)
             {
-                //DEBUG
-                //Logger.Log(treeStack.Aggregate("\nDEBUG: ", (current, tree) => tree.Symbol + " " +current ));
-                //Logger.Log(input.Aggregate("Input: ", (current, symbol) => current + symbol + " "));
                 var action = GetParserAction(workingInput);
                 shouldContinue = ProcessAction(workingInput, action);
             }
@@ -85,7 +86,7 @@ namespace LRParser.Parser
 
         private ParserAction GetParserAction(List<Symbol> input)
         {
-            return _table.ActionTable.TryGetValue(new StateSymbolTuple(_stateStack.Peek(), input[0]), out var action)
+            return _table.ActionTable.TryGetValue(new StateSymbolTuple(_stateStack.Peek(), input[_position]), out var action)
                 ? action
                 : ParserAction.Default;
         }
@@ -103,33 +104,37 @@ namespace LRParser.Parser
 
         private void Error(List<Symbol> input)
         {
+            var current = input[_position];
             var expected = _table.ExpectedSymbols(_stateStack.Peek());
+            var expectedText = expected.Count > 0
+                ? string.Join(", ", expected.Select(s => s.ToString()))
+                : "<none>";
+
+            var message =
+                $"Parse error at line {current.Position.lineNumber}, column {current.Position.linePosition}: " +
+                $"unexpected {current} '{current.Attribute}'. Expected: {expectedText}.";
+
             if (_showOutput)
             {
-                _parsingOutput +=
-                    $"ERROR: cant parse \"{input[0]} - {input[0].Attribute.ToString()}\" in {input[0].Position}. current: {_stateStack.Peek()}\n Expected Symbols: {expected.Aggregate("", (current, symbol) => current + symbol + " ")}\n";
+                _parsingOutput += message + "\n";
+                Logger.Log(_parsingOutput);
             }
 
-            //DEBUG
-            /*foreach (var ex in expected) {
-                _table.ActionTable.TryGetValue((stateStack.Peek(), ex), out var action);
-                Logging.Log($"Expected: {ex}, Action: {action.Item1} {_cfg.Productions[action.Item2]} ");
-            }*/
-            throw new Exception($"Error in {input[0].Position}: \n{_parsingOutput}");
+            throw new ParseException(message, current.Position, expected);
         }
 
         private void Shift(List<Symbol> input, int shiftState)
         {
+            var current = input[_position];
             if (_showOutput)
             {
-                _parsingOutput += $"SHIFT: {input[0]}, current:{_stateStack.Peek()}, next state:{shiftState}\n";
+                _parsingOutput += $"SHIFT: {current}, current:{_stateStack.Peek()}, next state:{shiftState}\n";
             }
 
             _stateStack.Push(shiftState);
-            var clone = input[0];
-            var nodeIndex = _syntaxTree.AddNode(clone, null); //wurde nur auf stack gelegt eigentlich. jetzt im tree
+            var nodeIndex = _syntaxTree.AddNode(current, null);
             _treeNodeStack.Push(nodeIndex);
-            input.RemoveAt(0);
+            _position++;
         }
 
         private void Reduce(int ruleId)
@@ -142,7 +147,8 @@ namespace LRParser.Parser
             
             var reducedIndex = _syntaxTree.AddNode(rule.Premise, rule.SemanticAction);
 
-            for (var i = 0; i < rule.Conclusion.Count(s => !s.IsEpsilon); i++)
+            var symbolsToPop = rule.NonEpsilonLength;
+            for (var i = 0; i < symbolsToPop; i++)
             {
                 _stateStack.Pop();
                 _syntaxTree.AddChild(reducedIndex, _treeNodeStack.Pop());

@@ -40,7 +40,8 @@ namespace LRParserExample
         
         private ILanguageObject Rule00(Symbol[] rhs)
         {
-           return rhs[0].Attribute;
+           // rhs is empty for the epsilon production (LangObject -> epsilon).
+           return rhs.Length > 0 ? rhs[0].Attribute : null!;
         }
     }
 }

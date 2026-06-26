@@ -1,5 +1,6 @@
 using LRParser.CFG;
 using LRParser.Language;
+using LRParser.Lexer;
 
 namespace LRParser.Tests;
 
@@ -33,6 +34,163 @@ public sealed class ReduceReduceGrammar : ContextFreeGrammar<RrTerminal, RrNonTe
         InsertStartProductionRule();
     }
 
+    private static ILanguageObject Noop(Symbol[] rhs) => rhs.Length > 0 ? rhs[0].Attribute : null!;
+}
+
+public enum DrTerminal { End }
+
+public enum DrNonTerminal { S, A, B }
+
+// A grammar whose only reduce/reduce conflict is on the $ (end-of-input)
+// lookahead: S -> A | B, A -> epsilon, B -> epsilon. Empty input could reduce
+// via either A or B. Used to verify the conflict detector no longer ignores $.
+public sealed class DollarReduceReduceGrammar : ContextFreeGrammar<DrTerminal, DrNonTerminal>
+{
+    public DollarReduceReduceGrammar()
+    {
+        AddTerminalsAndNonTerminals();
+
+        AddRule(Noop, DrNonTerminal.S, DrNonTerminal.A);
+        AddRule(Noop, DrNonTerminal.S, DrNonTerminal.B);
+        AddRule(Noop, DrNonTerminal.A, InternalSymbol.Epsilon);
+        AddRule(Noop, DrNonTerminal.B, InternalSymbol.Epsilon);
+
+        InsertStartProductionRule();
+    }
+
+    private static ILanguageObject Noop(Symbol[] rhs) => rhs.Length > 0 ? rhs[0].Attribute : null!;
+}
+
+public enum FsTerminal { a, b, c }
+
+public enum FsNonTerminal { S, A, B, T }
+
+// Grammar built to exercise FIRST-set computation directly:
+//   S -> A B c        (FIRST should chain through nullable A and B to reach c)
+//   A -> a | epsilon  (nullable)
+//   B -> b | epsilon  (nullable)
+//   T -> c B          (first symbol non-nullable: FIRST(T) must be {c} only)
+// It subclasses ContextFreeGrammar directly so tests can query First(...) on a
+// fully built grammar without constructing parser tables.
+public sealed class FirstSetGrammar : ContextFreeGrammar<FsTerminal, FsNonTerminal>
+{
+    public FirstSetGrammar()
+    {
+        AddTerminalsAndNonTerminals();
+
+        AddRule(Noop, FsNonTerminal.S, FsNonTerminal.A, FsNonTerminal.B, FsTerminal.c);
+        AddRule(Noop, FsNonTerminal.A, FsTerminal.a);
+        AddRule(Noop, FsNonTerminal.A, InternalSymbol.Epsilon);
+        AddRule(Noop, FsNonTerminal.B, FsTerminal.b);
+        AddRule(Noop, FsNonTerminal.B, InternalSymbol.Epsilon);
+        AddRule(Noop, FsNonTerminal.T, FsTerminal.c, FsNonTerminal.B);
+
+        InsertStartProductionRule();
+    }
+
+    public static Symbol Term(FsTerminal t) => new Symbol(t, SymbolType.Terminal);
+    public static Symbol NonTerm(FsNonTerminal n) => new Symbol(n, SymbolType.NonTerminal);
+
+    private static ILanguageObject Noop(Symbol[] rhs) => rhs.Length > 0 ? rhs[0].Attribute : null!;
+}
+
+public enum UndefTerminal { X }
+
+public enum UndefNonTerminal { S, A, B }
+
+// S -> A B, A -> X, but B is reachable and has no productions. Construction must
+// fail fast rather than build a broken table.
+public sealed class UndefinedNonTerminalGrammar : ContextFreeGrammar<UndefTerminal, UndefNonTerminal>
+{
+    public UndefinedNonTerminalGrammar()
+    {
+        AddTerminalsAndNonTerminals();
+
+        AddRule(Noop, UndefNonTerminal.S, UndefNonTerminal.A, UndefNonTerminal.B);
+        AddRule(Noop, UndefNonTerminal.A, UndefTerminal.X);
+
+        InsertStartProductionRule();
+    }
+
+    private static ILanguageObject Noop(Symbol[] rhs) => rhs.Length > 0 ? rhs[0].Attribute : null!;
+}
+
+public enum UnprTerminal { X }
+
+public enum UnprNonTerminal { S, A }
+
+// S -> A, A -> A X. A can only derive via itself, so it never reaches a terminal
+// string: A (and therefore S) is unproductive. Construction must fail fast.
+public sealed class UnproductiveGrammar : ContextFreeGrammar<UnprTerminal, UnprNonTerminal>
+{
+    public UnproductiveGrammar()
+    {
+        AddTerminalsAndNonTerminals();
+
+        AddRule(Noop, UnprNonTerminal.S, UnprNonTerminal.A);
+        AddRule(Noop, UnprNonTerminal.A, UnprNonTerminal.A, UnprTerminal.X);
+
+        InsertStartProductionRule();
+    }
+
+    private static ILanguageObject Noop(Symbol[] rhs) => rhs.Length > 0 ? rhs[0].Attribute : null!;
+}
+
+public enum EvTerminal { Ta }
+
+public enum EvNonTerminal { S }
+
+// Exercises evaluation of an epsilon production's semantic action: S -> a | epsilon.
+// For empty input the S -> epsilon action must run and yield its value, even
+// though that tree node has no children.
+public sealed class EpsilonValueLang : Language<EvTerminal, EvNonTerminal>
+{
+    protected override TokenDefinition<EvTerminal>[] SetUpTokenDefinitions()
+    {
+        return new[] { new TokenDefinition<EvTerminal>(EvTerminal.Ta, "a") };
+    }
+
+    protected override void SetUpGrammar()
+    {
+        AddRule(PassThrough, EvNonTerminal.S, EvTerminal.Ta);
+        AddRule(Empty, EvNonTerminal.S, InternalSymbol.Epsilon);
+    }
+
+    private static ILanguageObject PassThrough(Symbol[] rhs) => rhs[0].Attribute;
+    private static ILanguageObject Empty(Symbol[] rhs) => new LexValue("empty");
+}
+
+public enum NpTerminal { Ta, Tb, Tc }
+
+public enum NpNonTerminal { S, OptA, OptB }
+
+// End-to-end language over the same nullable-prefix grammar so the FIRST fix can
+// be verified through real parsing:
+//   S -> OptA OptB c     OptA -> a | epsilon     OptB -> b | epsilon
+// Input "c" parses only if A->epsilon reduces on lookahead c, which requires
+// FIRST to chain through the nullable OptB to reach the terminal c.
+public sealed class NullablePrefixLang : Language<NpTerminal, NpNonTerminal>
+{
+    protected override TokenDefinition<NpTerminal>[] SetUpTokenDefinitions()
+    {
+        return new[]
+        {
+            new TokenDefinition<NpTerminal>(NpTerminal.Ta, "a"),
+            new TokenDefinition<NpTerminal>(NpTerminal.Tb, "b"),
+            new TokenDefinition<NpTerminal>(NpTerminal.Tc, "c"),
+        };
+    }
+
+    protected override void SetUpGrammar()
+    {
+        AddRule(SAction, NpNonTerminal.S, NpNonTerminal.OptA, NpNonTerminal.OptB, NpTerminal.Tc);
+        AddRule(Noop, NpNonTerminal.OptA, NpTerminal.Ta);
+        AddRule(Noop, NpNonTerminal.OptA, InternalSymbol.Epsilon);
+        AddRule(Noop, NpNonTerminal.OptB, NpTerminal.Tb);
+        AddRule(Noop, NpNonTerminal.OptB, InternalSymbol.Epsilon);
+    }
+
+    private static ILanguageObject SAction(Symbol[] rhs) => new LexValue("parsed");
     private static ILanguageObject Noop(Symbol[] rhs) => rhs.Length > 0 ? rhs[0].Attribute : null!;
 }
 

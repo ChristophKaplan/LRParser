@@ -77,7 +77,6 @@ public class TableSnapshotTests
             "(0,Type) -> Shift, Next state: 8",
             "(1,Dollar) -> Accept",
             "(10,Dollar) -> Reduce to production 4",
-            "(10,Equals) -> Reduce to production 4",
             "(10,Variable) -> Reduce to production 4",
             "(2,Dollar) -> Reduce to production 1",
             "(2,Variable) -> Shift, Next state: 4",

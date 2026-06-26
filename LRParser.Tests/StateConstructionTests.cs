@@ -81,6 +81,33 @@ public class StateConstructionTests
         Assert.Equal(3, sm.States[0].Items[0].LookAheadSymbols.Count);
     }
 
+    // The canonical LR(1) path (lalr: false) skips state merging entirely and
+    // was otherwise never exercised. It must still build a conflict-free table
+    // and never have fewer states than the merged LALR machine.
+    [Fact]
+    public void CanonicalLr_DebugLang_BuildsAndHasAtLeastAsManyStatesAsLalr()
+        => AssertCanonicalConsistentWithLalr(new DbgNs.DebugLang());
+
+    [Fact]
+    public void CanonicalLr_ExampleLang_BuildsAndHasAtLeastAsManyStatesAsLalr()
+        => AssertCanonicalConsistentWithLalr(new ExNs.ExampleLang());
+
+    private static void AssertCanonicalConsistentWithLalr<T, N>(ContextFreeGrammar<T, N> cfg)
+        where T : struct, Enum where N : struct, Enum
+    {
+        var lalr = BuildStates(cfg, lalr: true);
+        var canonical = BuildStates(cfg, lalr: false);
+
+        Assert.True(canonical.States.Count >= lalr.States.Count,
+            "Canonical LR(1) should never have fewer states than LALR.");
+
+        // Both must yield a buildable (conflict-free) table.
+        var lalrTable = new Table<T, N>(lalr, cfg);
+        var canonicalTable = new Table<T, N>(canonical, cfg);
+        Assert.NotEmpty(lalrTable.ActionTable);
+        Assert.NotEmpty(canonicalTable.ActionTable);
+    }
+
     private static void AssertNoDuplicateCores(IReadOnlyList<State> states)
     {
         for (var i = 0; i < states.Count; i++)
@@ -131,5 +158,32 @@ public class StateConstructionTests
         var reported = (bool)validate.Invoke(sm, null)!;
 
         Assert.True(reported, "ValidateStates did not report an existing conflict.");
+    }
+
+    // The reduce/reduce detector must not ignore $ as a lookahead: S -> A | B
+    // with A -> epsilon and B -> epsilon conflict only on end-of-input.
+    [Fact]
+    public void HasConflict_DetectsReduceReduceOnDollarLookahead()
+    {
+        var sm = BuildStates(new DollarReduceReduceGrammar(), lalr: true);
+
+        var anyConflict = sm.States.Any(s =>
+        {
+            var output = string.Empty;
+            return s.HasConflict(ref output);
+        });
+
+        Assert.True(anyConflict, "Reduce/reduce conflict on $ was not detected.");
+    }
+
+    // A genuinely conflicting grammar must fail loudly when its table is built,
+    // rather than silently producing a broken table.
+    [Fact]
+    public void Table_ForReduceReduceGrammar_ThrowsOnConflict()
+    {
+        var cfg = new ReduceReduceGrammar();
+        var sm = BuildStates(cfg, lalr: true);
+
+        Assert.Throws<Exception>(() => new Table<RrTerminal, RrNonTerminal>(sm, cfg));
     }
 }

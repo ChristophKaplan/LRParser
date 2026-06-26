@@ -13,7 +13,7 @@ public class SemanticActionTests
     {
         var lang = new ExNs.ExampleLang();
 
-        var result = lang.TryParse("Int A; A = 50;");
+        var result = lang.Parse("Int A; A = 50;");
 
         var intValue = Assert.IsType<ExNs.IntValue>(result);
         Assert.Equal(50, intValue.Value);
@@ -26,7 +26,7 @@ public class SemanticActionTests
 
         // The grammar accepts this input but Float assignment is unsupported;
         // it should fail loudly rather than hand back null.
-        Assert.Throws<Exception>(() => lang.TryParse("Float A; A = 50;"));
+        Assert.Throws<Exception>(() => lang.Parse("Float A; A = 50;"));
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class SemanticActionTests
     {
         var lang = new DbgNs.DebugLang();
 
-        var result = lang.TryParse("A B C");
+        var result = lang.Parse("A B C");
 
         Assert.Equal("A", result.ToString());
     }

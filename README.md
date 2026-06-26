@@ -73,10 +73,14 @@ public class ExampleLang : Language<Terminal, NonTerminal>
 
 ```csharp
 var lang = new ExampleLang();
-Console.WriteLine(lang.TryParse("Int A; A = 50;"));
+Console.WriteLine(lang.Parse("Int A; A = 50;"));
+
+// Non-throwing variant:
+if (lang.TryParse("Int A; A = 50;", out var result))
+    Console.WriteLine(result);
 ```
 
-A single language instance is safe to reuse across multiple `TryParse` calls; override `ResetState()` to clear any per-parse state (e.g. a symbol table).
+`Parse` throws `LexerException` or `ParseException` (which exposes the source position and the expected symbols) on malformed input. `TryParse` returns `false` instead. A single language instance is safe to reuse across multiple `Parse`/`TryParse` calls; override `ResetState()` to clear any per-parse state (e.g. a symbol table).
 
 ## How it works
 

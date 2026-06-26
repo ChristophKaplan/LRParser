@@ -6,15 +6,21 @@ using LRParser.CFG;
 namespace LRParser.Parser {
     public class LRItem {
         private readonly int _dotPosition;
+        private readonly int _coreHash;
 
         public LRItem(Production production, int dotPosition, List<Symbol> lookAheadSymbols) {
             Production = production;
             _dotPosition = dotPosition;
-            LookAheadSymbols = lookAheadSymbols;
+            // Copy so each item owns its lookahead set. Sharing the list (e.g. via
+            // NextItem) let LALR lookahead merges mutate items in other states.
+            LookAheadSymbols = new List<Symbol>(lookAheadSymbols);
 
             if (!IsComplete && CurrentSymbol.IsEpsilon) {
                 _dotPosition++;
             }
+
+            // The core (production + dot) is immutable, so cache its hash.
+            _coreHash = HashCode.Combine(Production, _dotPosition);
         }
 
         public Production Production { get; }
@@ -89,13 +95,17 @@ namespace LRParser.Parser {
             }
         }
 
+        // Consistent with Equals: equal items share the same core, so hashing on
+        // the core never distinguishes two items that Equals considers equal.
+        // (Lookaheads are a mutable List and compared by content, so they must
+        // not feed the hash.)
         public override int GetHashCode() {
-            return HashCode.Combine(Production, _dotPosition, LookAheadSymbols);
+            return _coreHash;
         }
-        
+
         public int GetCoreHash()
         {
-            return HashCode.Combine(Production, _dotPosition);
+            return _coreHash;
         }
 
         public override string ToString() {

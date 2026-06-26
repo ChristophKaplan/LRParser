@@ -20,7 +20,8 @@ namespace LRParser.CFG
     {
         private readonly int _hashcode;
 
-        //these ore not performant
+        // Boxed grammar-symbol identity; the IsEpsilon/IsDollar predicates are
+        // resolved once in the constructor to keep the hot paths boxing-free.
         private readonly Enum _enum;
         public ILanguageObject Attribute;
         public (int lineNumber, int linePosition) Position;
@@ -33,15 +34,22 @@ namespace LRParser.CFG
             Type = type;
             Attribute = default;
             Position = (-1, -1);
-            _hashcode = 0;
-            _hashcode = CreateHashCode();
+
+            // Resolve the internal-symbol predicates once. Doing it here (a single
+            // unboxing) avoids boxing InternalSymbol on every IsEpsilon/IsDollar
+            // call, which the closure/reduce hot paths hit constantly.
+            var internalSymbol = @enum as InternalSymbol?;
+            IsEpsilon = internalSymbol == InternalSymbol.Epsilon;
+            IsDollar = internalSymbol == InternalSymbol.Dollar;
+
+            _hashcode = CreateHashCode(@enum, type);
         }
 
         public static Symbol Epsilon => new(InternalSymbol.Epsilon, SymbolType.Terminal);
         public static Symbol Dollar => new(InternalSymbol.Dollar, SymbolType.Terminal);
         public static Symbol Start => new(InternalSymbol.Start, SymbolType.NonTerminal);
-        public bool IsEpsilon => _enum.Equals(InternalSymbol.Epsilon);
-        public bool IsDollar => _enum.Equals(InternalSymbol.Dollar);
+        public bool IsEpsilon { get; }
+        public bool IsDollar { get; }
 
         public void SetValue(string value)
         {
@@ -53,12 +61,12 @@ namespace LRParser.CFG
             this.Position = position;
         }
 
-        private int CreateHashCode()
+        private static int CreateHashCode(Enum @enum, SymbolType type)
         {
             const int internalSymbolMarker = 23;
-            return _enum is InternalSymbol ? 
-                HashCode.Combine(_enum, Type, internalSymbolMarker) : 
-                HashCode.Combine(_enum, Type);
+            return @enum is InternalSymbol ?
+                HashCode.Combine(@enum, type, internalSymbolMarker) :
+                HashCode.Combine(@enum, type);
         }
 
         public override int GetHashCode() => _hashcode;
