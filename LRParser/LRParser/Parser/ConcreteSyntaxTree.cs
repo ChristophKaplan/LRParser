@@ -4,9 +4,9 @@ using LRParser.CFG;
 namespace LRParser.Parser { 
     public class ConcreteSyntaxTree : ArenaTree<Symbol>
     {
-        private readonly List<Production.SemanticActionDelegate> _semanticActions = new();
-        
-        public int AddNode(Symbol symbol, Production.SemanticActionDelegate semanticAction)
+        private readonly List<Production.SemanticActionDelegate?> _semanticActions = new();
+
+        public int AddNode(Symbol symbol, Production.SemanticActionDelegate? semanticAction)
         {
             _semanticActions.Add(semanticAction);
             return base.AddNode(symbol);

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using LogHelper;
@@ -11,7 +12,7 @@ namespace LRParser.Parser
     public class StateManager<T, N> where T : struct, Enum where N : struct, Enum
     {
         private readonly ContextFreeGrammar<T, N> _cfg;
-        public List<State> States { get; private set; }
+        public List<State> States { get; private set; } = new();
 
         // Index of states by core hash, used only during generation to make
         // state de-duplication near O(1) instead of a linear scan of all states.
@@ -162,7 +163,7 @@ namespace LRParser.Parser
             States.Remove(mergeMe);
         }
 
-        private bool TryGetEqualState(State state, out State foundState)
+        private bool TryGetEqualState(State state, [MaybeNullWhen(false)] out State foundState)
         {
             if (_statesByCoreHash.TryGetValue(state.CoreHash, out var bucket))
             {
@@ -251,7 +252,7 @@ namespace LRParser.Parser
             return result;
         }
 
-        private static bool TryGetEqualCore(LRItem newItem, IEnumerable<LRItem> closedSet, out LRItem closedItem)
+        private static bool TryGetEqualCore(LRItem newItem, IEnumerable<LRItem> closedSet, [MaybeNullWhen(false)] out LRItem closedItem)
         {
             foreach (var item in closedSet)
             {

@@ -20,7 +20,6 @@ namespace LRParser.Lexer
             var currentIndex = 0;
             var lineNumber = 1;
             var columnNumber = 1; // Spaltenzähler hinzugefügt
-            TokenDefinition<T> tokenDefinition = null;
 
             while (currentIndex < source.Length)
             {
@@ -33,7 +32,7 @@ namespace LRParser.Lexer
                 }
 
                 var matchLength = 0;
-                tokenDefinition = null;
+                TokenDefinition<T>? tokenDefinition = null;
 
                 // Maximal munch: pick the rule with the longest match at this
                 // position. Ties keep the earliest-declared rule (strict '>'),
@@ -51,7 +50,9 @@ namespace LRParser.Lexer
                     }
                 }
 
-                if (matchLength == 0)
+                // No rule matched here (matchLength is non-zero exactly when a
+                // rule was picked, since zero-length matches are ignored above).
+                if (tokenDefinition is null)
                 {
                     if (char.IsWhiteSpace(source[currentIndex]))
                     {

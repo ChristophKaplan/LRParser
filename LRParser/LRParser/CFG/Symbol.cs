@@ -32,7 +32,10 @@ namespace LRParser.CFG
         {
             _enum = @enum;
             Type = type;
-            Attribute = default;
+            // Null until the lexer (terminals) or a semantic action (non-terminals)
+            // fills it in. Symbol is a struct, so default(Symbol) can null it
+            // regardless of what this field is annotated as.
+            Attribute = default!;
             Position = (-1, -1);
 
             // Resolve the internal-symbol predicates once. Doing it here (a single
